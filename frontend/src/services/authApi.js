@@ -49,22 +49,6 @@ export const authApi = baseApi.injectEndpoints({
     getMe: builder.query({
       query: () => '/auth/me',
       providesTags: ['User'],
-      async onQueryStarted(_, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          // Restore token from getMe response after page reload
-          if (data.accessToken) {
-            setMemoryToken(data.accessToken);
-          }
-          // Update Redux state with user data
-          if (data.user) {
-            dispatch(setCredentials({ user: data.user }));
-          }
-        } catch (error) {
-          // If getMe fails, user is not authenticated
-          // Skip - the error is handled by useAuthInit
-        }
-      },
     }),
     updateProfile: builder.mutation({
       query: (data) => ({ url: '/users/profile', method: 'PUT', body: data }),
