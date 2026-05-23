@@ -45,8 +45,8 @@ export default function LocationValidator({
     }
   }, [validationData, onValidationChange]);
 
-  // Si no hay dirección, no renderizar nada
-  if (!displayDireccion) {
+  // Si no hay dirección validada aún, no renderizar nada
+  if (!debouncedDireccion) {
     return null;
   }
 
