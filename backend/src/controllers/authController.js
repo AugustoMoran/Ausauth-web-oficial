@@ -101,16 +101,23 @@ const logout = async (req, res, next) => {
 };
 
 const getMe = (req, res) => {
+  // Generate a fresh access token for cross-domain auth
+  // This ensures the frontend has a valid token after page reload
+  const accessToken = generateAccessToken(req.user._id);
+  
   res.json({
-    _id: req.user._id,
-    nombre: req.user.nombre,
-    apellido: req.user.apellido,
-    email: req.user.email,
-    telefono: req.user.telefono,
-    direccion: req.user.direccion,
-    role: req.user.role,
-    zone: req.user.zone,
-    favoritos: req.user.favoritos,
+    accessToken, // Return token so frontend can store in memory
+    user: {
+      _id: req.user._id,
+      nombre: req.user.nombre,
+      apellido: req.user.apellido,
+      email: req.user.email,
+      telefono: req.user.telefono,
+      direccion: req.user.direccion,
+      role: req.user.role,
+      zone: req.user.zone,
+      favoritos: req.user.favoritos,
+    }
   });
 };
 
