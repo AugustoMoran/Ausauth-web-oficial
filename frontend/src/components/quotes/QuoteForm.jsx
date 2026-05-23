@@ -41,7 +41,9 @@ const QuoteForm = ({ quote, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     clientId: quote?.client._id || '',
     items: quote?.items || [],
-    instalacion: quote?.instalacion || { incluye: false, monto: 0, descripcion: '', currency: 'USD' },
+    instalacion: quote?.instalacion 
+      ? { ...quote.instalacion, currency: quote.instalacion.currency || 'USD' }
+      : { incluye: false, monto: 0, descripcion: '', currency: 'USD' },
     notas: quote?.notas || '',
   });
 
@@ -446,7 +448,7 @@ const QuoteForm = ({ quote, onClose, onSuccess }) => {
                         },
                       })
                     }
-                    className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="min-w-[90px] bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="USD">USD</option>
                     <option value="ARS">ARS</option>
