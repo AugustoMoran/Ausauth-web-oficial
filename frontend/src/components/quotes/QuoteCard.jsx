@@ -26,7 +26,11 @@ const QuoteCard = ({ quote, isAdmin = false, onDeleteSuccess }) => {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`/api/quotes/${quote._id}/pdf`, {
+      // Use full backend URL from env - it includes /api prefix already
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const pdfUrl = `${apiUrl}/quotes/${quote._id}/pdf`;
+
+      const response = await fetch(pdfUrl, {
         method: 'GET',
         headers,
         credentials: 'include',
