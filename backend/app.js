@@ -33,6 +33,7 @@ const adminUserRoutes = require('./src/routes/admin/users');
 const adminRecommendationRoutes = require('./src/routes/admin/recommendations');
 const recommendationRoutes = require('./src/routes/recommendations');
 const settingsRoutes = require('./src/routes/settings');
+const downloadRoutes = require('./src/routes/downloads');
 
 // New isolated modules (do NOT touch ecommerce routes above)
 const jobRoutes = require('./modules/jobs/job.routes');
@@ -114,6 +115,7 @@ app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin/recommendations', adminRecommendationRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/downloads', downloadRoutes);
 
 // ── New isolated modules ──────────────────────────────────────────────────────
 app.use('/api/jobs', jobRoutes);

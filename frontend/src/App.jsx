@@ -19,6 +19,7 @@ const OrderHistory = lazy(() => import('./pages/OrderHistory'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Favorites = lazy(() => import('./pages/Favorites'));
 const RecommendationsPage = lazy(() => import('./pages/RecommendationsPage'));
+const DownloadsPage = lazy(() => import('./pages/DownloadsPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Admin pages
@@ -36,6 +37,7 @@ const AdminCotizacion = lazy(() => import('./pages/admin/AdminCotizacion'));
 const AdminUsuarios = lazy(() => import('./pages/admin/AdminUsuarios'));
 const AdminRecomendaciones = lazy(() => import('./pages/admin/AdminRecomendaciones'));
 const AdminQuotes = lazy(() => import('./pages/admin/AdminQuotes'));
+const DownloadsAdmin = lazy(() => import('./pages/admin/DownloadsAdmin'));
 const MyQuotes = lazy(() => import('./pages/MyQuotes'));
 
 // Tecnico pages
@@ -161,6 +163,7 @@ const App = () => (
         <Route path="/favoritos" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
         <Route path="/recomendaciones" element={<ProtectedRoute><RecommendationsPage /></ProtectedRoute>} />
         <Route path="/mis-presupuestos" element={<ProtectedRoute><MyQuotes /></ProtectedRoute>} />
+        <Route path="/downloads" element={<DownloadsPage />} />
       </Route>
 
       {/* Admin routes (no Layout wrapper — AdminLayout is self-contained) */}
@@ -178,6 +181,7 @@ const App = () => (
       <Route path="/admin/usuarios" element={<AdminRoute><AdminUsuarios /></AdminRoute>} />
       <Route path="/admin/recomendaciones" element={<AdminRoute><AdminRecomendaciones /></AdminRoute>} />
       <Route path="/admin/presupuestos" element={<AdminRoute><AdminQuotes /></AdminRoute>} />
+      <Route path="/admin/descargas" element={<AdminRoute><DownloadsAdmin /></AdminRoute>} />
 
       {/* Tecnico routes (no Layout wrapper — TecnicoLayout is self-contained) */}
       <Route path="/tecnico" element={<TecnicoRoute><TecnicoDashboard /></TecnicoRoute>} />

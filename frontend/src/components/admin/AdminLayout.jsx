@@ -17,6 +17,7 @@ import {
   HiOutlineUsers,
   HiOutlineStar,
   HiOutlineDocument,
+  HiOutlineDownload,
 } from 'react-icons/hi';
 
 const NAV_ITEMS = [
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
   { to: '/admin/popup', label: 'Popup WhatsApp', icon: HiOutlineChatAlt2 },
   { to: '/admin/usuarios', label: 'Gestión de Usuarios', icon: HiOutlineUsers },
   { to: '/admin/recomendaciones', label: 'Recomendaciones', icon: HiOutlineStar },
+  { to: '/admin/descargas', label: 'Descargas', icon: HiOutlineDownload },
 ];
 
 const AdminLayout = ({ children }) => {
