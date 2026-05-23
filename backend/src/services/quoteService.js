@@ -18,35 +18,17 @@ const generateQuotePDF = (quote) => {
     try {
       console.log('📄 PDF Generation started for quote:', quote?.numero);
       
-      // Create a PassThrough stream to collect PDF data
-      const stream = new PassThrough();
-      const chunks = [];
+      const pdfPath = path.join(__dirname, '../../', `.tmp_quote_${quote._id}.pdf`);
+      console.log('📄 Temporary PDF file:', pdfPath);
       
-      // Listen for data chunks
-      stream.on('data', (chunk) => {
-        console.log('📄 Stream chunk received:', chunk.length, 'bytes');
-        chunks.push(chunk);
-      });
-      
-      // Listen for stream end
-      stream.on('end', () => {
-        console.log('📄 Stream ended, concatenating', chunks.length, 'chunks');
-        const buffer = Buffer.concat(chunks);
-        console.log('✅ PDF buffer ready, size:', buffer.length, 'bytes');
-        resolve(buffer);
-      });
-      
-      // Listen for errors
-      stream.on('error', (err) => {
-        console.error('❌ Stream error:', err.message);
-        reject(err);
-      });
-      
-      // Create PDF document with the stream
+      // Create write stream to file
+      const writeStream = fs.createWriteStream(pdfPath);
       const doc = new PDFDocument({ margin: 40, size: 'A4' });
-      doc.pipe(stream);
       
-      console.log('📄 Document created and piped to stream');
+      // Pipe PDF document to file
+      doc.pipe(writeStream);
+      
+      console.log('📄 Document piped to file stream');
       
       // Render content
       try {
@@ -72,12 +54,45 @@ const generateQuotePDF = (quote) => {
         console.log('📄 Content rendered successfully');
       } catch (renderErr) {
         console.error('❌ Error rendering PDF content:', renderErr.message);
-        stream.destroy();
+        writeStream.destroy();
+        fs.unlink(pdfPath, () => {}); // Delete temp file on error
         reject(renderErr);
         return;
       }
       
-      // End the document (this triggers the stream to flush)
+      // Listen for file write completion
+      writeStream.on('finish', () => {
+        console.log('📄 PDF file written successfully');
+        
+        // Read file and convert to buffer
+        fs.readFile(pdfPath, (err, data) => {
+          // Clean up temp file
+          fs.unlink(pdfPath, (delErr) => {
+            if (delErr) console.error('⚠️  Failed to delete temp file:', delErr);
+          });
+          
+          if (err) {
+            console.error('❌ Error reading PDF file:', err.message);
+            reject(err);
+            return;
+          }
+          
+          console.log('✅ PDF buffer created from file, size:', data.length, 'bytes');
+          if (data.length === 0) {
+            console.warn('⚠️  WARNING: PDF buffer is empty!');
+          }
+          resolve(data);
+        });
+      });
+      
+      // Listen for write errors
+      writeStream.on('error', (err) => {
+        console.error('❌ Write stream error:', err.message);
+        fs.unlink(pdfPath, () => {}); // Delete temp file on error
+        reject(err);
+      });
+      
+      // End the document (this triggers the write stream to flush)
       console.log('📄 Finalizing document...');
       doc.end();
       console.log('📄 doc.end() called');
