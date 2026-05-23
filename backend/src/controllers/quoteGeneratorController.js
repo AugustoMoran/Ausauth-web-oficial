@@ -288,16 +288,46 @@ const downloadQuotePDF = async (req, res, next) => {
       return res.status(403).json({ message: 'No autorizado' });
     }
 
-    // ULTRA SIMPLE: Create PDF with minimal operations
+    // Generate PDF as base64 string instead of streaming
     logPDFError(`📄 Creating PDF for ${quote.numero}`);
     
     const PDFDocument = require('pdfkit');
+    const chunks = [];
+    
     const doc = new PDFDocument();
     
-    // Pipe to response immediately
-    doc.pipe(res);
+    // Collect chunks
+    doc.on('data', (chunk) => {
+      chunks.push(chunk);
+    });
     
-    // Add minimal content
+    doc.on('error', (err) => {
+      logPDFError(`❌ PDF error event: ${err.message}`);
+    });
+    
+    doc.on('finish', () => {
+      try {
+        const pdfBuffer = Buffer.concat(chunks);
+        const base64PDF = pdfBuffer.toString('base64');
+        
+        logPDFError(`✅ PDF generated: ${pdfBuffer.length} bytes, base64: ${base64PDF.length} chars`);
+        
+        // Send as JSON with base64
+        res.json({
+          success: true,
+          pdf: base64PDF,
+          filename: `presupuesto-${quote.numero}.pdf`,
+          size: pdfBuffer.length
+        });
+      } catch (err) {
+        logPDFError(`❌ Error on finish: ${err.message}`);
+        if (!res.headersSent) {
+          res.status(500).json({ error: err.message });
+        }
+      }
+    });
+    
+    // Add content
     doc.fontSize(20).text('PRESUPUESTO', 100, 100);
     doc.fontSize(14).text(`Nº: ${quote.numero}`);
     doc.text(`Cliente: ${quote.client?.nombre || 'N/A'}`);
@@ -318,7 +348,7 @@ const downloadQuotePDF = async (req, res, next) => {
     
     // End
     doc.end();
-    logPDFError(`✅ PDF stream ended for ${quote.numero}`);
+    logPDFError(`✅ PDF generation started for ${quote.numero}`);
     
   } catch (error) {
     logPDFError(`❌ ERROR: ${error.message}`);

@@ -20,13 +20,12 @@ const QuoteCard = ({ quote, isAdmin = false, onDeleteSuccess }) => {
     try {
       const token = getMemoryToken();
       const headers = {
-        'Accept': 'application/pdf',
+        'Content-Type': 'application/json',
       };
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      // Use full backend URL from env - it includes /api prefix already
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const pdfUrl = `${apiUrl}/quotes/${quote._id}/pdf`;
 
@@ -40,17 +39,32 @@ const QuoteCard = ({ quote, isAdmin = false, onDeleteSuccess }) => {
         throw new Error('Error al descargar PDF');
       }
 
-      const blob = await response.blob();
+      // Backend now returns JSON with base64 PDF
+      const data = await response.json();
       
-      // Create a temporary download link
+      if (!data.success || !data.pdf) {
+        throw new Error('Respuesta inválida del servidor');
+      }
+
+      // Decode base64 and create blob
+      const binaryString = atob(data.pdf);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: 'application/pdf' });
+      
+      // Download
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `presupuesto-${quote.numero}.pdf`;
+      a.download = data.filename || `presupuesto-${quote.numero}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+      
+      toast.success('PDF descargado correctamente');
     } catch (error) {
       toast.error('Error al descargar PDF');
       console.error('PDF download error:', error);
