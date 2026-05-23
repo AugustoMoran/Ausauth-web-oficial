@@ -16,91 +16,50 @@ const transporter = nodemailer.createTransport({
 const generateQuotePDF = (quote) => {
   return new Promise((resolve, reject) => {
     try {
-      console.log('📄 PDF Generation started for quote:', quote?.numero);
+      console.log('📄 Starting PDF generation for:', quote?.numero);
       
-      // Use /tmp for Render environment, or temp dir for local
-      const tmpDir = process.env.NODE_ENV === 'production' ? '/tmp' : path.join(__dirname, '../../');
-      const pdfPath = path.join(tmpDir, `pdf_${Date.now()}_${quote._id}.pdf`);
-      console.log('📄 Temporary PDF file path:', pdfPath);
+      const chunks = [];
+      const doc = new PDFDocument();
       
-      // Create write stream to file
-      const writeStream = fs.createWriteStream(pdfPath);
-      const doc = new PDFDocument({ margin: 40, size: 'A4' });
-      
-      // Pipe PDF document to file
-      doc.pipe(writeStream);
-      
-      console.log('📄 Document piped to file stream');
-      
-      // Render content
-      try {
-        doc.fontSize(24).text('PRESUPUESTO');
-        doc.fontSize(12).text(`Nº ${quote.numero || 'N/A'}`);
-        doc.fontSize(10).text('Cliente: ' + (quote.client?.nombre || 'N/A'));
-        
-        // Items section
-        if (quote.items && quote.items.length > 0) {
-          doc.fontSize(11).text('\nProductos:');
-          quote.items.forEach((item, i) => {
-            doc.fontSize(10).text(
-              `${i+1}. ${item.nombre || 'N/A'} - Cantidad: ${item.cantidad} - $${item.subtotal || 0}`
-            );
-          });
-        }
-        
-        // Total section
-        const total = quote.totales?.USD?.total || quote.totales?.ARS?.total || 0;
-        doc.fontSize(14).text('\n─────────────────');
-        doc.fontSize(14).text(`TOTAL: $${total.toFixed(2)}`);
-        
-        console.log('📄 Content rendered successfully');
-      } catch (renderErr) {
-        console.error('❌ Error rendering PDF content:', renderErr.message);
-        writeStream.destroy();
-        fs.unlink(pdfPath, () => {}); // Delete temp file on error
-        reject(renderErr);
-        return;
-      }
-      
-      // Listen for file write completion
-      writeStream.on('finish', () => {
-        console.log('📄 PDF file written successfully');
-        
-        // Read file and convert to buffer
-        fs.readFile(pdfPath, (err, data) => {
-          // Clean up temp file
-          fs.unlink(pdfPath, (delErr) => {
-            if (delErr) console.error('⚠️  Failed to delete temp file:', delErr);
-          });
-          
-          if (err) {
-            console.error('❌ Error reading PDF file:', err.message);
-            reject(err);
-            return;
-          }
-          
-          console.log('✅ PDF buffer created from file, size:', data.length, 'bytes');
-          if (data.length === 0) {
-            console.warn('⚠️  WARNING: PDF buffer is empty!');
-          }
-          resolve(data);
-        });
+      // Collect data chunks from the document
+      doc.on('data', (chunk) => {
+        chunks.push(chunk);
       });
-      
-      // Listen for write errors
-      writeStream.on('error', (err) => {
-        console.error('❌ Write stream error:', err.message);
-        fs.unlink(pdfPath, () => {}); // Delete temp file on error
+
+      doc.on('end', () => {
+        const buffer = Buffer.concat(chunks);
+        console.log('✅ PDF ready, size:', buffer.length);
+        resolve(buffer);
+      });
+
+      doc.on('error', (err) => {
+        console.error('❌ PDF error:', err);
         reject(err);
       });
+
+      // Add content - very simple
+      doc.fontSize(16).text('PRESUPUESTO', { align: 'center' });
+      doc.text('');
+      doc.fontSize(12).text(`Nº: ${quote.numero}`);
+      doc.text(`Cliente: ${quote.client?.nombre || 'N/A'}`);
+      doc.text('');
+      doc.fontSize(11).text('Productos:');
       
-      // End the document (this triggers the write stream to flush)
-      console.log('📄 Finalizing document...');
+      if (quote.items && quote.items.length > 0) {
+        quote.items.forEach((item) => {
+          doc.text(`- ${item.nombre}: $${item.subtotal}`);
+        });
+      }
+      
+      doc.text('');
+      const total = quote.totales?.USD?.total || quote.totales?.ARS?.total || 0;
+      doc.fontSize(14).text(`TOTAL: $${total.toFixed(2)}`);
+
+      // End document - THIS IS CRITICAL
       doc.end();
-      console.log('📄 doc.end() called');
       
     } catch (error) {
-      console.error('❌ PDF Generation Error:', error.message);
+      console.error('❌ Error:', error.message);
       reject(error);
     }
   });
