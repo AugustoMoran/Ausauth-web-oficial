@@ -288,73 +288,100 @@ const downloadQuotePDF = async (req, res, next) => {
       return res.status(403).json({ message: 'No autorizado' });
     }
 
-    // Generate PDF as base64 string instead of streaming
     logPDFError(`📄 Creating PDF for ${quote.numero}`);
     
-    const PDFDocument = require('pdfkit');
-    const chunks = [];
-    
-    const doc = new PDFDocument();
-    
-    // Collect chunks
-    doc.on('data', (chunk) => {
-      chunks.push(chunk);
-    });
-    
-    doc.on('error', (err) => {
-      logPDFError(`❌ PDF error event: ${err.message}`);
-    });
-    
-    doc.on('finish', () => {
+    // Generate PDF using Promise wrapper
+    const pdfPromise = new Promise((resolve, reject) => {
       try {
-        const pdfBuffer = Buffer.concat(chunks);
-        const base64PDF = pdfBuffer.toString('base64');
+        const chunks = [];
+        const doc = new PDFDocument({ margin: 40, size: 'A4', autoFirstPage: true });
         
-        logPDFError(`✅ PDF generated: ${pdfBuffer.length} bytes, base64: ${base64PDF.length} chars`);
-        
-        // Send as JSON with base64
-        res.json({
-          success: true,
-          pdf: base64PDF,
-          filename: `presupuesto-${quote.numero}.pdf`,
-          size: pdfBuffer.length
+        doc.on('data', (chunk) => {
+          chunks.push(chunk);
         });
-      } catch (err) {
-        logPDFError(`❌ Error on finish: ${err.message}`);
-        if (!res.headersSent) {
-          res.status(500).json({ error: err.message });
+        
+        doc.on('end', () => {
+          // Use 'end' instead of 'finish' - more reliable
+          try {
+            const pdfBuffer = Buffer.concat(chunks);
+            resolve(pdfBuffer);
+          } catch (err) {
+            reject(err);
+          }
+        });
+        
+        doc.on('error', (err) => {
+          reject(err);
+        });
+        
+        // Build content
+        doc.fontSize(20).font('Helvetica-Bold').text('PRESUPUESTO', { align: 'center' });
+        doc.moveDown();
+        
+        doc.fontSize(12).font('Helvetica').text(`Número: ${quote.numero}`, { underline: true });
+        doc.text(`Fecha: ${new Date(quote.createdAt).toLocaleDateString('es-AR')}`);
+        doc.moveDown();
+        
+        // Client info
+        doc.fontSize(11).font('Helvetica-Bold').text('CLIENTE:');
+        doc.font('Helvetica')
+          .text(`Nombre: ${quote.client?.nombre || 'N/A'}`)
+          .text(`Email: ${quote.client?.email || 'N/A'}`)
+          .text(`Teléfono: ${quote.client?.telefono || 'N/A'}`);
+        doc.moveDown();
+        
+        // Items
+        doc.font('Helvetica-Bold').fontSize(11).text('PRODUCTOS:');
+        if (quote.items && Array.isArray(quote.items) && quote.items.length > 0) {
+          doc.font('Helvetica').fontSize(10);
+          quote.items.forEach((item, idx) => {
+            const qty = parseFloat(item.cantidad) || 0;
+            const price = parseFloat(item.precioUnitario) || 0;
+            const subtotal = qty * price;
+            doc.text(`${idx + 1}. ${item.nombre || 'Producto'}`);
+            doc.text(`   Cantidad: ${qty} x $${price.toFixed(2)} = $${subtotal.toFixed(2)}`);
+          });
         }
+        doc.moveDown();
+        
+        // Totals
+        const totalUSD = quote.totales?.USD?.total || 0;
+        const totalARS = quote.totales?.ARS?.total || 0;
+        doc.font('Helvetica-Bold').fontSize(14);
+        if (totalUSD > 0) doc.text(`TOTAL USD: $${parseFloat(totalUSD).toFixed(2)}`);
+        if (totalARS > 0) doc.text(`TOTAL ARS: $${parseFloat(totalARS).toFixed(2)}`);
+        if (totalUSD === 0 && totalARS === 0) doc.text('TOTAL: $0.00');
+        
+        // End document
+        doc.end();
+      } catch (err) {
+        reject(err);
       }
     });
     
-    // Add content
-    doc.fontSize(20).text('PRESUPUESTO', 100, 100);
-    doc.fontSize(14).text(`Nº: ${quote.numero}`);
-    doc.text(`Cliente: ${quote.client?.nombre || 'N/A'}`);
+    // Wait for PDF generation
+    const pdfBuffer = await pdfPromise;
+    const base64PDF = pdfBuffer.toString('base64');
     
-    // Items
-    doc.moveDown();
-    doc.text('Productos:');
-    if (quote.items && Array.isArray(quote.items)) {
-      quote.items.forEach(item => {
-        doc.fontSize(11).text(`  - ${item.nombre} x ${item.cantidad}`);
-      });
-    }
+    logPDFError(`✅ PDF generated: ${pdfBuffer.length} bytes`);
     
-    // Total
-    doc.moveDown();
-    const total = quote.totales?.USD?.total || quote.totales?.ARS?.total || 0;
-    doc.fontSize(16).text(`TOTAL: $${total}`);
-    
-    // End
-    doc.end();
-    logPDFError(`✅ PDF generation started for ${quote.numero}`);
+    // Send as JSON with base64
+    res.json({
+      success: true,
+      pdf: base64PDF,
+      filename: `presupuesto-${quote.numero}.pdf`,
+      size: pdfBuffer.length
+    });
     
   } catch (error) {
-    logPDFError(`❌ ERROR: ${error.message}`);
+    logPDFError(`❌ PDF Generation Error: ${error.message}`);
     logPDFError(`STACK: ${error.stack}`);
+    
     if (!res.headersSent) {
-      res.status(500).json({ message: 'Error generating PDF', error: error.message });
+      res.status(500).json({ 
+        message: 'Error al generar PDF', 
+        error: error.message 
+      });
     }
   }
 };
