@@ -55,6 +55,9 @@ export const baseApi = createApi({
   endpoints: () => ({}),
 });
 
+// Export baseQueryWithReauth for other APIs to use
+export { baseQueryWithReauth };
+
 // Exportar función para actualizar token en memoria
 export const setMemoryToken = (token) => {
   accessToken = token;

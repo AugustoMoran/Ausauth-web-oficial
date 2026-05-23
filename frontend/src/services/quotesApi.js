@@ -1,13 +1,9 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-
-const baseQuery = fetchBaseQuery({
-  baseUrl: '/api',
-  credentials: 'include',
-});
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQueryWithReauth } from './baseApi';
 
 export const quotesApi = createApi({
   reducerPath: 'quotesApi',
-  baseQuery,
+  baseQuery: baseQueryWithReauth,
   tagTypes: ['Quote', 'MyQuotes', 'AllQuotes'],
   endpoints: (builder) => ({
     // Admin: crear presupuesto
