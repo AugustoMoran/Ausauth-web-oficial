@@ -28,12 +28,19 @@ const DownloadsAdmin = () => {
       return;
     }
 
+    // Agregar https:// si no tiene protocolo
+    let enlace = formData.enlace.trim();
+    if (!enlace.startsWith('http://') && !enlace.startsWith('https://')) {
+      enlace = 'https://' + enlace;
+    }
+
     try {
+      const dataToSave = { ...formData, enlace };
       if (editingId) {
-        await updateDownload({ id: editingId, ...formData }).unwrap();
+        await updateDownload({ id: editingId, ...dataToSave }).unwrap();
         toast.success('Descarga actualizada');
       } else {
-        await createDownload(formData).unwrap();
+        await createDownload(dataToSave).unwrap();
         toast.success('Descarga creada');
       }
       
