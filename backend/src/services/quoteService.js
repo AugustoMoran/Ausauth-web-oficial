@@ -32,15 +32,15 @@ const generateQuotePDF = (quote) => {
       
       // Render content
       try {
-        doc.fontSize(24).font('Helvetica-Bold').text('PRESUPUESTO');
-        doc.fontSize(12).font('Helvetica').text(`Nº ${quote.numero || 'N/A'}`);
+        doc.fontSize(24).text('PRESUPUESTO');
+        doc.fontSize(12).text(`Nº ${quote.numero || 'N/A'}`);
         doc.fontSize(10).text('Cliente: ' + (quote.client?.nombre || 'N/A'));
         
         // Items section
         if (quote.items && quote.items.length > 0) {
-          doc.fontSize(11).font('Helvetica-Bold').text('\nProductos:');
+          doc.fontSize(11).text('\nProductos:');
           quote.items.forEach((item, i) => {
-            doc.fontSize(10).font('Helvetica').text(
+            doc.fontSize(10).text(
               `${i+1}. ${item.nombre || 'N/A'} - Cantidad: ${item.cantidad} - $${item.subtotal || 0}`
             );
           });
@@ -48,8 +48,8 @@ const generateQuotePDF = (quote) => {
         
         // Total section
         const total = quote.totales?.USD?.total || quote.totales?.ARS?.total || 0;
-        doc.fontSize(14).font('Helvetica-Bold').text('\n─────────────────');
-        doc.fontSize(14).font('Helvetica-Bold').text(`TOTAL: $${total.toFixed(2)}`);
+        doc.fontSize(14).text('\n─────────────────');
+        doc.fontSize(14).text(`TOTAL: $${total.toFixed(2)}`);
         
         console.log('📄 Content rendered successfully');
       } catch (renderErr) {
