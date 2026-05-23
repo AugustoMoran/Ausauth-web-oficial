@@ -65,16 +65,6 @@ const generateQuotePDF = (quote) => {
   });
 };
 
-      console.log('📄 About to call doc.end()');
-      doc.end();
-      console.log('📄 doc.end() called, waiting for stream events');
-    } catch (error) {
-      console.error('❌ PDF Generation Error in try-catch:', error);
-      reject(error);
-    }
-  });
-};
-
 const sendQuoteEmail = async (quote, pdfBuffer) => {
   const emailTemplate = `
     <!DOCTYPE html>
