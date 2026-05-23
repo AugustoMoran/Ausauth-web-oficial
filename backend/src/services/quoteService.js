@@ -16,17 +16,28 @@ const generateQuotePDF = (quote) => {
   return new Promise((resolve, reject) => {
     try {
       console.log('📄 PDF Generation started for quote:', quote?.numero);
+      console.log('📄 Quote type:', typeof quote);
       console.log('📄 Items count:', quote?.items?.length);
+      console.log('📄 Totales keys:', Object.keys(quote?.totales || {}));
+      console.log('📄 Full totales:', JSON.stringify(quote?.totales));
       
       const doc = new PDFDocument({ margin: 40, size: 'A4' });
       const buffers = [];
 
-      doc.on('data', (data) => buffers.push(data));
+      doc.on('data', (data) => {
+        console.log('📄 PDF data chunk received, size:', data.length);
+        buffers.push(data);
+      });
+      
       doc.on('end', () => {
         const finalBuffer = Buffer.concat(buffers);
-        console.log('✅ PDF Generated, size:', finalBuffer.length, 'bytes');
+        console.log('✅ PDF Generated successfully, total size:', finalBuffer.length, 'bytes');
+        if (finalBuffer.length === 0) {
+          console.warn('⚠️  WARNING: Generated PDF buffer is empty!');
+        }
         resolve(finalBuffer);
       });
+      
       doc.on('error', (err) => {
         console.error('❌ PDF Stream Error:', err);
         reject(err);
@@ -45,9 +56,12 @@ const generateQuotePDF = (quote) => {
       if (fs.existsSync(logoPath)) {
         try {
           doc.image(logoPath, 40, yPosition, { width: logoWidth });
+          console.log('📄 Logo added to PDF');
         } catch (logoErr) {
-          console.log('⚠️  Logo not found:', logoPath);
+          console.log('⚠️  Logo not found or error adding:', logoPath, logoErr.message);
         }
+      } else {
+        console.log('⚠️  Logo file does not exist at:', logoPath);
       }
 
       // Título y número a la derecha
@@ -55,6 +69,7 @@ const generateQuotePDF = (quote) => {
       doc.fontSize(11).fillColor(primaryColor).font('Helvetica-Bold').text(`Nº ${quote.numero || 'SIN-NUMERO'}`, 250, yPosition + 40);
       doc.fontSize(9).fillColor('#666666').font('Helvetica').text(`Fecha: ${new Date(quote.createdAt).toLocaleDateString('es-AR')}`, 250, yPosition + 58);
 
+      console.log('📄 Header rendered at y:', yPosition);
       yPosition = yPosition + 100;
 
       // Línea separadora
@@ -82,6 +97,7 @@ const generateQuotePDF = (quote) => {
       }
 
       yPosition += 10;
+      console.log('📄 Client data rendered, y:', yPosition);
 
       // Tabla de productos
       const tableTop = yPosition;
@@ -100,8 +116,9 @@ const generateQuotePDF = (quote) => {
 
       // Items de productos
       if (quote.items && Array.isArray(quote.items) && quote.items.length > 0) {
+        console.log('📄 Rendering', quote.items.length, 'items');
         let rowBg = false;
-        quote.items.forEach((item) => {
+        quote.items.forEach((item, idx) => {
           // Fondo alterno
           if (rowBg) {
             doc.fillColor(lightColor).rect(40, yPosition - 3, 515, 20).fill();
@@ -113,15 +130,17 @@ const generateQuotePDF = (quote) => {
           doc.text((item.cantidad || 0).toString(), 265, yPosition);
           doc.text(`$${(item.precioUnitario || 0).toFixed(2)} ${item.currency || 'USD'}`, 335, yPosition);
           doc.text(`$${(item.subtotal || 0).toFixed(2)} ${item.currency || 'USD'}`, 455, yPosition);
+          console.log(`📄 Item ${idx + 1} rendered: ${item.nombre}`);
           yPosition += 20;
         });
       } else {
+        console.log('⚠️  WARNING: No items to render, quote.items:', quote.items);
         doc.fillColor('#999999').text('SIN PRODUCTOS', 50, yPosition);
         yPosition += 20;
       }
 
       // Instalación
-      if (quote.instalacion.incluye) {
+      if (quote.instalacion?.incluye) {
         if (rowBg) {
           doc.fillColor(lightColor).rect(40, yPosition - 3, 515, 20).fill();
         }
@@ -129,7 +148,8 @@ const generateQuotePDF = (quote) => {
         doc.text('Instalación' + (quote.instalacion.descripcion ? ` - ${quote.instalacion.descripcion}` : ''), 50, yPosition);
         doc.text('-', 265, yPosition);
         doc.text('-', 335, yPosition);
-        doc.text(`$${quote.instalacion.monto.toFixed(2)}`, 455, yPosition);
+        doc.text(`$${(quote.instalacion.monto || 0).toFixed(2)}`, 455, yPosition);
+        console.log('📄 Installation row rendered:', quote.instalacion.monto);
         yPosition += 20;
       }
 
@@ -140,32 +160,42 @@ const generateQuotePDF = (quote) => {
       yPosition += 15;
 
       // Totales
-      const hasUSD = quote.totales.USD && quote.totales.USD.subtotal > 0;
-      const hasARS = quote.totales.ARS && quote.totales.ARS.subtotal > 0;
+      const hasUSD = quote.totales?.USD && quote.totales.USD.subtotal > 0;
+      const hasARS = quote.totales?.ARS && quote.totales.ARS.subtotal > 0;
       const isMixed = hasUSD && hasARS;
+      
+      console.log('📄 Totales check - hasUSD:', hasUSD, 'hasARS:', hasARS, 'isMixed:', isMixed);
       
       doc.fontSize(10).fillColor(darkColor).font('Helvetica');
       
       if (hasUSD) {
         doc.text('SUBTOTAL USD:', 350, yPosition);
-        doc.text(`$${quote.totales.USD.subtotal.toFixed(2)}`, 470, yPosition, { align: 'right' });
+        const usdSubtotal = (quote.totales.USD.subtotal || 0).toFixed(2);
+        doc.text(`$${usdSubtotal}`, 470, yPosition, { align: 'right' });
+        console.log('📄 USD Subtotal rendered:', usdSubtotal);
         yPosition += 15;
         
-        if (quote.totales.USD.instalacion > 0 && !isMixed) {
+        if ((quote.totales.USD.instalacion || 0) > 0 && !isMixed) {
           doc.text('INSTALACIÓN:', 350, yPosition);
-          doc.text(`$${quote.totales.USD.instalacion.toFixed(2)}`, 470, yPosition, { align: 'right' });
+          const usdInstalacion = (quote.totales.USD.instalacion || 0).toFixed(2);
+          doc.text(`$${usdInstalacion}`, 470, yPosition, { align: 'right' });
+          console.log('📄 USD Installation rendered:', usdInstalacion);
           yPosition += 15;
         }
       }
       
       if (hasARS) {
         doc.text('SUBTOTAL ARS:', 350, yPosition);
-        doc.text(`$${quote.totales.ARS.subtotal.toFixed(2)}`, 470, yPosition, { align: 'right' });
+        const arsSubtotal = (quote.totales.ARS.subtotal || 0).toFixed(2);
+        doc.text(`$${arsSubtotal}`, 470, yPosition, { align: 'right' });
+        console.log('📄 ARS Subtotal rendered:', arsSubtotal);
         yPosition += 15;
         
-        if (quote.totales.ARS.instalacion > 0 && !isMixed) {
+        if ((quote.totales.ARS.instalacion || 0) > 0 && !isMixed) {
           doc.text('INSTALACIÓN:', 350, yPosition);
-          doc.text(`$${quote.totales.ARS.instalacion.toFixed(2)}`, 470, yPosition, { align: 'right' });
+          const arsInstalacion = (quote.totales.ARS.instalacion || 0).toFixed(2);
+          doc.text(`$${arsInstalacion}`, 470, yPosition, { align: 'right' });
+          console.log('📄 ARS Installation rendered:', arsInstalacion);
           yPosition += 15;
         }
       }
@@ -177,13 +207,17 @@ const generateQuotePDF = (quote) => {
       
       if (hasUSD) {
         doc.text(isMixed ? 'TOTAL USD:' : 'TOTAL FINAL:', 350, yPosition);
-        doc.text(`$${quote.totales.USD.total.toFixed(2)}`, 470, yPosition, { align: 'right' });
+        const usdTotal = (quote.totales.USD.total || 0).toFixed(2);
+        doc.text(`$${usdTotal}`, 470, yPosition, { align: 'right' });
+        console.log('📄 USD Total rendered:', usdTotal);
         yPosition += 18;
       }
       
       if (hasARS) {
         doc.text(isMixed ? 'TOTAL ARS:' : 'TOTAL FINAL:', 350, yPosition);
-        doc.text(`$${quote.totales.ARS.total.toFixed(2)}`, 470, yPosition, { align: 'right' });
+        const arsTotal = (quote.totales.ARS.total || 0).toFixed(2);
+        doc.text(`$${arsTotal}`, 470, yPosition, { align: 'right' });
+        console.log('📄 ARS Total rendered:', arsTotal);
         yPosition += 18;
       }
 
@@ -192,6 +226,7 @@ const generateQuotePDF = (quote) => {
         yPosition += 30;
         doc.fontSize(9).fillColor('#666666').font('Helvetica-Oblique');
         doc.text(`Notas: ${quote.notas}`, 40, yPosition, { width: 515 });
+        console.log('📄 Notes rendered:', quote.notas);
       }
 
       // Footer
@@ -200,9 +235,13 @@ const generateQuotePDF = (quote) => {
       doc.fontSize(8).fillColor('#999999').font('Helvetica');
       doc.text('Válido por 30 días. Para aceptar o consultar, responda este email.', 40, footerY + 10);
       doc.text('SAUSANSYSTEM | info@sausansystem.com | +54 9 11 6839-3582', 40, footerY + 20);
+      console.log('📄 Footer rendered');
 
+      console.log('📄 About to call doc.end()');
       doc.end();
+      console.log('📄 doc.end() called');
     } catch (error) {
+      console.error('❌ PDF Generation Error in try-catch:', error);
       reject(error);
     }
   });
