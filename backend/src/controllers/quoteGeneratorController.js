@@ -57,19 +57,31 @@ const calculateTotalsByByCurrency = (items, instalacion) => {
 
 const createQuote = async (req, res, next) => {
   try {
+    console.log('🔍 CreateQuote - User role:', req.user.role);
+    console.log('🔍 CreateQuote - Body received:', JSON.stringify(req.body, null, 2));
+
     if (req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Solo administradores pueden crear presupuestos' });
     }
 
     const { clientId, items, instalacion, notas } = req.body;
+    
+    console.log('🔍 ClientId:', clientId);
+    console.log('🔍 Items:', JSON.stringify(items, null, 2));
+
     const client = await User.findById(clientId);
     if (!client) {
+      console.log('❌ Cliente no encontrado con ID:', clientId);
       return res.status(404).json({ message: 'Cliente no encontrado' });
     }
+    
+    console.log('✅ Cliente encontrado:', client.nombre);
 
     const processedItems = await Promise.all(
       items.map(async (item) => {
+        console.log('🔍 Processing item:', item);
         const product = await Product.findById(item.producto);
+        console.log('🔍 Product found:', product?.nombre || 'PRODUCTO NO ENCONTRADO', 'para ID:', item.producto);
         return {
           producto: item.producto,
           nombre: item.nombre || product?.nombre,
