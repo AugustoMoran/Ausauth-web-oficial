@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import AdminLayout from '../../components/admin/AdminLayout';
 import { useGetDownloadsQuery, useCreateDownloadMutation, useUpdateDownloadMutation, useDeleteDownloadMutation } from '../../services/downloadApi';
 import toast from 'react-hot-toast';
 import { HiOutlineTrash, HiOutlinePencilAlt, HiOutlinePlus } from 'react-icons/hi';
@@ -72,7 +73,8 @@ const DownloadsAdmin = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <AdminLayout>
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-white">Gestión de Descargas</h1>
@@ -246,6 +248,7 @@ const DownloadsAdmin = () => {
         </div>
       )}
     </div>
+    </AdminLayout>
   );
 };
 

@@ -1,28 +1,9 @@
 import React from 'react';
 import { useGetDownloadsQuery } from '../services/downloadApi';
 import { HiOutlineDownload } from 'react-icons/hi';
-import toast from 'react-hot-toast';
 
 const DownloadsPage = () => {
   const { data: downloads = [], isLoading, error } = useGetDownloadsQuery();
-
-  const handleDownload = (enlace) => {
-    try {
-      if (enlace.startsWith('http')) {
-        window.open(enlace, '_blank');
-      } else {
-        const link = document.createElement('a');
-        link.href = enlace;
-        link.download = true;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-      toast.success('Descarga iniciada');
-    } catch (err) {
-      toast.error('Error al descargar');
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-950">
@@ -55,32 +36,32 @@ const DownloadsPage = () => {
           </div>
         )}
 
-        {/* Downloads Grid */}
+        {/* Downloads List */}
         {!isLoading && downloads.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
             {downloads.map((download) => (
-              <div
+              <a
                 key={download._id}
-                className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:border-primary-500 transition-all hover:shadow-lg hover:shadow-primary-500/20"
+                href={download.enlace}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-primary-500 hover:bg-gray-750 transition-all group"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-white mb-2">{download.titulo}</h3>
+                <div className="flex items-center gap-3 flex-1">
+                  <HiOutlineDownload size={24} className="text-primary-500 flex-shrink-0" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-white group-hover:text-primary-400 transition-colors">
+                      {download.titulo}
+                    </h3>
                     {download.descripcion && (
-                      <p className="text-gray-400 text-sm mb-4">{download.descripcion}</p>
+                      <p className="text-gray-400 text-sm">{download.descripcion}</p>
                     )}
                   </div>
-                  <HiOutlineDownload size={24} className="text-primary-500 flex-shrink-0 ml-4" />
                 </div>
-
-                <button
-                  onClick={() => handleDownload(download.enlace)}
-                  className="w-full bg-gradient-to-r from-primary-600 to-primary-500 text-white font-semibold py-3 rounded-lg hover:from-primary-700 hover:to-primary-600 transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
-                >
-                  <HiOutlineDownload size={18} />
-                  Descargar
-                </button>
-              </div>
+                <div className="text-primary-400 group-hover:translate-x-1 transition-transform flex-shrink-0 ml-4">
+                  →
+                </div>
+              </a>
             ))}
           </div>
         )}
