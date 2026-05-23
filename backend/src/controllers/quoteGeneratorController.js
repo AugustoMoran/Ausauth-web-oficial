@@ -292,110 +292,121 @@ const downloadQuotePDF = async (req, res, next) => {
     res.setHeader('Content-Disposition', `attachment; filename="presupuesto-${quote.numero}.pdf"`);
     
     try {
-      // Generate PDF to buffer instead of streaming directly
-      const chunks = [];
+      // Generate minimal PDF to test PDF generation works
+      console.log('📄 [PDF] Starting minimal PDF generation');
       
+      const chunks = [];
       const doc = new PDFDocument({
         margin: 50,
         size: 'A4'
       });
 
-      console.log('📄 [PDF] Creating PDF document');
-      
-      // Collect PDF data in chunks
+      // Collect data
       doc.on('data', (chunk) => {
+        console.log('📥 [PDF] Received chunk:', chunk.length, 'bytes');
         chunks.push(chunk);
       });
 
       doc.on('error', (err) => {
-        console.error('❌ [PDF] Document stream error:', err.message);
+        console.error('❌ [PDF] Document error event:', err.message, err);
       });
-      
-      // Add content
-      doc.fontSize(16).font('Helvetica-Bold').text('PRESUPUESTO', { align: 'center' });
-      doc.moveDown(0.5);
-      
-      doc.fontSize(12).font('Helvetica').text(`Nº: ${quote.numero || 'N/A'}`);
-      doc.text(`Cliente: ${quote.client?.nombre || 'N/A'}`);
-      doc.text(`Email: ${quote.client?.email || 'N/A'}`);
-      doc.moveDown(0.5);
-      
-      // Products section
-      doc.fontSize(11).font('Helvetica-Bold').text('PRODUCTOS:');
-      doc.font('Helvetica');
-      
-      if (quote.items && Array.isArray(quote.items) && quote.items.length > 0) {
-        quote.items.forEach((item) => {
-          try {
-            const itemText = `${item.nombre || 'Producto'} - Cantidad: ${item.cantidad || 1} - $${item.subtotal || 0}`;
-            doc.fontSize(10).text(itemText);
-          } catch (itemError) {
-            console.error('⚠️ [PDF] Error rendering item:', itemError.message);
-            doc.fontSize(10).text(`Error renderizando item: ${itemError.message}`);
-          }
-        });
-      } else {
-        doc.fontSize(10).text('(Sin productos)');
-      }
-      
-      doc.moveDown(1);
-      
-      // Total section
-      try {
-        const total = quote.totales?.USD?.total || quote.totales?.ARS?.total || 0;
-        doc.fontSize(14).font('Helvetica-Bold').text(`TOTAL: $${parseFloat(total).toFixed(2)}`);
-      } catch (totalError) {
-        console.error('⚠️ [PDF] Error rendering total:', totalError.message);
-        doc.fontSize(10).text('Total: N/A');
-      }
-      
-      // End document and wait for completion
-      doc.end();
-      console.log('✅ [PDF] Document generation started');
 
-      // Return buffer when document is finished
       doc.on('finish', () => {
         try {
+          console.log('✅ [PDF] Document finish event triggered');
           const pdfBuffer = Buffer.concat(chunks);
-          console.log('✅ [PDF] Document finished - size:', pdfBuffer.length, 'bytes');
+          console.log('✅ [PDF] Buffer concatenated, size:', pdfBuffer.length, 'bytes');
           
           if (pdfBuffer.length === 0) {
-            console.error('❌ [PDF] Generated PDF is empty!');
+            console.error('❌ [PDF] Buffer is empty!');
             if (!res.headersSent) {
-              res.status(500).json({ message: 'PDF generado pero vacío', error: 'Buffer size is 0' });
+              return res.status(500).json({ message: 'PDF buffer is empty', error: 'No data generated' });
             }
             return;
           }
           
-          // Send buffer as response
+          // Send response
           if (!res.headersSent) {
+            console.log('📤 [PDF] Sending PDF response with', pdfBuffer.length, 'bytes');
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="presupuesto-${quote.numero}.pdf"`);
             res.setHeader('Content-Length', pdfBuffer.length);
             res.write(pdfBuffer);
             res.end();
+            console.log('✅ [PDF] Response sent successfully');
+          } else {
+            console.error('❌ [PDF] Headers already sent, cannot send PDF');
           }
-          console.log('✅ [PDF] Response sent successfully');
-          
-          // Update download timestamp if client is viewing their own quote
-          if (clientId === userId) {
-            Quote.findByIdAndUpdate(req.params.id, { 'enviado.descargadoFecha': new Date() }).catch(err => {
-              console.error('⚠️ [PDF] Error updating download timestamp:', err.message);
-            });
-          }
-        } catch (finishError) {
-          console.error('❌ [PDF] Error on finish event:', finishError.message);
+        } catch (finishErr) {
+          console.error('❌ [PDF] Error in finish handler:', finishErr.message);
           if (!res.headersSent) {
-            res.status(500).json({ message: 'Error enviando PDF', error: finishError.message });
+            res.status(500).json({ message: 'Error sending PDF', error: finishErr.message });
           }
         }
       });
+
+      // Generate content - start with absolute minimal
+      try {
+        console.log('📝 [PDF] Adding title');
+        doc.fontSize(16).text('PRESUPUESTO', { align: 'center' });
+        console.log('✅ [PDF] Title added');
+      } catch (titleErr) {
+        console.error('❌ [PDF] Title error:', titleErr.message);
+        doc.fontSize(12).text('PRESUPUESTO');
+      }
+
+      try {
+        console.log('📝 [PDF] Adding quote number');
+        doc.fontSize(12).text(`Nº: ${quote.numero || 'N/A'}`);
+        console.log('✅ [PDF] Quote number added');
+      } catch (numErr) {
+        console.error('❌ [PDF] Number error:', numErr.message);
+      }
+
+      try {
+        console.log('📝 [PDF] Adding client info');
+        doc.text(`Cliente: ${quote.client?.nombre || 'N/A'}`);
+        console.log('✅ [PDF] Client info added');
+      } catch (clientErr) {
+        console.error('❌ [PDF] Client error:', clientErr.message);
+      }
+
+      try {
+        console.log('📝 [PDF] Adding items');
+        if (quote.items && Array.isArray(quote.items)) {
+          doc.text(`Productos: ${quote.items.length} items`);
+          quote.items.forEach((item, idx) => {
+            const desc = `${item.nombre || 'Producto'} x${item.cantidad || 1}`;
+            doc.text(`  ${idx + 1}. ${desc}`);
+          });
+        } else {
+          doc.text('(Sin productos)');
+        }
+        console.log('✅ [PDF] Items added');
+      } catch (itemsErr) {
+        console.error('❌ [PDF] Items error:', itemsErr.message);
+        doc.text('(Error al mostrar productos)');
+      }
+
+      try {
+        console.log('📝 [PDF] Adding total');
+        const total = quote.totales?.USD?.total || quote.totales?.ARS?.total || 0;
+        doc.fontSize(14).text(`TOTAL: $${parseFloat(total).toFixed(2)}`);
+        console.log('✅ [PDF] Total added');
+      } catch (totalErr) {
+        console.error('❌ [PDF] Total error:', totalErr.message);
+        doc.text('Total: N/A');
+      }
+
+      // End the document
+      console.log('📝 [PDF] Calling doc.end()');
+      doc.end();
+      console.log('✅ [PDF] doc.end() called, waiting for finish event');
       
     } catch (pdfError) {
-      console.error('❌ [PDF] PDF Generation Error:', pdfError.message, pdfError.stack);
+      console.error('❌ [PDF] Outer try-catch error:', pdfError.message, pdfError.stack);
       if (!res.headersSent) {
-        res.status(500).json({ message: 'Error al generar PDF', error: pdfError.message });
-      } else {
-        // Headers already sent, can't send error response
-        res.end();
+        res.status(500).json({ message: 'PDF generation failed', error: pdfError.message });
       }
     }
     
