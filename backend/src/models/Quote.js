@@ -41,6 +41,7 @@ const quoteSchema = new mongoose.Schema(
       incluye: { type: Boolean, default: false },
       monto: { type: Number, default: 0 },
       descripcion: String,
+      currency: { type: String, enum: ['USD', 'ARS'], default: 'USD' },
     },
     totales: {
       subtotal: Number,

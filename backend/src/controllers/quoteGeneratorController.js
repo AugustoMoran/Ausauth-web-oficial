@@ -37,19 +37,11 @@ const calculateTotalsByByCurrency = (items, instalacion) => {
     },
   };
 
-  // Asignar instalación a la moneda que tenga productos (prioridad USD)
+  // Asignar instalación a la moneda seleccionada por el usuario
   if (instalacion?.incluye && instalacion.monto > 0) {
-    if (totales.USD.subtotal > 0) {
-      totales.USD.instalacion = instalacion.monto;
-      totales.USD.total = totales.USD.subtotal + instalacion.monto;
-    } else if (totales.ARS.subtotal > 0) {
-      totales.ARS.instalacion = instalacion.monto;
-      totales.ARS.total = totales.ARS.subtotal + instalacion.monto;
-    } else {
-      // Si no hay productos, asignar a USD por defecto
-      totales.USD.instalacion = instalacion.monto;
-      totales.USD.total = instalacion.monto;
-    }
+    const instCurrency = instalacion.currency || 'USD';
+    totales[instCurrency].instalacion = instalacion.monto;
+    totales[instCurrency].total = totales[instCurrency].subtotal + instalacion.monto;
   }
 
   // Total final es suma de ambas monedas
@@ -124,6 +116,7 @@ const createQuote = async (req, res, next) => {
         incluye: instalacion?.incluye || false,
         monto: instalacion?.monto || 0,
         descripcion: instalacion?.descripcion,
+        currency: instalacion?.currency || 'USD',
       },
       totales,
       notas,
@@ -214,6 +207,7 @@ const updateQuote = async (req, res, next) => {
         incluye: instalacion.incluye || false,
         monto: instalacion.monto || 0,
         descripcion: instalacion.descripcion,
+        currency: instalacion.currency || 'USD',
       };
     }
 
@@ -366,15 +360,14 @@ const downloadQuotePDF = async (req, res, next) => {
         doc.y = 160;
         doc.fillColor('#000');
 
-        // Date and status
+        // Date only (no status)
         const createdDate = new Date(quote.createdAt).toLocaleDateString('es-AR', { 
           year: 'numeric', 
           month: 'long', 
           day: 'numeric' 
         });
         doc.fontSize(10).font('Helvetica')
-          .text(`Fecha: ${createdDate}`, { continued: true })
-          .text(`  |  Estado: ${quote.estado.toUpperCase()}`, { align: 'right' });
+          .text(`Fecha: ${createdDate}`);
         
         doc.moveTo(50, doc.y + 5).lineTo(550, doc.y + 5).stroke('#ddd');
         doc.moveDown();
