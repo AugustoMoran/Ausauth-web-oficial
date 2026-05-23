@@ -1,6 +1,7 @@
 const Quote = require('../models/Quote');
 const User = require('../models/User');
 const Product = require('../models/Product');
+const PDFDocument = require('pdfkit');
 const { generateQuotePDF, sendQuoteEmail } = require('../services/quoteService');
 
 // Función helper para calcular totales por moneda
@@ -283,7 +284,6 @@ const downloadQuotePDF = async (req, res, next) => {
       res.setHeader('Content-Disposition', `attachment; filename="presupuesto-${quote.numero}.pdf"`);
       
       // Create PDF and write directly to response
-      const PDFDocument = require('pdfkit');
       const doc = new PDFDocument();
       
       // Pipe directly to response
