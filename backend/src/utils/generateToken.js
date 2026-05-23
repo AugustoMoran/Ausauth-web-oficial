@@ -17,20 +17,22 @@ const generateRefreshToken = async (userId) => {
 };
 
 const setRefreshTokenCookie = (res, token) => {
+  const isProduction = process.env.NODE_ENV === 'production';
   res.cookie('refreshToken', token, {
     httpOnly: true,
-    secure: false, // Always false for localhost (HTTP), secure: true is for production HTTPS
-    sameSite: 'Lax', // Lax works best for localhost development
+    secure: isProduction, // true for HTTPS production, false for HTTP development
+    sameSite: isProduction ? 'None' : 'Lax', // 'None' needed for cross-domain HTTPS
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: '/',
   });
 };
 
 const setAccessTokenCookie = (res, token) => {
+  const isProduction = process.env.NODE_ENV === 'production';
   res.cookie('accessToken', token, {
     httpOnly: true,
-    secure: false, // Always false for localhost (HTTP), secure: true is for production HTTPS
-    sameSite: 'Lax', // Lax works best for localhost development
+    secure: isProduction, // true for HTTPS production, false for HTTP development
+    sameSite: isProduction ? 'None' : 'Lax', // 'None' needed for cross-domain HTTPS
     maxAge: 15 * 60 * 1000,
     path: '/',
   });
