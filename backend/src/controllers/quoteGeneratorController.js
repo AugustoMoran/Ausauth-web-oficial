@@ -232,8 +232,18 @@ const sendQuote = async (req, res, next) => {
       return res.status(404).json({ message: 'Presupuesto no encontrado' });
     }
 
-    const pdfBuffer = await generateQuotePDF(quote);
-    await sendQuoteEmail(quote, pdfBuffer);
+    try {
+      const pdfBuffer = await generateQuotePDF(quote);
+      
+      // Intentar enviar email sin bloquear
+      sendQuoteEmail(quote, pdfBuffer).catch((emailError) => {
+        console.error('Email send error:', emailError);
+        // No fallar la request si el email falla
+      });
+    } catch (pdfError) {
+      console.error('PDF generation error:', pdfError);
+      // Continuar incluso si el PDF falla
+    }
 
     quote.estado = 'enviado';
     quote.enviado = {
