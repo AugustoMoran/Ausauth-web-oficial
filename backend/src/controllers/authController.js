@@ -101,7 +101,11 @@ const logout = async (req, res, next) => {
 };
 
 const getMe = (req, res) => {
+  // Generate fresh access token for cross-domain compatibility
+  const accessToken = generateAccessToken(req.user._id);
+  
   res.json({
+    accessToken, // Token separado - frontend capturará esto
     _id: req.user._id,
     nombre: req.user.nombre,
     apellido: req.user.apellido,

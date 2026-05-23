@@ -49,6 +49,15 @@ export const authApi = baseApi.injectEndpoints({
     getMe: builder.query({
       query: () => '/auth/me',
       providesTags: ['User'],
+      transformResponse: (response) => {
+        // Capture token before it's stored in cache
+        if (response?.accessToken) {
+          setMemoryToken(response.accessToken);
+        }
+        // Return response without accessToken so Redux only stores user data
+        const { accessToken, ...userData } = response;
+        return userData;
+      },
     }),
     updateProfile: builder.mutation({
       query: (data) => ({ url: '/users/profile', method: 'PUT', body: data }),
