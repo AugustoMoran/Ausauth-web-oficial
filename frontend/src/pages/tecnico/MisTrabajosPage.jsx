@@ -156,7 +156,7 @@ const MisTrabajosPage = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 border-b border-gray-700">>
+        <div className="flex gap-4 border-b border-gray-700">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
