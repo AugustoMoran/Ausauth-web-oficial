@@ -4,6 +4,15 @@ const Product = require('../models/Product');
 const PDFDocument = require('pdfkit');
 const { generateQuotePDF, sendQuoteEmail } = require('../services/quoteService');
 
+// In-memory error log for debugging
+const pdfErrorLog = [];
+function logPDFError(msg) {
+  const log = { timestamp: new Date().toISOString(), msg };
+  pdfErrorLog.push(log);
+  if (pdfErrorLog.length > 50) pdfErrorLog.shift(); // Keep only last 50
+  console.error('📝 [PDF-LOG]', msg);
+}
+
 // Función helper para calcular totales por moneda
 const calculateTotalsByByCurrency = (items, instalacion) => {
   const currencies = { USD: 0, ARS: 0 };
@@ -262,157 +271,61 @@ const sendQuote = async (req, res, next) => {
 
 const downloadQuotePDF = async (req, res, next) => {
   try {
-    console.log('📥 [PDF] Download request for quote ID:', req.params.id);
+    logPDFError(`📥 Download request: ${req.params.id}`);
     
-    // Get quote - try lean first, fallback to full document
-    let quote = await Quote.findById(req.params.id).lean();
+    const quote = await Quote.findById(req.params.id);
     if (!quote) {
-      quote = await Quote.findById(req.params.id);
-    }
-    
-    if (!quote) {
-      console.log('❌ [PDF] Quote not found');
+      logPDFError(`❌ Quote not found: ${req.params.id}`);
       return res.status(404).json({ message: 'Presupuesto no encontrado' });
     }
 
-    console.log('✅ [PDF] Quote found:', quote.numero);
-    console.log('📊 [PDF] Quote data - items:', quote.items?.length, 'client:', quote.client?.nombre);
-
-    // Check authorization - safely handle both string and ObjectId
+    // Check auth
     const clientId = quote.client?._id?.toString?.() || quote.client?._id;
     const userId = req.user._id?.toString?.() || req.user._id;
     
     if (req.user.role !== 'admin' && clientId !== userId) {
-      console.log('❌ [PDF] Unauthorized - role:', req.user.role, 'clientId:', clientId, 'userId:', userId);
+      logPDFError(`❌ Unauthorized: role=${req.user.role} clientId=${clientId} userId=${userId}`);
       return res.status(403).json({ message: 'No autorizado' });
     }
 
-    // Set headers BEFORE writing to response
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="presupuesto-${quote.numero}.pdf"`);
+    // ULTRA SIMPLE: Create PDF with minimal operations
+    logPDFError(`📄 Creating PDF for ${quote.numero}`);
     
-    try {
-      // Generate minimal PDF to test PDF generation works
-      console.log('📄 [PDF] Starting minimal PDF generation');
-      
-      const chunks = [];
-      const doc = new PDFDocument({
-        margin: 50,
-        size: 'A4'
+    const PDFDocument = require('pdfkit');
+    const doc = new PDFDocument();
+    
+    // Pipe to response immediately
+    doc.pipe(res);
+    
+    // Add minimal content
+    doc.fontSize(20).text('PRESUPUESTO', 100, 100);
+    doc.fontSize(14).text(`Nº: ${quote.numero}`);
+    doc.text(`Cliente: ${quote.client?.nombre || 'N/A'}`);
+    
+    // Items
+    doc.moveDown();
+    doc.text('Productos:');
+    if (quote.items && Array.isArray(quote.items)) {
+      quote.items.forEach(item => {
+        doc.fontSize(11).text(`  - ${item.nombre} x ${item.cantidad}`);
       });
-
-      // Collect data
-      doc.on('data', (chunk) => {
-        console.log('📥 [PDF] Received chunk:', chunk.length, 'bytes');
-        chunks.push(chunk);
-      });
-
-      doc.on('error', (err) => {
-        console.error('❌ [PDF] Document error event:', err.message, err);
-      });
-
-      doc.on('finish', () => {
-        try {
-          console.log('✅ [PDF] Document finish event triggered');
-          const pdfBuffer = Buffer.concat(chunks);
-          console.log('✅ [PDF] Buffer concatenated, size:', pdfBuffer.length, 'bytes');
-          
-          if (pdfBuffer.length === 0) {
-            console.error('❌ [PDF] Buffer is empty!');
-            if (!res.headersSent) {
-              return res.status(500).json({ message: 'PDF buffer is empty', error: 'No data generated' });
-            }
-            return;
-          }
-          
-          // Send response
-          if (!res.headersSent) {
-            console.log('📤 [PDF] Sending PDF response with', pdfBuffer.length, 'bytes');
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="presupuesto-${quote.numero}.pdf"`);
-            res.setHeader('Content-Length', pdfBuffer.length);
-            res.write(pdfBuffer);
-            res.end();
-            console.log('✅ [PDF] Response sent successfully');
-          } else {
-            console.error('❌ [PDF] Headers already sent, cannot send PDF');
-          }
-        } catch (finishErr) {
-          console.error('❌ [PDF] Error in finish handler:', finishErr.message);
-          if (!res.headersSent) {
-            res.status(500).json({ message: 'Error sending PDF', error: finishErr.message });
-          }
-        }
-      });
-
-      // Generate content - start with absolute minimal
-      try {
-        console.log('📝 [PDF] Adding title');
-        doc.fontSize(16).text('PRESUPUESTO', { align: 'center' });
-        console.log('✅ [PDF] Title added');
-      } catch (titleErr) {
-        console.error('❌ [PDF] Title error:', titleErr.message);
-        doc.fontSize(12).text('PRESUPUESTO');
-      }
-
-      try {
-        console.log('📝 [PDF] Adding quote number');
-        doc.fontSize(12).text(`Nº: ${quote.numero || 'N/A'}`);
-        console.log('✅ [PDF] Quote number added');
-      } catch (numErr) {
-        console.error('❌ [PDF] Number error:', numErr.message);
-      }
-
-      try {
-        console.log('📝 [PDF] Adding client info');
-        doc.text(`Cliente: ${quote.client?.nombre || 'N/A'}`);
-        console.log('✅ [PDF] Client info added');
-      } catch (clientErr) {
-        console.error('❌ [PDF] Client error:', clientErr.message);
-      }
-
-      try {
-        console.log('📝 [PDF] Adding items');
-        if (quote.items && Array.isArray(quote.items)) {
-          doc.text(`Productos: ${quote.items.length} items`);
-          quote.items.forEach((item, idx) => {
-            const desc = `${item.nombre || 'Producto'} x${item.cantidad || 1}`;
-            doc.text(`  ${idx + 1}. ${desc}`);
-          });
-        } else {
-          doc.text('(Sin productos)');
-        }
-        console.log('✅ [PDF] Items added');
-      } catch (itemsErr) {
-        console.error('❌ [PDF] Items error:', itemsErr.message);
-        doc.text('(Error al mostrar productos)');
-      }
-
-      try {
-        console.log('📝 [PDF] Adding total');
-        const total = quote.totales?.USD?.total || quote.totales?.ARS?.total || 0;
-        doc.fontSize(14).text(`TOTAL: $${parseFloat(total).toFixed(2)}`);
-        console.log('✅ [PDF] Total added');
-      } catch (totalErr) {
-        console.error('❌ [PDF] Total error:', totalErr.message);
-        doc.text('Total: N/A');
-      }
-
-      // End the document
-      console.log('📝 [PDF] Calling doc.end()');
-      doc.end();
-      console.log('✅ [PDF] doc.end() called, waiting for finish event');
-      
-    } catch (pdfError) {
-      console.error('❌ [PDF] Outer try-catch error:', pdfError.message, pdfError.stack);
-      if (!res.headersSent) {
-        res.status(500).json({ message: 'PDF generation failed', error: pdfError.message });
-      }
     }
     
+    // Total
+    doc.moveDown();
+    const total = quote.totales?.USD?.total || quote.totales?.ARS?.total || 0;
+    doc.fontSize(16).text(`TOTAL: $${total}`);
+    
+    // End
+    doc.end();
+    logPDFError(`✅ PDF stream ended for ${quote.numero}`);
+    
   } catch (error) {
-    console.error('❌ [PDF] Download Error:', error.message, error.stack);
-    next(error);
+    logPDFError(`❌ ERROR: ${error.message}`);
+    logPDFError(`STACK: ${error.stack}`);
+    if (!res.headersSent) {
+      res.status(500).json({ message: 'Error generating PDF', error: error.message });
+    }
   }
 };
 
@@ -523,6 +436,11 @@ const testPDF = async (req, res, next) => {
   }
 };
 
+// GET PDF error log for debugging
+const getPDFErrorLog = (req, res) => {
+  res.json({ errors: pdfErrorLog, totalErrors: pdfErrorLog.length });
+};
+
 module.exports = {
   createQuote,
   getAllQuotes,
@@ -534,4 +452,5 @@ module.exports = {
   updateQuoteStatus,
   deleteQuote,
   testPDF,
+  getPDFErrorLog,
 };

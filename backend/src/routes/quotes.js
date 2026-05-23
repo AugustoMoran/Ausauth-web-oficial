@@ -12,10 +12,12 @@ const {
   updateQuoteStatus,
   deleteQuote,
   testPDF,
+  getPDFErrorLog,
 } = require('../controllers/quoteGeneratorController');
 
 // Test endpoint - NO AUTH (goes before protect middleware)
 router.get('/test/pdf', testPDF);
+router.get('/debug/pdf-errors', getPDFErrorLog);  // Debug errors
 
 // Apply auth middleware to all routes below
 router.use(protect);
