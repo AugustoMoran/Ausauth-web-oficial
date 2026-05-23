@@ -2,6 +2,7 @@ const PDFDocument = require('pdfkit');
 const nodemailer = require('nodemailer');
 const path = require('path');
 const fs = require('fs');
+const { PassThrough } = require('stream');
 
 // Configurar transporter de email
 const transporter = nodemailer.createTransport({
@@ -16,67 +17,73 @@ const generateQuotePDF = (quote) => {
   return new Promise((resolve, reject) => {
     try {
       console.log('📄 PDF Generation started for quote:', quote?.numero);
-      console.log('📄 Items count:', quote?.items?.length);
-      console.log('📄 Totales:', quote?.totales?.USD?.total || quote?.totales?.ARS?.total || 0);
       
-      const buffers = [];
-      const doc = new PDFDocument({ margin: 40, size: 'A4', bufferPages: true });
-
-      // Collect data chunks
-      doc.on('data', (chunk) => {
-        console.log('📄 PDF data chunk:', chunk.length, 'bytes');
-        buffers.push(chunk);
+      // Create a PassThrough stream to collect PDF data
+      const stream = new PassThrough();
+      const chunks = [];
+      
+      // Listen for data chunks
+      stream.on('data', (chunk) => {
+        console.log('📄 Stream chunk received:', chunk.length, 'bytes');
+        chunks.push(chunk);
       });
-
-      // When finished
-      doc.on('end', () => {
-        console.log('📄 doc.on(end) fired, total chunks:', buffers.length);
-        const pdfBuffer = Buffer.concat(buffers);
-        console.log('✅ PDF buffer created, size:', pdfBuffer.length, 'bytes');
-        resolve(pdfBuffer);
+      
+      // Listen for stream end
+      stream.on('end', () => {
+        console.log('📄 Stream ended, concatenating', chunks.length, 'chunks');
+        const buffer = Buffer.concat(chunks);
+        console.log('✅ PDF buffer ready, size:', buffer.length, 'bytes');
+        resolve(buffer);
       });
-
-      // Handle errors
-      doc.on('error', (err) => {
-        console.error('❌ PDF doc error:', err);
+      
+      // Listen for errors
+      stream.on('error', (err) => {
+        console.error('❌ Stream error:', err.message);
         reject(err);
       });
-
-      // START RENDERING
-      console.log('📄 Starting PDF content rendering...');
       
+      // Create PDF document with the stream
+      const doc = new PDFDocument({ margin: 40, size: 'A4' });
+      doc.pipe(stream);
+      
+      console.log('📄 Document created and piped to stream');
+      
+      // Render content
       try {
-        doc.fontSize(24).text('PRESUPUESTO');
-        doc.fontSize(12).text('Nº ' + (quote.numero || 'N/A'));
+        doc.fontSize(24).font('Helvetica-Bold').text('PRESUPUESTO');
+        doc.fontSize(12).font('Helvetica').text(`Nº ${quote.numero || 'N/A'}`);
         doc.fontSize(10).text('Cliente: ' + (quote.client?.nombre || 'N/A'));
         
-        // Add items
+        // Items section
         if (quote.items && quote.items.length > 0) {
-          doc.fontSize(11).text('\nProductos:');
+          doc.fontSize(11).font('Helvetica-Bold').text('\nProductos:');
           quote.items.forEach((item, i) => {
-            doc.fontSize(10).text(`${i+1}. ${item.nombre || 'N/A'} - $${item.subtotal || 0}`);
+            doc.fontSize(10).font('Helvetica').text(
+              `${i+1}. ${item.nombre || 'N/A'} - Cantidad: ${item.cantidad} - $${item.subtotal || 0}`
+            );
           });
         }
         
-        // Add total
+        // Total section
         const total = quote.totales?.USD?.total || quote.totales?.ARS?.total || 0;
-        doc.fontSize(14).text('\nTOTAL: $' + total.toFixed(2));
+        doc.fontSize(14).font('Helvetica-Bold').text('\n─────────────────');
+        doc.fontSize(14).font('Helvetica-Bold').text(`TOTAL: $${total.toFixed(2)}`);
         
-        console.log('📄 All content added to PDF');
+        console.log('📄 Content rendered successfully');
       } catch (renderErr) {
-        console.error('❌ Error rendering content:', renderErr);
-        doc.end();
+        console.error('❌ Error rendering PDF content:', renderErr.message);
+        stream.destroy();
         reject(renderErr);
         return;
       }
-
-      // THIS IS CRITICAL - must call end() to flush the document
-      console.log('📄 Calling doc.end()...');
+      
+      // End the document (this triggers the stream to flush)
+      console.log('📄 Finalizing document...');
       doc.end();
       console.log('📄 doc.end() called');
       
     } catch (error) {
-      console.error('❌ PDF Generation Error:', error);
+      console.error('❌ PDF Generation Error:', error.message);
       reject(error);
     }
   });
