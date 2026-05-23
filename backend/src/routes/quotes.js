@@ -14,34 +14,37 @@ const {
   testPDF,
 } = require('../controllers/quoteGeneratorController');
 
-// Test endpoint - no auth required
+// Test endpoint - NO AUTH (goes before protect middleware)
 router.get('/test/pdf', testPDF);
 
+// Apply auth middleware to all routes below
+router.use(protect);
+
 // Admin: Crear presupuesto
-router.post('/', protect, createQuote);
+router.post('/', createQuote);
 
 // Admin: Obtener todos
-router.get('/admin/all', protect, getAllQuotes);
+router.get('/admin/all', getAllQuotes);
 
 // Cliente: Mis presupuestos
-router.get('/mis-presupuestos', protect, getMyQuotes);
+router.get('/mis-presupuestos', getMyQuotes);
 
 // Obtener presupuesto por ID (admin o cliente dueño)
-router.get('/:id', protect, getQuoteById);
+router.get('/:id', getQuoteById);
 
 // Admin: Actualizar presupuesto
-router.put('/:id', protect, updateQuote);
+router.put('/:id', updateQuote);
 
 // Admin: Enviar por email
-router.post('/:id/enviar', protect, sendQuote);
+router.post('/:id/enviar', sendQuote);
 
 // Descargar PDF (admin o cliente dueño)
-router.get('/:id/pdf', protect, downloadQuotePDF);
+router.get('/:id/pdf', downloadQuotePDF);
 
 // Cliente: Cambiar estado
-router.put('/:id/status', protect, updateQuoteStatus);
+router.put('/:id/status', updateQuoteStatus);
 
 // Admin: Eliminar presupuesto (solo borrador)
-router.delete('/:id', protect, deleteQuote);
+router.delete('/:id', deleteQuote);
 
 module.exports = router;
