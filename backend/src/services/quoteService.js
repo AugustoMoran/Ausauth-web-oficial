@@ -16,84 +16,67 @@ const generateQuotePDF = (quote) => {
   return new Promise((resolve, reject) => {
     try {
       console.log('📄 PDF Generation started for quote:', quote?.numero);
-      console.log('📄 Quote type:', typeof quote);
       console.log('📄 Items count:', quote?.items?.length);
-      console.log('📄 Totales keys:', Object.keys(quote?.totales || {}));
-      console.log('📄 Full totales:', JSON.stringify(quote?.totales));
+      console.log('📄 Totales:', quote?.totales?.USD?.total || quote?.totales?.ARS?.total || 0);
       
-      const doc = new PDFDocument({ margin: 40, size: 'A4' });
       const buffers = [];
+      const doc = new PDFDocument({ margin: 40, size: 'A4', bufferPages: true });
 
-      doc.on('data', (data) => {
-        console.log('📄 PDF data chunk received, size:', data.length);
-        buffers.push(data);
+      // Collect data chunks
+      doc.on('data', (chunk) => {
+        console.log('📄 PDF data chunk:', chunk.length, 'bytes');
+        buffers.push(chunk);
       });
-      
+
+      // When finished
       doc.on('end', () => {
-        const finalBuffer = Buffer.concat(buffers);
-        console.log('✅ PDF Generated successfully, total size:', finalBuffer.length, 'bytes');
-        if (finalBuffer.length === 0) {
-          console.warn('⚠️  WARNING: Generated PDF buffer is empty!');
-        }
-        resolve(finalBuffer);
+        console.log('📄 doc.on(end) fired, total chunks:', buffers.length);
+        const pdfBuffer = Buffer.concat(buffers);
+        console.log('✅ PDF buffer created, size:', pdfBuffer.length, 'bytes');
+        resolve(pdfBuffer);
       });
-      
+
+      // Handle errors
       doc.on('error', (err) => {
-        console.error('❌ PDF Stream Error:', err);
+        console.error('❌ PDF doc error:', err);
         reject(err);
       });
 
-      // Simple test - just text
-      console.log('📄 About to add test content');
+      // START RENDERING
+      console.log('📄 Starting PDF content rendering...');
+      
       try {
         doc.fontSize(24).text('PRESUPUESTO');
-        console.log('✅ Title added');
-      } catch (e) {
-        console.error('❌ Error adding title:', e.message);
-      }
-
-      try {
-        doc.fontSize(12).text(`Nº ${quote.numero || 'N/A'}`);
-        console.log('✅ Quote number added');
-      } catch (e) {
-        console.error('❌ Error adding number:', e.message);
-      }
-
-      try {
+        doc.fontSize(12).text('Nº ' + (quote.numero || 'N/A'));
         doc.fontSize(10).text('Cliente: ' + (quote.client?.nombre || 'N/A'));
-        console.log('✅ Client name added');
-      } catch (e) {
-        console.error('❌ Error adding client:', e.message);
-      }
-
-      try {
+        
+        // Add items
         if (quote.items && quote.items.length > 0) {
-          quote.items.forEach((item, idx) => {
-            const text = `Producto ${idx + 1}: ${item.nombre || 'N/A'} - $${item.subtotal || 0}`;
-            doc.fontSize(10).text(text);
-            console.log('✅ Item', idx + 1, 'added:', text);
+          doc.fontSize(11).text('\nProductos:');
+          quote.items.forEach((item, i) => {
+            doc.fontSize(10).text(`${i+1}. ${item.nombre || 'N/A'} - $${item.subtotal || 0}`);
           });
-        } else {
-          doc.fontSize(10).text('(No items)');
-          console.log('⚠️  No items to add');
         }
-      } catch (e) {
-        console.error('❌ Error adding items:', e.message);
-      }
-
-      try {
+        
+        // Add total
         const total = quote.totales?.USD?.total || quote.totales?.ARS?.total || 0;
-        doc.fontSize(14).text('TOTAL: $' + total.toFixed(2));
-        console.log('✅ Total added:', total);
-      } catch (e) {
-        console.error('❌ Error adding total:', e.message);
+        doc.fontSize(14).text('\nTOTAL: $' + total.toFixed(2));
+        
+        console.log('📄 All content added to PDF');
+      } catch (renderErr) {
+        console.error('❌ Error rendering content:', renderErr);
+        doc.end();
+        reject(renderErr);
+        return;
       }
 
-      console.log('📄 About to call doc.end()');
+      // THIS IS CRITICAL - must call end() to flush the document
+      console.log('📄 Calling doc.end()...');
       doc.end();
-      console.log('📄 doc.end() called, waiting for stream events');
+      console.log('📄 doc.end() called');
+      
     } catch (error) {
-      console.error('❌ PDF Generation Error in try-catch:', error);
+      console.error('❌ PDF Generation Error:', error);
       reject(error);
     }
   });
