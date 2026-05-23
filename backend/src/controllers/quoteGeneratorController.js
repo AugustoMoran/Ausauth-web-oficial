@@ -292,7 +292,9 @@ const downloadQuotePDF = async (req, res, next) => {
     res.setHeader('Content-Disposition', `attachment; filename="presupuesto-${quote.numero}.pdf"`);
     
     try {
-      // Create PDF document
+      // Generate PDF to buffer instead of streaming directly
+      const chunks = [];
+      
       const doc = new PDFDocument({
         margin: 50,
         size: 'A4'
@@ -300,8 +302,14 @@ const downloadQuotePDF = async (req, res, next) => {
 
       console.log('📄 [PDF] Creating PDF document');
       
-      // Pipe directly to HTTP response
-      doc.pipe(res);
+      // Collect PDF data in chunks
+      doc.on('data', (chunk) => {
+        chunks.push(chunk);
+      });
+
+      doc.on('error', (err) => {
+        console.error('❌ [PDF] Document stream error:', err.message);
+      });
       
       // Add content
       doc.fontSize(16).font('Helvetica-Bold').text('PRESUPUESTO', { align: 'center' });
@@ -341,16 +349,45 @@ const downloadQuotePDF = async (req, res, next) => {
         doc.fontSize(10).text('Total: N/A');
       }
       
-      // End document - this will trigger stream end
+      // End document and wait for completion
       doc.end();
-      console.log('✅ [PDF] Document ended - streaming to response');
-      
-      // Update download timestamp if client is viewing their own quote
-      if (clientId === userId) {
-        Quote.findByIdAndUpdate(req.params.id, { 'enviado.descargadoFecha': new Date() }).catch(err => {
-          console.error('⚠️ [PDF] Error updating download timestamp:', err.message);
-        });
-      }
+      console.log('✅ [PDF] Document generation started');
+
+      // Return buffer when document is finished
+      doc.on('finish', () => {
+        try {
+          const pdfBuffer = Buffer.concat(chunks);
+          console.log('✅ [PDF] Document finished - size:', pdfBuffer.length, 'bytes');
+          
+          if (pdfBuffer.length === 0) {
+            console.error('❌ [PDF] Generated PDF is empty!');
+            if (!res.headersSent) {
+              res.status(500).json({ message: 'PDF generado pero vacío', error: 'Buffer size is 0' });
+            }
+            return;
+          }
+          
+          // Send buffer as response
+          if (!res.headersSent) {
+            res.setHeader('Content-Length', pdfBuffer.length);
+            res.write(pdfBuffer);
+            res.end();
+          }
+          console.log('✅ [PDF] Response sent successfully');
+          
+          // Update download timestamp if client is viewing their own quote
+          if (clientId === userId) {
+            Quote.findByIdAndUpdate(req.params.id, { 'enviado.descargadoFecha': new Date() }).catch(err => {
+              console.error('⚠️ [PDF] Error updating download timestamp:', err.message);
+            });
+          }
+        } catch (finishError) {
+          console.error('❌ [PDF] Error on finish event:', finishError.message);
+          if (!res.headersSent) {
+            res.status(500).json({ message: 'Error enviando PDF', error: finishError.message });
+          }
+        }
+      });
       
     } catch (pdfError) {
       console.error('❌ [PDF] PDF Generation Error:', pdfError.message, pdfError.stack);
