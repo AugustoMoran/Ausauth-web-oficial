@@ -10,17 +10,23 @@ export const initializeMercadoPago = () => {
     return;
   }
 
-  // Wait for SDK to load (max 5 attempts)
+  // Wait for SDK to load (max 15 attempts = 7.5s for production delays)
   let attempts = 0;
-  const maxAttempts = 5;
+  const maxAttempts = 15;
   
   const initialize = () => {
-    if (typeof window.mp !== 'undefined') {
-      console.log('✅ Mercado Pago SDK initialized');
+    // Check for window.MercadoPago (SDK v2) or window.mp (legacy)
+    if (typeof window.MercadoPago !== 'undefined' || typeof window.mp !== 'undefined') {
+      const mp = window.MercadoPago || window.mp;
+      console.log('✅ Mercado Pago SDK loaded and initialized');
       try {
-        window.mp.init({
-          publicKey: publicKey,
-        });
+        if (typeof mp.bricks !== 'undefined') {
+          // SDK v2 with Bricks
+          console.log('✅ Mercado Pago Bricks available');
+        } else if (typeof mp.checkout !== 'undefined') {
+          // Legacy checkout
+          console.log('✅ Mercado Pago Checkout available');
+        }
       } catch (error) {
         console.error('❌ Error initializing MP SDK:', error);
       }
@@ -29,7 +35,7 @@ export const initializeMercadoPago = () => {
       console.log(`⏳ Waiting for MP SDK to load... (${attempts}/${maxAttempts})`);
       setTimeout(initialize, 500);
     } else {
-      console.warn('⚠️ Mercado Pago SDK did not load after 2.5s. Check index.html');
+      console.warn('⚠️ Mercado Pago SDK did not load after 7.5s. Check network and index.html');
     }
   };
 
