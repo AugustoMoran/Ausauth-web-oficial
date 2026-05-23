@@ -10,8 +10,8 @@ export const getCurrencyByRole = (userRole) => {
 
 /**
  * Obtiene el precio a mostrar según el rol del usuario CON CONVERSIÓN automática
- * Admin, Tecnico, Despachante: ven precios en USD
- * Usuarios normales (gremio, user): ven precios en ARS
+ * Admin, Tecnico, Despachante, Gremio: ven precios en USD
+ * Usuarios normales (usuario): ven precios en ARS
  */
 export const getPriceByRole = (product, userRole, exchangeRate = 1000) => {
   if (!product) return 0;
@@ -64,7 +64,7 @@ export const getPriceWithCurrency = (product, userRole, exchangeRate = 1000) => 
 export const getOriginalPriceByRole = (product, userRole, exchangeRate = 1000) => {
   if (!product) return 0;
   
-  const usdRoles = ['admin', 'tecnico', 'despachante'];
+  const usdRoles = ['admin', 'tecnico', 'despachante', 'gremio'];
   
   if (userRole && usdRoles.includes(userRole)) {
     // Precio original en USD

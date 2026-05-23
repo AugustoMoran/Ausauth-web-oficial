@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { selectCartItems, selectCartTotal, clearGuestCart } from '../features/cart/cartSlice';
+import { selectCartItems, clearGuestCart } from '../features/cart/cartSlice';
 import { useDispatch } from 'react-redux';
 import { useCreateOrderMutation, useValidateCouponMutation } from '../services/ordersApi';
 import { useClearCartMutation } from '../services/cartApi';
@@ -10,10 +10,11 @@ import { formatCurrency } from '../utils/formatCurrency';
 import { generateWhatsAppLink } from '../utils/generateWhatsAppLink';
 import toast from 'react-hot-toast';
 import { FaWhatsapp, FaCreditCard } from 'react-icons/fa';
-import { HiExclamation } from 'react-icons/hi';
+
 import LocationValidator from '../components/location/LocationValidator';
 import InstallationOption from '../components/location/InstallationOption';
-import { validateCartCurrencies, detectProductCurrency, getProductPrice } from '../utils/detectCurrency';
+import { getCurrencyByRole, getPriceByRole } from '../utils/getPriceByRole';
+import { useGetExchangeRateQuery } from '../services/settingsApi';
 
 const REQUIRED_GUEST_FIELDS = ['nombre', 'apellido', 'email', 'telefono'];
 
@@ -25,10 +26,12 @@ const Checkout = () => {
   const navigate = useNavigate();
   const user = useSelector(selectCurrentUser);
   const items = useSelector(selectCartItems);
-  const total = useSelector(selectCartTotal);
   const [createOrder, { isLoading }] = useCreateOrderMutation();
   const [clearCartApi] = useClearCartMutation();
   const [validateCoupon] = useValidateCouponMutation();
+  const { data: rateData } = useGetExchangeRateQuery();
+  const exchangeRate = rateData?.rate || 1000;
+  const userCurrency = getCurrencyByRole(user?.role);
 
   const [guestData, setGuestData] = useState({ nombre: '', apellido: '', email: '', telefono: '', direccion: '' });
   const [couponCode, setCouponCode] = useState('');
@@ -38,21 +41,15 @@ const Checkout = () => {
   // Geolocalización e instalación
   const [locationValidation, setLocationValidation] = useState(null);
 
-  // Totales por moneda (ARS / USD)
-  const totalesPorMoneda = items.reduce((acc, item) => {
-    const currency = detectProductCurrency(item.producto) || 'ARS';
-    const price = getProductPrice(item.producto);
-    acc[currency] = (acc[currency] || 0) + price * item.cantidad;
-    return acc;
-  }, {});
-  const soloARS = Object.keys(totalesPorMoneda).length === 1 && totalesPorMoneda.ARS;
-  const soloUSD = Object.keys(totalesPorMoneda).length === 1 && totalesPorMoneda.USD;
+  // Total en la moneda del usuario
+  const cartSubtotal = items.reduce((sum, item) => {
+    const price = getPriceByRole(item.producto, user?.role, exchangeRate);
+    return sum + price * item.cantidad;
+  }, 0);
 
-  const currencyValidation = validateCartCurrencies(items);
-  const arsBase = totalesPorMoneda.ARS || 0;
-  const finalTotal = couponResult && soloARS
-    ? Math.max(0, arsBase - couponResult.descuento)
-    : arsBase;
+  const finalTotal = couponResult && userCurrency === 'ARS'
+    ? Math.max(0, cartSubtotal - couponResult.descuento)
+    : cartSubtotal;
 
   if (items.length === 0) {
     return (
@@ -72,7 +69,7 @@ const Checkout = () => {
 
   const handleApplyCoupon = async () => {
     try {
-      const result = await validateCoupon({ codigo: couponCode, subtotal: arsBase }).unwrap();
+      const result = await validateCoupon({ codigo: couponCode, subtotal: cartSubtotal }).unwrap();
       setCouponResult(result);
       toast.success(`Cupón aplicado: -${formatCurrency(result.descuento)}`);
     } catch (err) {
@@ -97,12 +94,6 @@ const Checkout = () => {
   };
 
   const handleOrder = async (metodoPago) => {
-    // Validar mezcla de monedas en MP
-    if (metodoPago === 'mercadopago' && currencyValidation.hasMixedCurrencies) {
-      toast.error('No puedes pagar en Mercado Pago con divisas mixtas (USD + ARS). Por favor usa WhatsApp.');
-      return;
-    }
-
     if (!user) {
       for (const field of REQUIRED_GUEST_FIELDS) {
         if (!guestData[field]) {
@@ -116,6 +107,7 @@ const Checkout = () => {
       const payload = {
         items: orderItems,
         metodoPago,
+        moneda: userCurrency,
         cuponCodigo: couponResult ? couponCode : undefined,
         direccion: user?.direccion || guestData.direccion,
         esEnAMBA: locationValidation?.esEnAMBA,
@@ -262,14 +254,13 @@ const Checkout = () => {
             <h2 className="font-semibold text-lg mb-4">Resumen</h2>
             <ul className="divide-y divide-gray-100 mb-4">
               {items.map((item) => {
-                const itemCurrency = detectProductCurrency(item.producto) || 'ARS';
-                const price = getProductPrice(item.producto);
+                const price = getPriceByRole(item.producto, user?.role, exchangeRate);
                 const nombre = item.producto?.nombre || '';
                 return (
                   <li key={item.producto?._id || item.producto} className="py-2 flex justify-between text-sm">
                     <span className="text-gray-600 truncate max-w-[60%]">{nombre} <span className="text-gray-400">x{item.cantidad}</span></span>
                     <span className="font-medium">
-                      {itemCurrency === 'USD' ? `USD $${(price * item.cantidad).toFixed(2)}` : formatCurrency(price * item.cantidad)}
+                      {userCurrency === 'USD' ? `USD $${(price * item.cantidad).toFixed(2)}` : formatCurrency(price * item.cantidad)}
                     </span>
                   </li>
                 );
@@ -283,34 +274,16 @@ const Checkout = () => {
               </div>
             )}
 
-            {/* Alerta de monedas mixtas */}
-            {currencyValidation.hasMixedCurrencies && (
-              <div className="mb-4 p-3 bg-red-900/20 border border-red-700 rounded-lg flex gap-2 items-start">
-                <HiExclamation className="text-red-500 flex-shrink-0 mt-0.5" size={18} />
-                <div className="text-xs text-red-400">
-                  <p className="font-semibold">Carrito con divisas mixtas</p>
-                  <p>Solo puedes pagar con WhatsApp. Mercado Pago no soporta mezcla de USD y ARS.</p>
-                </div>
+            <div className="border-t pt-3 mb-5">
+              <div className="flex justify-between font-bold text-lg">
+                <span>Total</span>
+                <span>{userCurrency === 'USD' ? `USD $${finalTotal.toFixed(2)}` : formatCurrency(finalTotal)}</span>
               </div>
-            )}
-
-            <div className="border-t pt-3 mb-5 space-y-1">
-              {Object.entries(totalesPorMoneda).map(([currency, amount]) => {
-                const discounted = currency === 'ARS' && couponResult && soloARS
-                  ? Math.max(0, amount - couponResult.descuento)
-                  : amount;
-                return (
-                  <div key={currency} className="flex justify-between font-bold text-lg">
-                    <span>{Object.keys(totalesPorMoneda).length > 1 ? `Total ${currency}` : 'Total'}</span>
-                    <span>{currency === 'USD' ? `USD $${discounted.toFixed(2)}` : formatCurrency(discounted)}</span>
-                  </div>
-                );
-              })}
             </div>
 
             <button
               onClick={() => handleOrder(payMethod)}
-              disabled={isLoading || (payMethod === 'mercadopago' && currencyValidation.hasMixedCurrencies)}
+              disabled={isLoading}
               className={`w-full flex items-center justify-center gap-2 font-bold px-6 py-3 rounded-xl transition-all active:scale-95 disabled:opacity-50 ${
                 payMethod === 'whatsapp'
                   ? 'bg-green-500 hover:bg-green-400 text-white'

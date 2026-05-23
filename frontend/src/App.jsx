@@ -18,6 +18,7 @@ const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation'));
 const OrderHistory = lazy(() => import('./pages/OrderHistory'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Favorites = lazy(() => import('./pages/Favorites'));
+const RecommendationsPage = lazy(() => import('./pages/RecommendationsPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Admin pages
@@ -158,6 +159,7 @@ const App = () => (
         <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/mis-ordenes" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
         <Route path="/favoritos" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
+        <Route path="/recomendaciones" element={<ProtectedRoute><RecommendationsPage /></ProtectedRoute>} />
         <Route path="/mis-presupuestos" element={<ProtectedRoute><MyQuotes /></ProtectedRoute>} />
       </Route>
 

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { useGetProductsQuery } from '../../services/productsApi';
 import { useGetUsersListQuery } from '../../services/adminUsersApi';
+import { useCreateRecommendationMutation } from '../../services/recommendationApi';
 import toast from 'react-hot-toast';
 
 const AdminRecomendaciones = () => {
@@ -13,9 +14,10 @@ const AdminRecomendaciones = () => {
   const [showClientSuggestions, setShowClientSuggestions] = useState(false);
   const clientSearchRef = useRef(null);
 
-  // Queries
+  // Queries & Mutations
   const { data: productsList = { products: [] }, isLoading: productsLoading } = useGetProductsQuery({ limit: 100 });
   const { data: usersList = { users: [] }, isLoading: usersLoading } = useGetUsersListQuery({ search: clientSearch, limit: 100 });
+  const [createRecommendation, { isLoading: isCreating }] = useCreateRecommendationMutation();
 
   // Click outside handler
   useEffect(() => {
@@ -50,12 +52,22 @@ const AdminRecomendaciones = () => {
     }
 
     try {
+      const result = await createRecommendation({
+        clientId: selectedClient,
+        productIds: selectedProducts,
+        message: message || '',
+      }).unwrap();
+
       toast.success('Recomendación creada exitosamente');
+      
+      // Reset form
       setSelectedClient('');
       setSelectedProducts([]);
       setMessage('');
+      setClientSearch('');
+      setProductSearch('');
     } catch (error) {
-      toast.error('Error al crear recomendación');
+      toast.error(error?.data?.message || 'Error al crear recomendación');
     }
   };
 
@@ -211,9 +223,10 @@ const AdminRecomendaciones = () => {
         {/* Create Button */}
         <button
           onClick={handleCreateRecommendation}
-          className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
+          disabled={isCreating}
+          className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium"
         >
-          Enviar Recomendación
+          {isCreating ? 'Enviando...' : 'Enviar Recomendación'}
         </button>
       </div>
 

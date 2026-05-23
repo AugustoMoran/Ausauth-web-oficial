@@ -150,11 +150,11 @@ const PopupAdmin = () => {
               type="button"
               onClick={() => set('activo', !form.activo)}
               className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
-                form.activo ? 'bg-primary-400' : 'bg-gray-300'
+                form.activo ? 'bg-primary-400' : 'bg-gray-600'
               }`}
             >
               <span
-                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-primary-400 rounded-full shadow transition-transform duration-200 ${
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
                   form.activo ? 'translate-x-6' : 'translate-x-0'
                 }`}
               />

@@ -10,22 +10,28 @@ const {
 } = require('../utils/sendNotifications');
 
 // ── Currency helpers ─────────────────────────────────────────────────────────
-const detectProductCurrency = (product) => {
-  if (product.priceUSD > 0 || product.priceOfferUSD > 0) return 'USD';
-  return 'ARS';
-};
-const getProductPrice = (product) => {
-  if (detectProductCurrency(product) === 'USD') {
-    return Number(product.priceOfferUSD || product.priceUSD || 0);
+// Returns price based on the order currency (ARS or USD), mirrors frontend getPriceByRole
+const getProductPriceByMoneda = (product, moneda) => {
+  if (moneda === 'USD') {
+    const usd = Number(product.priceOfferUSD || product.priceUSD || 0);
+    if (usd > 0) return usd;
+    // Fallback: ARS price if no USD set
+    return Number(product.priceOfferPesos || product.pricePesos || product.precioOferta || product.precio || 0);
   }
-  return Number(product.precioOferta || product.precio || product.priceOfferPesos || product.pricePesos || 0);
+  // ARS (default)
+  const ars = Number(product.priceOfferPesos || product.pricePesos || product.precioOferta || product.precio || 0);
+  if (ars > 0) return ars;
+  // Fallback: USD price if no ARS set
+  return Number(product.priceOfferUSD || product.priceUSD || 0);
 };
 
-const createOrder = async ({ userId, guestData, items, cuponCodigo, metodoPago }) => {
+const createOrder = async ({ userId, guestData, items, cuponCodigo, metodoPago, moneda }) => {
+  // Normalize moneda: accept only 'ARS' or 'USD', default to 'ARS'
+  const orderMoneda = moneda === 'USD' ? 'USD' : 'ARS';
+
   // Validate and build items
   let subtotal = 0;
   const orderItems = [];
-  const currencies = new Set();
 
   for (const item of items) {
     const product = await Product.findOne({ _id: item.producto, isActive: true });
@@ -53,9 +59,7 @@ const createOrder = async ({ userId, guestData, items, cuponCodigo, metodoPago }
       }
     }
 
-    const itemCurrency = detectProductCurrency(product);
-    const itemPrice = getProductPrice(product);
-    currencies.add(itemCurrency);
+    const itemPrice = getProductPriceByMoneda(product, orderMoneda);
 
     orderItems.push({
       producto: product._id,
@@ -69,14 +73,8 @@ const createOrder = async ({ userId, guestData, items, cuponCodigo, metodoPago }
     subtotal += itemPrice * item.cantidad;
   }
 
-  // Detect order currency
-  const orderMoneda = currencies.size > 1 ? 'mixto' : ([...currencies][0] || 'ARS');
-  if (orderMoneda === 'mixto' && metodoPago === 'mercadopago') {
-    throw Object.assign(
-      new Error('No se pueden mezclar productos en USD y ARS para pagar con Mercado Pago.'),
-      { statusCode: 400 }
-    );
-  }
+  // Validate MP is not used for USD orders if not supported
+  // (USD MP payments are supported, so no extra validation needed here)
 
   // Handle coupon
   let descuento = 0;

@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 export const recommendationApi = createApi({
   reducerPath: 'recommendationApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: '/api/admin/recommendations',
+    baseUrl: '/api',
     credentials: 'include',
   }),
 
@@ -13,42 +13,42 @@ export const recommendationApi = createApi({
     // GET /api/admin/recommendations - listar recomendaciones (admin)
     getRecommendations: builder.query({
       query: ({ limit = 20, skip = 0 } = {}) =>
-        `/?limit=${limit}&skip=${skip}`,
+        `/admin/recommendations?limit=${limit}&skip=${skip}`,
       providesTags: ['Recommendations'],
     }),
 
     // POST /api/admin/recommendations - crear recomendación (admin)
     createRecommendation: builder.mutation({
       query: (data) => ({
-        url: '/',
+        url: '/admin/recommendations',
         method: 'POST',
         body: data,
       }),
       invalidatesTags: ['Recommendations', 'ClientRecommendations'],
     }),
 
-    // GET /api/recommendations/client - ver mis recomendaciones (cliente)
+    // GET /api/recommendations - ver mis recomendaciones (cliente)
     getMyRecommendations: builder.query({
-      query: () => '/client',
+      query: () => '/recommendations',
       providesTags: ['ClientRecommendations'],
     }),
 
     // DELETE /api/recommendations/:id - rechazar recomendación (cliente)
     rejectRecommendation: builder.mutation({
       query: (id) => ({
-        url: `/${id}`,
+        url: `/recommendations/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['ClientRecommendations'],
     }),
 
-    // PUT /api/admin/recommendations/:id/viewed - marcar como visto (admin)
+    // PUT /api/recommendations/:id/viewed - marcar como visto (cliente)
     markAsViewed: builder.mutation({
       query: (id) => ({
-        url: `/${id}/viewed`,
+        url: `/recommendations/${id}/viewed`,
         method: 'PUT',
       }),
-      invalidatesTags: ['Recommendations'],
+      invalidatesTags: ['ClientRecommendations'],
     }),
   }),
 });

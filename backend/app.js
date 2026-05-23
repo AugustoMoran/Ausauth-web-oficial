@@ -30,7 +30,8 @@ const locationRoutes = require('./src/routes/location');
 const quoteRoutes = require('./src/routes/quote');
 const quotesRoutes = require('./src/routes/quotes');
 const adminUserRoutes = require('./src/routes/admin/users');
-const recommendationRoutes = require('./src/routes/admin/recommendations');
+const adminRecommendationRoutes = require('./src/routes/admin/recommendations');
+const recommendationRoutes = require('./src/routes/recommendations');
 const settingsRoutes = require('./src/routes/settings');
 
 // New isolated modules (do NOT touch ecommerce routes above)
@@ -110,7 +111,8 @@ app.use('/api/location', locationRoutes);
 app.use('/api/quote', quoteRoutes);
 app.use('/api/quotes', quotesRoutes);
 app.use('/api/admin/users', adminUserRoutes);
-app.use('/api/admin/recommendations', recommendationRoutes);
+app.use('/api/admin/recommendations', adminRecommendationRoutes);
+app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/settings', settingsRoutes);
 
 // ── New isolated modules ──────────────────────────────────────────────────────

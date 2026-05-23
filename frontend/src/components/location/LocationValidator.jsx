@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCheckInstallationAvailableQuery } from '../../services/locationApi';
-import { HiOutlineMapPin, HiOutlineCheckCircle, HiOutlineXCircle } from 'react-icons/hi';
+import { HiOutlineLocationMarker, HiOutlineCheckCircle, HiOutlineXCircle } from 'react-icons/hi';
 
 /**
  * 🗺️ Componente: LocationValidator
@@ -18,24 +18,24 @@ export default function LocationValidator({
   onValidationChange,
   showInstallationOption = false,
 }) {
-  const [displayDireccion, setDisplayDireccion] = useState(direccion || '');
-  const [shouldValidate, setShouldValidate] = useState(false);
+  const [debouncedDireccion, setDebouncedDireccion] = useState('');
 
-  // Debounce: solo validar si la dirección cambió después de 1 segundo
+  // Debounce: esperar 800ms después de que el usuario para de escribir
   useEffect(() => {
+    if (!direccion || direccion.trim().length < 5) {
+      setDebouncedDireccion('');
+      return;
+    }
     const timer = setTimeout(() => {
-      if (displayDireccion && displayDireccion !== direccion) {
-        setShouldValidate(true);
-      }
-    }, 1000);
-
+      setDebouncedDireccion(direccion.trim());
+    }, 800);
     return () => clearTimeout(timer);
-  }, [displayDireccion, direccion]);
+  }, [direccion]);
 
   // Query: Validar ubicación
   const { data: validationData, isLoading, error } = useCheckInstallationAvailableQuery(
-    displayDireccion,
-    { skip: !shouldValidate || !displayDireccion }
+    debouncedDireccion,
+    { skip: !debouncedDireccion }
   );
 
   // Notificar cambios
@@ -55,7 +55,7 @@ export default function LocationValidator({
     return (
       <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
         <div className="animate-spin">
-          <HiOutlineMapPin className="text-blue-600 text-lg" />
+          <HiOutlineLocationMarker className="text-blue-600 text-lg" />
         </div>
         <span className="text-sm text-blue-700">Validando ubicación...</span>
       </div>

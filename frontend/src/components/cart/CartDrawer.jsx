@@ -1,25 +1,28 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { HiX, HiOutlineTrash, HiOutlineShoppingBag, HiExclamation } from 'react-icons/hi';
+import { HiX, HiOutlineTrash, HiOutlineShoppingBag } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
 import { closeCart, selectCartIsOpen } from '../../features/cart/cartSlice';
 import { useSelector } from 'react-redux';
 import useCart from '../../hooks/useCart';
 import { formatCurrency } from '../../utils/formatCurrency';
-import { detectProductCurrency, getProductPrice, validateCartCurrencies } from '../../utils/detectCurrency';
+import { getCurrencyByRole, getPriceByRole } from '../../utils/getPriceByRole';
+import { useGetExchangeRateQuery } from '../../services/settingsApi';
+import { selectCurrentUser } from '../../features/auth/authSlice';
 
 const CartDrawer = () => {
   const dispatch = useDispatch();
   const isOpen = useSelector(selectCartIsOpen);
   const { items, removeFromCart, updateQuantity, clearCart } = useCart();
+  const user = useSelector(selectCurrentUser);
+  const { data: rateData } = useGetExchangeRateQuery();
+  const exchangeRate = rateData?.rate || 1000;
+  const userCurrency = getCurrencyByRole(user?.role);
 
-  const totalesPorMoneda = items.reduce((acc, item) => {
-    const currency = detectProductCurrency(item.producto) || 'ARS';
-    const price = getProductPrice(item.producto);
-    acc[currency] = (acc[currency] || 0) + price * item.cantidad;
-    return acc;
-  }, {});
-  const esMixto = Object.keys(totalesPorMoneda).length > 1;
+  const cartTotal = items.reduce((sum, item) => {
+    const price = getPriceByRole(item.producto, user?.role, exchangeRate);
+    return sum + price * item.cantidad;
+  }, 0);
 
   return (
     <>
@@ -65,23 +68,13 @@ const CartDrawer = () => {
             </div>
           ) : (
             <>
-              {/* Validación de mezcla de monedas */}
-              {validateCartCurrencies(items).hasMixedCurrencies && (
-                <div className="mb-4 p-3 bg-red-900/20 border border-red-700 rounded-lg flex gap-2 items-start">
-                  <HiExclamation className="text-red-500 flex-shrink-0 mt-0.5" size={18} />
-                  <div className="text-xs text-red-400">
-                    <p className="font-semibold">Carrito con divisas mixtas</p>
-                    <p>No puedes mezclar productos en USD y ARS. Deberás pagar solo en una moneda.</p>
-                  </div>
-                </div>
-              )}
+
 
               <ul className="space-y-4">
                 {items.map((item) => {
                   const producto = item.producto;
                   const id = producto?._id || producto;
-                  const currency = detectProductCurrency(producto) || 'ARS';
-                  const price = getProductPrice(producto);
+                  const price = getPriceByRole(producto, user?.role, exchangeRate);
                   const imagen = producto?.imagenes?.[0]?.url || '';
                   const nombre = producto?.nombre || item.nombre || 'Producto sin nombre';
 
@@ -93,7 +86,7 @@ const CartDrawer = () => {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium line-clamp-2 mb-1">{nombre}</p>
                         <div className="text-xs text-gray-500 mb-2 space-y-0.5">
-                          <p>{formatCurrency(price)} {currency} c/u</p>
+                          <p>{userCurrency === 'USD' ? `USD $${price.toFixed(2)}` : formatCurrency(price)} c/u</p>
                           {item.talla && <p>Talla: <span className="font-medium">{item.talla}</span></p>}
                           {item.color && <p>Color: <span className="font-medium">{item.color}</span></p>}
                         </div>
@@ -120,7 +113,7 @@ const CartDrawer = () => {
                         >
                           <HiOutlineTrash size={16} />
                         </button>
-                        <span className="text-sm font-bold">{formatCurrency(price * item.cantidad)}</span>
+                        <span className="text-sm font-bold">{userCurrency === 'USD' ? `USD $${(price * item.cantidad).toFixed(2)}` : formatCurrency(price * item.cantidad)}</span>
                       </div>
                     </li>
                   );
@@ -134,19 +127,12 @@ const CartDrawer = () => {
         {items.length > 0 && (
           <div className="px-5 py-4 border-t border-gray-800 space-y-3">
             <div className="space-y-1">
-              {Object.entries(totalesPorMoneda).map(([currency, amount]) => (
-                <div key={currency} className="flex justify-between items-center">
-                  <span className="font-medium text-gray-400 text-sm">
-                    {esMixto ? `Subtotal ${currency}` : 'Total'}
-                  </span>
-                  <span className="font-bold text-xl">
-                    {currency === 'USD' ? `USD $${amount.toFixed(2)}` : formatCurrency(amount)}
-                  </span>
-                </div>
-              ))}
-              {esMixto && (
-                <p className="text-xs text-yellow-500 mt-1">⚠️ Mezclaste USD y ARS. Solo podés pagar por WhatsApp</p>
-              )}
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-gray-400 text-sm">Total</span>
+                <span className="font-bold text-xl">
+                  {userCurrency === 'USD' ? `USD $${cartTotal.toFixed(2)}` : formatCurrency(cartTotal)}
+                </span>
+              </div>
             </div>
             <Link
               to="/checkout"

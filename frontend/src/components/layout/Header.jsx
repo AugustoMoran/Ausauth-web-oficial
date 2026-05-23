@@ -159,6 +159,7 @@ const Header = () => {
                     <Link to="/perfil" className="block px-4 py-2 text-sm hover:bg-gray-700 text-gray-100">Mi perfil</Link>
                     <Link to="/mis-ordenes" className="block px-4 py-2 text-sm hover:bg-gray-700 text-gray-100">Mis pedidos</Link>
                     <Link to="/mis-presupuestos" className="block px-4 py-2 text-sm hover:bg-gray-700 text-gray-100">Mis presupuestos</Link>
+                    <Link to="/recomendaciones" className="block px-4 py-2 text-sm hover:bg-gray-700 text-gray-100">Recomendaciones</Link>
                     <Link to="/favoritos" className="block px-4 py-2 text-sm hover:bg-gray-700 text-gray-100">Favoritos</Link>
                     {isAdmin && (
                       <Link to="/admin" className="block px-4 py-2 text-sm text-primary-400 font-bold hover:bg-gray-700 border-t border-gray-700">

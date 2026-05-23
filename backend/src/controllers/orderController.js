@@ -4,7 +4,7 @@ const Order = require('../models/Order');
 
 const createOrder = async (req, res, next) => {
   try {
-    const { guestData, items, cuponCodigo, metodoPago } = req.body;
+    const { guestData, items, cuponCodigo, metodoPago, moneda } = req.body;
     const userId = req.user?._id || null;
 
     console.log('\n╔════════════════════════════════════════╗');
@@ -32,7 +32,7 @@ const createOrder = async (req, res, next) => {
     }
 
     console.log('\n✅ Validation passed, creating order...');
-    const order = await orderService.createOrder({ userId, guestData, items, cuponCodigo, metodoPago });
+    const order = await orderService.createOrder({ userId, guestData, items, cuponCodigo, metodoPago, moneda });
     console.log(`✅ Order created: ${order._id}`);
     console.log(`   Order code: ${order.codigo}`);
     console.log(`   Total: ${order.total}`);

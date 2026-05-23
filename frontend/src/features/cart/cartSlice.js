@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { getProductPrice, detectProductCurrency } from '../utils/detectCurrency';
+import { getProductPrice, detectProductCurrency } from '../../utils/detectCurrency';
 
 const loadFromStorage = () => {
   try {
