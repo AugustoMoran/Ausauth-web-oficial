@@ -1,5 +1,14 @@
 const Download = require('../models/Download');
 
+// Helper: Validar y agregar protocolo si falta
+const ensureProtocol = (url) => {
+  const urlTrim = url.trim();
+  if (!urlTrim.startsWith('http://') && !urlTrim.startsWith('https://')) {
+    return 'https://' + urlTrim;
+  }
+  return urlTrim;
+};
+
 const getDownloads = async (req, res, next) => {
   try {
     const downloads = await Download.find({ isActive: true }).sort({ orden: 1 });
@@ -11,11 +20,14 @@ const getDownloads = async (req, res, next) => {
 
 const createDownload = async (req, res, next) => {
   try {
-    const { titulo, enlace, descripcion } = req.body;
+    let { titulo, enlace, descripcion } = req.body;
     
     if (!titulo || !enlace) {
       return res.status(400).json({ message: 'Título y enlace son requeridos' });
     }
+
+    // Asegurar que el enlace tenga protocolo
+    enlace = ensureProtocol(enlace);
 
     const download = await Download.create({
       titulo,
@@ -32,7 +44,12 @@ const createDownload = async (req, res, next) => {
 const updateDownload = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { titulo, enlace, descripcion, isActive, orden } = req.body;
+    let { titulo, enlace, descripcion, isActive, orden } = req.body;
+
+    // Asegurar que el enlace tenga protocolo si se actualiza
+    if (enlace) {
+      enlace = ensureProtocol(enlace);
+    }
 
     const download = await Download.findByIdAndUpdate(
       id,
