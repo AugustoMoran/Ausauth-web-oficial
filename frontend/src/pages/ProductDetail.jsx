@@ -361,8 +361,9 @@ const ProductDetail = () => {
                           alert('Por favor selecciona talla y color');
                           return;
                         }
-                        const installationText = `Quiero solicitar instalación para ${product.nombre}${selectedTalla ? ` (Talla: ${selectedTalla})` : ''}${selectedColor ? ` - Color: ${selectedColor}` : ''} - Cantidad: ${qty}`;
-                        const wa = generateWhatsAppLink([], 0, installationText);
+                        const installationText = `Quiero solicitar la instalación para el producto *${product.nombre}*${selectedTalla ? ` (Talla: ${selectedTalla})` : ''}${selectedColor ? ` - Color: ${selectedColor}` : ''} - Cantidad: ${qty}`;
+                        const waNumber = '5491130932799'; // WhatsApp number
+                        const wa = `https://wa.me/${waNumber}?text=${encodeURIComponent(installationText)}`;
                         window.open(wa, '_blank');
                       }}
                       className="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-3 rounded-xl transition-all active:scale-95 shadow-lg"
