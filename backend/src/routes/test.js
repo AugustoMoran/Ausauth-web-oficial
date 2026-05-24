@@ -17,47 +17,61 @@ router.get('/mp-config', async (req, res) => {
 });
 
 router.get('/email-config', async (req, res) => {
-  const key = process.env.SENDGRID_API_KEY || '';
   res.json({
-    sendgrid: {
-      apiKeyExists: !!key,
-      apiKeyLength: key.length,
-      apiKeyPrefix: key ? key.substring(0, 10) + '...' : 'NOT SET',
+    smtp: {
+      host: process.env.SMTP_HOST || 'NOT SET',
+      port: process.env.SMTP_PORT || 'NOT SET',
+      user: process.env.SMTP_USER || 'NOT SET',
+      passExists: !!process.env.SMTP_PASS,
+      passLength: process.env.SMTP_PASS ? process.env.SMTP_PASS.length : 0,
     },
     emailFrom: process.env.EMAIL_FROM || 'NOT SET',
     adminEmail: process.env.ADMIN_EMAIL || 'NOT SET',
-    sendgridFromEmail: process.env.SENDGRID_FROM_EMAIL || 'NOT SET',
+    storeName: process.env.STORE_NAME || 'NOT SET',
   });
 });
 
 router.post('/send-test-email', async (req, res) => {
   try {
-    const sgMail = require('@sendgrid/mail');
-    const key = process.env.SENDGRID_API_KEY;
+    const transporter = require('../config/mailer');
     
-    if (!key) {
-      return res.status(500).json({ error: 'SENDGRID_API_KEY not set' });
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      return res.status(500).json({ error: 'SMTP_USER or SMTP_PASS not set' });
     }
     
-    sgMail.setApiKey(key);
-    
-    const msg = {
-      to: req.body.to || 'augusto.moran.informatica@gmail.com',
-      from: req.body.from || 'administracion@sausansystem.com.ar',
+    const mailOptions = {
+      to: req.body.to || 'augusto@gmail.com',
+      from: process.env.EMAIL_FROM || process.env.SMTP_USER,
       subject: 'Test email from Render',
-      html: '<p>Este es un email de prueba desde Render usando SendGrid.</p>',
+      html: `
+        <html>
+          <body>
+            <h2>Test Email - Gmail SMTP</h2>
+            <p>This is a test email sent from Render backend.</p>
+            <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
+            <p><strong>Environment:</strong> Render Production</p>
+            <hr/>
+            <p>If you received this, Gmail SMTP is working! ✅</p>
+          </body>
+        </html>
+      `,
     };
     
-    console.log('🧪 Test email sending to:', msg.to, 'from:', msg.from);
-    await sgMail.send(msg);
-    res.json({ success: true, message: 'Email enviado', to: msg.to, from: msg.from });
+    console.log('🧪 Test email sending to:', mailOptions.to, 'from:', mailOptions.from);
+    const result = await transporter.sendMail(mailOptions);
+    res.json({ 
+      success: true, 
+      message: 'Email enviado correctamente',
+      to: mailOptions.to, 
+      from: mailOptions.from,
+      messageId: result.messageId,
+    });
   } catch (error) {
     console.error('🧪 Test email error:', error);
-    console.error('🧪 Test email error body:', error.response?.body);
     res.status(500).json({
       error: error.message,
-      status: error.code,
-      details: error.response?.body || null,
+      code: error.code,
+      response: error.response,
     });
   }
 });
