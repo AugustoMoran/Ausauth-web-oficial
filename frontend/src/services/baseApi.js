@@ -1,27 +1,37 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { logout, setCredentials } from '../features/auth/authSlice';
 
-// Determinar URL base en tiempo de EJECUCIÓN verificando el hostname
-// No usar import.meta.env.DEV porque puede no compilarse correctamente en Vercel
-const getBaseUrl = () => {
-  try {
+// Determinar URL base en cada request (no compilación)
+// Para desarrollo: usa /api (proxy Vite)
+// Para producción: usa URL absoluta (no confiar en paths relativos con Vercel rewrites)
+const getBaseUrlForRequest = () => {
+  // Si estamos en navegador
+  if (typeof window !== 'undefined' && window.location) {
+    const hostname = window.location.hostname;
+    
     // En desarrollo local
-    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('localhost:')) {
       return '/api';
     }
     
-    // En producción (cualquier hostname que no sea localhost)
-    // Render backend está en https://ecommerce-gestion-trabajo.onrender.com
-    return 'https://ecommerce-gestion-trabajo.onrender.com/api';
-  } catch (e) {
-    // Fallback en SSR o si window no está disponible
+    // En producción, SIEMPRE usar URL absoluta (Vercel puede reescribir paths relativos)
     return 'https://ecommerce-gestion-trabajo.onrender.com/api';
   }
+  
+  // Default para SSR/build - usar URL absoluta para producción
+  return 'https://ecommerce-gestion-trabajo.onrender.com/api';
 };
 
-const BASE_URL = getBaseUrl();
+// Llamar una sola vez pero permitir que window se resuelva correctamente
+const BASE_URL = getBaseUrlForRequest();
 
-console.log('🔧 BaseApi configured with URL:', BASE_URL);
+if (typeof window !== 'undefined') {
+  console.log('🔍 BaseApi initialized:', {
+    hostname: window.location.hostname,
+    baseUrl: BASE_URL,
+    isDev: BASE_URL === '/api'
+  });
+}
 
 // Store token in memory (perdido al recargar, es seguro)
 let accessToken = null;
@@ -102,7 +112,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Product', 'Category', 'Order', 'Cart', 'User', 'Coupon', 'Upload', 'Banner', 'Popup', 'Job', 'ExchangeRate'],
+  tagTypes: ['Product', 'Category', 'Order', 'Cart', 'User', 'Users', 'Coupon', 'Upload', 'Banner', 'Popup', 'Job', 'ExchangeRate', 'Recommendations', 'ClientRecommendations'],
   endpoints: () => ({}),
 });
 

@@ -34,9 +34,6 @@ const AdminRecomendaciones = () => {
     });
   }, [user]);
 
-  // Click outside handler
-  }, []);
-
   // Filter products
   const filteredProducts = productsList.products?.filter(p =>
     p.nombre?.toLowerCase().includes(productSearch.toLowerCase())
