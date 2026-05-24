@@ -25,7 +25,17 @@ const baseQuery = fetchBaseQuery({
   prepareHeaders: (headers, { getState }) => {
     // Obtener token del Redux store primero (persiste entre reloads)
     const state = getState();
-    const token = state?.auth?.accessToken || accessToken;
+    let token = state?.auth?.accessToken;
+    
+    // Fallback: intentar desde sessionStorage (más seguro que localStorage, se borra al cerrar)
+    if (!token) {
+      token = sessionStorage.getItem('_auth_token');
+    }
+    
+    // Fallback final: usar token en memoria
+    if (!token) {
+      token = accessToken;
+    }
     
     // FALLBACK: Si no hay cookie, usar token en memoria + Authorization header
     // Esto es necesario para cross-domain (www.sausansystem.com.ar → ecommerce-gestion-trabajo.onrender.com)
@@ -33,7 +43,7 @@ const baseQuery = fetchBaseQuery({
       headers.set('Authorization', `Bearer ${token}`);
       console.log('✅ Sending Authorization header with token');
     } else {
-      console.warn('⚠️ No token found in Redux or memory - request may fail with 401');
+      console.warn('⚠️ No token found - request may fail with 401');
     }
     return headers;
   },
@@ -95,8 +105,10 @@ export { baseQueryWithReauth };
 // Exportar función para actualizar token en memoria
 export const setMemoryToken = (token) => {
   accessToken = token;
-  // También guardar en sessionStorage para uso en descargas y otros contextos
+  // También guardar en sessionStorage para usar en requests después de recargar
+  // SessionStorage es más seguro que localStorage - se borra al cerrar la pestaña
   if (token) {
+    sessionStorage.setItem('_auth_token', token);
     sessionStorage.setItem('quoteToken', token);
   }
 };
@@ -108,5 +120,6 @@ export const getMemoryToken = () => {
 
 export const clearMemoryToken = () => {
   accessToken = null;
+  sessionStorage.removeItem('_auth_token');
   sessionStorage.removeItem('quoteToken');
 };
