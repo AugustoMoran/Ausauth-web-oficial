@@ -164,12 +164,15 @@ const getSuggestions = async (q, limit = 10) => {
   if (!q || q.trim().length === 0) return [];
   
   const query = q.trim().toLowerCase();
+  // Escapar caracteres especiales de regex
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  
   const suggestions = await Product.find({
     isActive: true,
     $or: [
-      { nombre: { $regex: `^${query}`, $options: 'i' } },
-      { nombre: { $regex: query, $options: 'i' } },
-      { tags: { $regex: query, $options: 'i' } },
+      { nombre: { $regex: `^${escapedQuery}`, $options: 'i' } },
+      { nombre: { $regex: escapedQuery, $options: 'i' } },
+      { tags: { $regex: escapedQuery, $options: 'i' } },
     ],
   })
     .select('_id nombre precio precioOferta imagenes')
