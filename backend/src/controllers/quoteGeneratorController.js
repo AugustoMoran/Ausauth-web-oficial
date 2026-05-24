@@ -545,6 +545,13 @@ const updateQuoteStatus = async (req, res, next) => {
     quote.estado = estado;
     await quote.save();
 
+    // 📧 Enviar notificación al admin cuando se acepte
+    if (estado === 'aceptado') {
+      const { sendQuoteAcceptanceToAdmin } = require('../utils/sendNotifications');
+      sendQuoteAcceptanceToAdmin(quote)
+        .catch(err => console.error('Error enviando notificación de aceptación:', err.message));
+    }
+
     res.json({ message: `Presupuesto marcado como ${estado}`, quote });
   } catch (error) {
     next(error);
@@ -637,6 +644,104 @@ const getPDFErrorLog = (req, res) => {
   res.json({ errors: pdfErrorLog, totalErrors: pdfErrorLog.length });
 };
 
+// POST /api/quotes/:id/create-payment - Crear pago MP para presupuesto aceptado
+const createQuotePayment = async (req, res, next) => {
+  try {
+    const quote = await Quote.findById(req.params.id);
+    if (!quote) {
+      return res.status(404).json({ message: 'Presupuesto no encontrado' });
+    }
+
+    // Solo cliente dueño o admin puede crear pago
+    if (req.user._id.toString() !== quote.client._id.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'No autorizado' });
+    }
+
+    // Solo presupuestos aceptados pueden ir a pago
+    if (quote.estado !== 'aceptado') {
+      return res.status(400).json({ message: 'El presupuesto debe estar aceptado para proceder al pago' });
+    }
+
+    const MercadoPagoConfig = require('mercadopago').default;
+    const { Preference } = require('mercadopago');
+    
+    const token = process.env.MP_ACCESS_TOKEN?.trim();
+    if (!token) {
+      console.error('❌ MP_ACCESS_TOKEN no configurado');
+      return res.status(500).json({ message: 'Mercado Pago no configurado' });
+    }
+
+    const client = new MercadoPagoConfig({ accessToken: token });
+    const preference = new Preference(client);
+
+    // Preparar items para MP
+    const items = (quote.items || []).map(item => ({
+      title: item.nombre,
+      quantity: item.cantidad,
+      unit_price: item.precioUnitario,
+    }));
+
+    // Agregar instalación si aplica
+    if (quote.instalacion?.incluye) {
+      items.push({
+        title: `Instalación${quote.instalacion.descripcion ? ` - ${quote.instalacion.descripcion}` : ''}`,
+        quantity: 1,
+        unit_price: quote.instalacion.monto,
+      });
+    }
+
+    // Calcular total
+    const usdTotal = quote.totales?.USD?.total || 0;
+    const arsTotal = quote.totales?.ARS?.total || 0;
+    const totalAmount = usdTotal + arsTotal; // Si es mixto, sumar ambos
+
+    const preferenceData = {
+      items: items,
+      external_reference: quote._id.toString(), // Usar ID del presupuesto
+      notification_url: `${process.env.BACKEND_URL}/api/webhooks/mercadopago`,
+      back_urls: {
+        success: `${process.env.FRONTEND_URL}/presupuestos/${quote._id}/pago-exitoso`,
+        failure: `${process.env.FRONTEND_URL}/presupuestos/${quote._id}/pago-fallido`,
+        pending: `${process.env.FRONTEND_URL}/presupuestos/${quote._id}/pago-pendiente`,
+      },
+      auto_return: 'approved',
+      payer: {
+        name: quote.client.nombre?.split(' ')[0] || 'Cliente',
+        surname: quote.client.nombre?.split(' ')[1] || '',
+        email: quote.client.email,
+        phone: { number: quote.client.telefono || '' },
+        address: {
+          street_name: quote.client.direccion?.calle || '',
+          street_number: 0,
+          zip_code: quote.client.direccion?.codigoPostal || '',
+        },
+      },
+      metadata: {
+        quoteNumber: quote.numero,
+        quoteType: 'presupuesto',
+      },
+    };
+
+    const createdPreference = await preference.create({ body: preferenceData });
+
+    // Guardar preference ID en presupuesto
+    quote.preferenceId = createdPreference.id;
+    await quote.save();
+
+    console.log(`✅ Preference creada para presupuesto ${quote.numero}:`, createdPreference.id);
+
+    res.json({
+      success: true,
+      preferenceId: createdPreference.id,
+      initPoint: createdPreference.init_point,
+      message: 'Preference de Mercado Pago creada exitosamente',
+    });
+  } catch (error) {
+    console.error('❌ Error creando pago MP:', error.message);
+    next(error);
+  }
+};
+
 module.exports = {
   createQuote,
   getAllQuotes,
@@ -647,6 +752,7 @@ module.exports = {
   downloadQuotePDF,
   updateQuoteStatus,
   deleteQuote,
+  createQuotePayment,
   testPDF,
   getPDFErrorLog,
 };

@@ -77,6 +77,14 @@ const quoteSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    // Mercado Pago payment tracking
+    mpPaymentId: String,
+    estadoPago: {
+      type: String,
+      enum: ['pendiente', 'aprobado', 'rechazado'],
+      default: 'pendiente',
+    },
+    preferenceId: String, // MP preference ID for checkout
   },
   { timestamps: true }
 );

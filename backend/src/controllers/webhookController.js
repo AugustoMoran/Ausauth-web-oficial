@@ -1,8 +1,9 @@
 const crypto = require('crypto');
 const Order = require('../models/Order');
+const Quote = require('../models/Quote');
 const Product = require('../models/Product');
 const Cart = require('../models/Cart');
-const { sendOrderConfirmationToUser, sendOrderNotificationToAdmin } = require('../utils/sendNotifications');
+const { sendOrderConfirmationToUser, sendOrderNotificationToAdmin, sendQuotePaymentConfirmation, sendQuotePaymentToAdmin } = require('../utils/sendNotifications');
 const logger = require('../utils/logger');
 
 const mercadopagoWebhook = async (req, res, next) => {
@@ -80,9 +81,35 @@ const mercadopagoWebhook = async (req, res, next) => {
       const statusMap = { approved: 'aprobado', pending: 'pendiente', rejected: 'rechazado' };
       const estadoPago = statusMap[status] || 'pendiente';
 
+      // Intentar encontrar presupuesto primero
+      let quote = await Quote.findById(externalRef);
+      if (quote) {
+        console.log(`📋 Presupuesto encontrado: ${quote.numero}`);
+        quote.estadoPago = estadoPago;
+        quote.mpPaymentId = paymentId;
+        
+        if (estadoPago === 'aprobado') {
+          quote.estado = 'aceptado';
+          console.log(`✅ Pago de presupuesto aprobado: ${quote.numero}`);
+          
+          // Enviar emails de confirmación
+          sendQuotePaymentConfirmation(quote)
+            .then(() => console.log(`✅ Email de confirmación enviado al cliente: ${quote.client.email}`))
+            .catch(err => console.error(`❌ Error enviando email a cliente:`, err.message));
+          
+          sendQuotePaymentToAdmin(quote)
+            .then(() => console.log(`✅ Notificación admin enviada para presupuesto ${quote.numero}`))
+            .catch(err => console.error(`❌ Error en notificación admin:`, err.message));
+        }
+        
+        await quote.save();
+        return res.sendStatus(200);
+      }
+
+      // Si no es presupuesto, buscar orden
       const order = await Order.findById(externalRef);
       if (!order) {
-        console.error(`❌ Orden no encontrada: ${externalRef}`);
+        console.error(`❌ Presupuesto ni Orden encontrada: ${externalRef}`);
         return res.sendStatus(200);
       }
 

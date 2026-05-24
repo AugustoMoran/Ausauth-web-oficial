@@ -88,8 +88,221 @@ const sendShippingCodeEmail = async (email, order) => {
   });
 };
 
+const sendQuoteAcceptanceToAdmin = async (quote) => {
+  const clientName = quote.client?.nombre || 'Cliente desconocido';
+  const clientEmail = quote.client?.email || 'No disponible';
+  
+  // Formatear items
+  const itemsHtml = (quote.items || []).map(item => `
+    <tr>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0">${item.nombre}</td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right">${item.cantidad}</td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right">$${item.subtotal.toFixed(2)} ${item.currency}</td>
+    </tr>
+  `).join('');
+
+  const installationRow = quote.instalacion?.incluye ? `
+    <tr style="background:#f0f9ff">
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0"><strong>Instalación</strong></td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0"></td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right"><strong>$${quote.instalacion.monto.toFixed(2)} ${quote.instalacion.currency}</strong></td>
+    </tr>
+  ` : '';
+
+  await transporter.sendMail({
+    from: `"Sistema SAUSANSYSTEM" <${process.env.EMAIL_FROM}>`,
+    to: process.env.ADMIN_EMAIL,
+    subject: `✅ Presupuesto ${quote.numero} ACEPTADO por ${clientName}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f8fafc;padding:20px;border-radius:8px">
+        <h2 style="color:#16a34a;border-bottom:3px solid #16a34a;padding-bottom:10px">
+          ✅ Presupuesto ACEPTADO
+        </h2>
+        
+        <div style="background:white;padding:15px;border-radius:6px;margin:15px 0">
+          <p><strong>Nº Presupuesto:</strong> ${quote.numero}</p>
+          <p><strong>Cliente:</strong> ${clientName}</p>
+          <p><strong>Email:</strong> ${clientEmail}</p>
+          <p><strong>Teléfono:</strong> ${quote.client?.telefono || 'No disponible'}</p>
+        </div>
+
+        <h3 style="color:#334155;margin-top:20px">Detalle del Presupuesto:</h3>
+        <table style="width:100%;border-collapse:collapse;background:white">
+          <thead>
+            <tr style="background:#0f172a;color:white">
+              <th style="padding:10px;text-align:left;border-bottom:2px solid #e2e8f0">Producto</th>
+              <th style="padding:10px;text-align:right;border-bottom:2px solid #e2e8f0">Cantidad</th>
+              <th style="padding:10px;text-align:right;border-bottom:2px solid #e2e8f0">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+            ${installationRow}
+          </tbody>
+        </table>
+
+        <div style="background:#f0f9ff;padding:15px;border-radius:6px;margin:15px 0;border-left:4px solid #0284c7">
+          <h3 style="color:#0284c7;margin-top:0">Totales:</h3>
+          ${quote.totales?.USD?.total > 0 ? `<p><strong>USD:</strong> $${quote.totales.USD.total.toFixed(2)}</p>` : ''}
+          ${quote.totales?.ARS?.total > 0 ? `<p><strong>ARS:</strong> $${quote.totales.ARS.total.toFixed(2)}</p>` : ''}
+        </div>
+
+        <p style="color:#475569;font-size:12px;margin-top:20px;border-top:1px solid #e2e8f0;padding-top:15px">
+          <strong>⚠️ Próximo paso:</strong> El cliente puede proceder al pago. Una vez aprobado el pago en Mercado Pago, recibirás una notificación de confirmación.
+        </p>
+      </div>
+    `,
+  });
+};
+
+const sendQuotePaymentConfirmation = async (quote) => {
+  const clientName = quote.client?.nombre || 'Cliente';
+  const clientEmail = quote.client?.email;
+
+  if (!clientEmail) {
+    console.error('❌ Sin email de cliente para presupuesto:', quote.numero);
+    return;
+  }
+
+  // Formatear items
+  const itemsHtml = (quote.items || []).map(item => `
+    <tr>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0">${item.nombre}</td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right">${item.cantidad}</td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right">$${item.subtotal.toFixed(2)} ${item.currency}</td>
+    </tr>
+  `).join('');
+
+  const installationRow = quote.instalacion?.incluye ? `
+    <tr style="background:#f0f9ff">
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0"><strong>Instalación</strong></td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0"></td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right"><strong>$${quote.instalacion.monto.toFixed(2)} ${quote.instalacion.currency}</strong></td>
+    </tr>
+  ` : '';
+
+  await transporter.sendMail({
+    from: `"SAUSANSYSTEM" <${process.env.EMAIL_FROM}>`,
+    to: clientEmail,
+    subject: `✅ Pago confirmado - Presupuesto ${quote.numero}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f8fafc;padding:20px;border-radius:8px">
+        <h2 style="color:#16a34a;border-bottom:3px solid #16a34a;padding-bottom:10px">
+          ✅ ¡Pago Confirmado!
+        </h2>
+        
+        <p style="font-size:16px;color:#334155">Hola ${clientName},</p>
+        <p style="color:#475569">Tu pago ha sido procesado exitosamente. Aquí está el detalle de tu presupuesto:</p>
+
+        <div style="background:white;padding:15px;border-radius:6px;margin:15px 0;border-left:4px solid #16a34a">
+          <p><strong>Nº Presupuesto:</strong> ${quote.numero}</p>
+          <p><strong>Fecha de pago:</strong> ${new Date().toLocaleDateString('es-AR')}</p>
+          <p><strong>Estado:</strong> <span style="color:#16a34a;font-weight:bold">✅ Pagado</span></p>
+        </div>
+
+        <h3 style="color:#334155;margin-top:20px">Detalle:</h3>
+        <table style="width:100%;border-collapse:collapse;background:white">
+          <thead>
+            <tr style="background:#0f172a;color:white">
+              <th style="padding:10px;text-align:left">Producto</th>
+              <th style="padding:10px;text-align:right">Cantidad</th>
+              <th style="padding:10px;text-align:right">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+            ${installationRow}
+          </tbody>
+        </table>
+
+        <div style="background:#f0f9ff;padding:15px;border-radius:6px;margin:15px 0;border-left:4px solid #0284c7">
+          <h3 style="color:#0284c7;margin-top:0">Totales:</h3>
+          ${quote.totales?.USD?.total > 0 ? `<p><strong>USD:</strong> $${quote.totales.USD.total.toFixed(2)}</p>` : ''}
+          ${quote.totales?.ARS?.total > 0 ? `<p><strong>ARS:</strong> $${quote.totales.ARS.total.toFixed(2)}</p>` : ''}
+        </div>
+
+        <p style="color:#475569;margin-top:20px">Nuestro equipo procesará tu pedido en breve y te contactaremos para confirmar los detalles de entrega.</p>
+        
+        <p style="color:#64748b;font-size:12px;margin-top:30px;border-top:1px solid #e2e8f0;padding-top:15px">
+          <strong>SAUSANSYSTEM</strong><br/>
+          info@sausansystem.com | +54 9 11 6839-3582
+        </p>
+      </div>
+    `,
+  });
+};
+
+const sendQuotePaymentToAdmin = async (quote) => {
+  const clientName = quote.client?.nombre || 'Cliente desconocido';
+  const clientEmail = quote.client?.email || 'No disponible';
+
+  // Formatear items
+  const itemsHtml = (quote.items || []).map(item => `
+    <tr>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0">${item.nombre}</td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right">${item.cantidad}</td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right">$${item.subtotal.toFixed(2)} ${item.currency}</td>
+    </tr>
+  `).join('');
+
+  const installationRow = quote.instalacion?.incluye ? `
+    <tr style="background:#f0f9ff">
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0"><strong>Instalación</strong></td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0"></td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right"><strong>$${quote.instalacion.monto.toFixed(2)} ${quote.instalacion.currency}</strong></td>
+    </tr>
+  ` : '';
+
+  await transporter.sendMail({
+    from: `"Sistema SAUSANSYSTEM" <${process.env.EMAIL_FROM}>`,
+    to: process.env.ADMIN_EMAIL,
+    subject: `💰 Presupuesto ${quote.numero} - PAGO APROBADO`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f8fafc;padding:20px;border-radius:8px">
+        <h2 style="color:#059669;border-bottom:3px solid #059669;padding-bottom:10px">
+          💰 Pago de Presupuesto Aprobado
+        </h2>
+        
+        <div style="background:white;padding:15px;border-radius:6px;margin:15px 0">
+          <p><strong>Nº Presupuesto:</strong> ${quote.numero}</p>
+          <p><strong>Cliente:</strong> ${clientName}</p>
+          <p><strong>Email:</strong> ${clientEmail}</p>
+          <p><strong>Teléfono:</strong> ${quote.client?.telefono || 'No disponible'}</p>
+          <p><strong>Fecha de pago:</strong> ${new Date().toLocaleDateString('es-AR')} ${new Date().toLocaleTimeString('es-AR')}</p>
+        </div>
+
+        <h3 style="color:#334155;margin-top:20px">Detalle del Presupuesto:</h3>
+        <table style="width:100%;border-collapse:collapse;background:white">
+          <thead>
+            <tr style="background:#0f172a;color:white">
+              <th style="padding:10px;text-align:left;border-bottom:2px solid #e2e8f0">Producto</th>
+              <th style="padding:10px;text-align:right;border-bottom:2px solid #e2e8f0">Cantidad</th>
+              <th style="padding:10px;text-align:right;border-bottom:2px solid #e2e8f0">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+            ${installationRow}
+          </tbody>
+        </table>
+
+        <div style="background:#dcfce7;padding:15px;border-radius:6px;margin:15px 0;border-left:4px solid #059669">
+          <h3 style="color:#059669;margin-top:0">Totales Pagados:</h3>
+          ${quote.totales?.USD?.total > 0 ? `<p><strong>USD:</strong> $${quote.totales.USD.total.toFixed(2)}</p>` : ''}
+          ${quote.totales?.ARS?.total > 0 ? `<p><strong>ARS:</strong> $${quote.totales.ARS.total.toFixed(2)}</p>` : ''}
+        </div>
+
+        <p style="color:#475569;margin-top:20px"><strong>⚠️ Acción requerida:</strong> Procesa este pedido y prepara el envío del material según lo acordado.</p>
+      </div>
+    `,
+  });
+};
+
 module.exports = {
   sendOrderConfirmationToUser,
   sendOrderNotificationToAdmin,
   sendShippingCodeEmail,
+  sendQuoteAcceptanceToAdmin,
+  sendQuotePaymentConfirmation,
+  sendQuotePaymentToAdmin,
 };

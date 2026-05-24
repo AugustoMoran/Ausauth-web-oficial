@@ -11,6 +11,7 @@ const {
   downloadQuotePDF,
   updateQuoteStatus,
   deleteQuote,
+  createQuotePayment,
   testPDF,
   getPDFErrorLog,
 } = require('../controllers/quoteGeneratorController');
@@ -39,6 +40,9 @@ router.put('/:id', updateQuote);
 
 // Admin: Enviar por email
 router.post('/:id/enviar', sendQuote);
+
+// Cliente: Crear pago en Mercado Pago
+router.post('/:id/create-payment', createQuotePayment);
 
 // Descargar PDF (admin o cliente dueño)
 router.get('/:id/pdf', downloadQuotePDF);
