@@ -1,7 +1,23 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/debug', async (req, res) => {
+// Global email logs storage
+global.emailLogs = global.emailLogs || [];
+
+function addEmailLog(type, message, details = {}) {
+  const log = {
+    timestamp: new Date().toISOString(),
+    type, // 'info', 'error', 'success'
+    message,
+    details,
+  };
+  global.emailLogs.unshift(log);
+  // Keep only last 20 logs
+  if (global.emailLogs.length > 20) {
+    global.emailLogs = global.emailLogs.slice(0, 20);
+  }
+  console.log(`[${type.toUpperCase()}]`, message, details);
+}
   res.json({ status: 'ok', message: 'Debug endpoint' });
 });
 
@@ -31,11 +47,19 @@ router.get('/email-config', async (req, res) => {
   });
 });
 
+router.get('/email-logs', async (req, res) => {
+  res.json({
+    logs: global.emailLogs || [],
+    totalLogs: (global.emailLogs || []).length,
+  });
+});
+
 router.post('/send-test-email', async (req, res) => {
   try {
     const transporter = require('../config/mailer');
     
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      addEmailLog('error', 'Missing SMTP credentials');
       return res.status(500).json({ error: 'SMTP_USER or SMTP_PASS not set' });
     }
     
@@ -57,21 +81,37 @@ router.post('/send-test-email', async (req, res) => {
       `,
     };
     
-    console.log('🧪 Test email sending to:', mailOptions.to, 'from:', mailOptions.from);
-    const result = await transporter.sendMail(mailOptions);
+    addEmailLog('info', `Test email queued: ${mailOptions.to}`, { from: mailOptions.from });
+    
+    // Send email in background - don't wait
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        addEmailLog('error', 'Email send failed', {
+          message: error.message,
+          code: error.code,
+          response: error.response,
+          to: mailOptions.to,
+        });
+      } else {
+        addEmailLog('success', 'Email sent successfully', {
+          messageId: info.messageId,
+          to: mailOptions.to,
+        });
+      }
+    });
+    
+    // Respond immediately (don't wait for email)
     res.json({ 
-      success: true, 
-      message: 'Email enviado correctamente',
-      to: mailOptions.to, 
-      from: mailOptions.from,
-      messageId: result.messageId,
+      message: 'Email queued for sending',
+      status: 'pending',
+      to: mailOptions.to,
+      note: 'Check /api/test/email-logs for result'
     });
   } catch (error) {
-    console.error('🧪 Test email error:', error);
+    addEmailLog('error', 'Test email setup error', { message: error.message });
     res.status(500).json({
       error: error.message,
       code: error.code,
-      response: error.response,
     });
   }
 });
