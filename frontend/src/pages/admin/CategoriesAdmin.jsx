@@ -96,7 +96,7 @@ const CategoriesAdmin = () => {
         ) : categories.map((c) => (
           <div key={c._id} className="card p-4 flex items-center gap-3">
             <div className="w-10 h-10 bg-primary-900 rounded-lg flex items-center justify-center">
-              <span className="text-primary-400 font-bold">{c.nombre[0]}</span>
+              <span className="text-primary-400 text-lg">📁</span>
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-medium truncate">{c.nombre}</p>

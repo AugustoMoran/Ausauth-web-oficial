@@ -146,6 +146,23 @@ const Header = () => {
 
             {/* Actions */}
             <div className="flex items-center gap-1 sm:gap-2">
+              {/* Admin Panels in Header */}
+              {isAdmin && (
+                <Link to="/admin" className="hidden md:flex items-center gap-1 p-2 rounded-xl hover:bg-gray-800 transition-colors text-primary-400 text-sm font-medium" title="Panel Admin">
+                  ⚙️ Admin
+                </Link>
+              )}
+              {isTecnico && (
+                <Link to="/tecnico" className="hidden md:flex items-center gap-1 p-2 rounded-xl hover:bg-blue-900 transition-colors text-blue-400 text-sm font-medium" title="Panel Técnico">
+                  🔧 Técnico
+                </Link>
+              )}
+              {isDespachante && (
+                <Link to="/despachante" className="hidden md:flex items-center gap-1 p-2 rounded-xl hover:bg-purple-900 transition-colors text-purple-400 text-sm font-medium" title="Panel Despachante">
+                  📦 Despachante
+                </Link>
+              )}
+
               {isAuthenticated ? (
                 <div className="relative group">
                   <button className="flex items-center gap-1 p-2 rounded-xl hover:bg-gray-800 transition-colors text-primary-400">
@@ -161,21 +178,6 @@ const Header = () => {
                     <Link to="/mis-presupuestos" className="block px-4 py-2 text-sm hover:bg-gray-700 text-gray-100">Mis presupuestos</Link>
                     <Link to="/recomendaciones" className="block px-4 py-2 text-sm hover:bg-gray-700 text-gray-100">Recomendaciones</Link>
                     <Link to="/favoritos" className="block px-4 py-2 text-sm hover:bg-gray-700 text-gray-100">Favoritos</Link>
-                    {isAdmin && (
-                      <Link to="/admin" className="block px-4 py-2 text-sm text-primary-400 font-bold hover:bg-gray-700 border-t border-gray-700">
-                        Panel Admin
-                      </Link>
-                    )}
-                    {isTecnico && (
-                      <Link to="/tecnico" className="block px-4 py-2 text-sm text-primary-400 font-bold hover:bg-gray-700 border-t border-gray-700">
-                        Panel Técnico
-                      </Link>
-                    )}
-                    {isDespachante && (
-                      <Link to="/despachante" className="block px-4 py-2 text-sm text-primary-400 font-bold hover:bg-gray-700 border-t border-gray-700">
-                        Panel Despachante
-                      </Link>
-                    )}
                     <button
                       onClick={logout}
                       className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700 border-t border-gray-700"
@@ -306,20 +308,8 @@ const Header = () => {
               Descargas
             </Link>
 
-            <Link
-              to="/productos"
-              onClick={() => dispatch(closeMenu())}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-800 font-medium transition-colors text-gray-100"
-            >
-              Todos los productos
-            </Link>
-
-
             {categories.length > 0 && (
               <div className="pt-2">
-                <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
-                  Categorías
-                </p>
                 {categories.map((cat) => (
                   <Link
                     key={cat._id}
@@ -345,33 +335,6 @@ const Header = () => {
                 >
                   Mi perfil
                 </Link>
-                {isAdmin && (
-                  <Link
-                    to="/admin"
-                    onClick={() => dispatch(closeMenu())}
-                    className="block w-full text-center bg-gradient-to-r from-gray-900 to-black text-white font-bold py-2 px-4 rounded-xl text-sm hover:from-black hover:to-gray-900 transition-colors"
-                  >
-                    ⚙️ Panel Admin
-                  </Link>
-                )}
-                {isTecnico && (
-                  <Link
-                    to="/tecnico"
-                    onClick={() => dispatch(closeMenu())}
-                    className="block w-full text-center bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-2 px-4 rounded-xl text-sm hover:from-blue-700 hover:to-blue-800 transition-colors"
-                  >
-                    🔧 Panel Técnico
-                  </Link>
-                )}
-                {isDespachante && (
-                  <Link
-                    to="/despachante"
-                    onClick={() => dispatch(closeMenu())}
-                    className="block w-full text-center bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold py-2 px-4 rounded-xl text-sm hover:from-purple-700 hover:to-purple-800 transition-colors"
-                  >
-                    📦 Panel Despachante
-                  </Link>
-                )}
                 <button onClick={() => { logout(); dispatch(closeMenu()); }} className="w-full btn-danger text-sm">
                   Cerrar sesión
                 </button>

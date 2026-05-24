@@ -15,7 +15,7 @@ const CategoryCard = ({ category }) => (
       <img src={category.imagen} alt={category.nombre} className="w-14 h-14 rounded-full object-cover mb-3" />
     ) : (
       <div className="w-14 h-14 bg-gray-900 rounded-full flex items-center justify-center mb-3">
-        <span className="text-primary-400 font-bold text-xl">{category.nombre[0]}</span>
+        <span className="text-primary-400 text-2xl">📁</span>
       </div>
     )}
     <span className="font-semibold text-sm text-center group-hover:text-gray-600 transition-colors">
