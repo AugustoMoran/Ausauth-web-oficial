@@ -87,7 +87,16 @@ const AdminQuotes = () => {
                         <div className="text-sm text-gray-400">{quote.client.email}</div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 font-bold text-green-400">${quote.totales.total.toFixed(2)}</td>
+                    <td className="px-4 py-3 font-bold">
+                      <div className="flex flex-col gap-1">
+                        {quote.totales?.USD?.total > 0 && (
+                          <span className="text-green-400">${quote.totales.USD.total.toFixed(2)} USD</span>
+                        )}
+                        {quote.totales?.ARS?.total > 0 && (
+                          <span className="text-green-400">${quote.totales.ARS.total.toFixed(2)} ARS</span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-3">
                       <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                         quote.estado === 'borrador' ? 'bg-yellow-600 text-yellow-50 border border-yellow-500' :

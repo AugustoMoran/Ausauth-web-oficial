@@ -76,9 +76,14 @@ const MyQuotes = () => {
                 {/* Total */}
                 <div className="flex justify-between items-center mb-4 text-lg">
                   <span className="font-bold">Total:</span>
-                  <span className="text-blue-600 font-bold text-xl">
-                    ${quote.totales.total.toFixed(2)}
-                  </span>
+                  <div className="text-blue-600 font-bold text-xl flex flex-col gap-1">
+                    {quote.totales?.USD?.total > 0 && (
+                      <div>${quote.totales.USD.total.toFixed(2)} USD</div>
+                    )}
+                    {quote.totales?.ARS?.total > 0 && (
+                      <div>${quote.totales.ARS.total.toFixed(2)} ARS</div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Info de envío */}
