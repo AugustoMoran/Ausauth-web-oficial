@@ -25,14 +25,6 @@ const getBaseUrlForRequest = () => {
 // Llamar una sola vez pero permitir que window se resuelva correctamente
 const BASE_URL = getBaseUrlForRequest();
 
-if (typeof window !== 'undefined') {
-  console.log('🔍 BaseApi initialized:', {
-    hostname: window.location.hostname,
-    baseUrl: BASE_URL,
-    isDev: BASE_URL === '/api'
-  });
-}
-
 // Store token in memory (perdido al recargar, es seguro)
 let accessToken = null;
 
@@ -58,7 +50,6 @@ const baseQuery = fetchBaseQuery({
     // Esto es necesario para cross-domain (www.sausansystem.com.ar → ecommerce-gestion-trabajo.onrender.com)
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
-      console.log('✅ Sending Authorization header with token');
     } else {
       console.warn('⚠️ No token found - request may fail with 401');
     }

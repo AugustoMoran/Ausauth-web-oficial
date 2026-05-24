@@ -18,7 +18,6 @@ export const useAuthInit = () => {
       try {
         const token = sessionStorage.getItem('_auth_token');
         if (token && !initialized.current) {
-          console.log('🔄 Restoring token from sessionStorage...');
           dispatch(restoreFromSessionStorage());
         }
       } catch (e) {
@@ -37,7 +36,6 @@ export const useAuthInit = () => {
       if (initialized.current && isLoading) return; // Skip if already processed and still loading
       
       if (user && !isLoading && !initialized.current) {
-        console.log('✅ Auth initialized with user:', user.email);
         dispatch(setUser(user));
         dispatch(setAuthInitialized(true));
         initialized.current = true;

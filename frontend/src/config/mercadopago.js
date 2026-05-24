@@ -18,21 +18,17 @@ export const initializeMercadoPago = () => {
     // Check for window.MercadoPago (SDK v2) or window.mp (legacy)
     if (typeof window.MercadoPago !== 'undefined' || typeof window.mp !== 'undefined') {
       const mp = window.MercadoPago || window.mp;
-      console.log('✅ Mercado Pago SDK loaded and initialized');
       try {
         if (typeof mp.bricks !== 'undefined') {
           // SDK v2 with Bricks
-          console.log('✅ Mercado Pago Bricks available');
         } else if (typeof mp.checkout !== 'undefined') {
           // Legacy checkout
-          console.log('✅ Mercado Pago Checkout available');
         }
       } catch (error) {
         console.error('❌ Error initializing MP SDK:', error);
       }
     } else if (attempts < maxAttempts) {
       attempts++;
-      console.log(`⏳ Waiting for MP SDK to load... (${attempts}/${maxAttempts})`);
       setTimeout(initialize, 500);
     } else {
       console.warn('⚠️ Mercado Pago SDK did not load after 7.5s. Check network and index.html');
