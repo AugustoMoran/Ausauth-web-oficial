@@ -1,12 +1,18 @@
 const sgMail = require('@sendgrid/mail');
 const logger = require('../utils/logger');
 
+// Debug environment
+console.log('🔑 [Mailer Init] SENDGRID_API_KEY:', process.env.SENDGRID_API_KEY ? `✅ Present (${process.env.SENDGRID_API_KEY.substring(0, 10)}...)` : '❌ NOT FOUND');
+console.log('🔑 [Mailer Init] All env keys:', Object.keys(process.env).filter(k => k.includes('SEND') || k.includes('MAIL') || k.includes('EMAIL')));
+
 // Verify API key is set
 if (!process.env.SENDGRID_API_KEY) {
-  console.warn('⚠️ WARNING: SENDGRID_API_KEY not configured');
+  console.error('🚨 CRITICAL: SENDGRID_API_KEY is NOT configured in environment variables!');
+  console.error('   This will cause all email sends to fail with Forbidden error.');
 } else {
+  console.log('✅ Setting SendGrid API Key...');
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-  console.log('✅ SendGrid API Key loaded');
+  console.log('✅ SendGrid API Key successfully configured');
 }
 
 // Create a compatible transporter interface for nodemailer compatibility
@@ -14,6 +20,10 @@ const transporter = {
   sendMail: async (options) => {
     try {
       console.log('📧 [SendGrid] Preparing email to:', options.to);
+      
+      if (!process.env.SENDGRID_API_KEY) {
+        throw new Error('SENDGRID_API_KEY environment variable is not set. Cannot send email.');
+      }
       
       const fromEmail = options.from || process.env.SENDGRID_FROM_EMAIL || 'administracion@sausansystem.com.ar';
       
@@ -55,12 +65,14 @@ const transporter = {
     } catch (error) {
       console.error('❌ [SendGrid] Send error:', error);
       console.error('❌ [SendGrid] Error code:', error.code);
+      console.error('❌ [SendGrid] Error status:', error.status || error.statusCode);
       console.error('❌ [SendGrid] Error response:', error.response?.body || error.response || 'No response');
       console.error('❌ [SendGrid] Full error:', JSON.stringify(error, null, 2));
       
       logger.error('SendGrid error', { 
         message: error.message,
         code: error.code,
+        status: error.status || error.statusCode,
         response: error.response?.body || error.response,
         to: options.to,
       });
