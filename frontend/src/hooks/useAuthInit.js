@@ -1,19 +1,33 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useGetMeQuery } from '../services/authApi';
-import { setUser, logout, setLoading, setAuthInitialized } from '../features/auth/authSlice';
+import { setUser, logout, setLoading, setAuthInitialized, restoreFromSessionStorage } from '../features/auth/authSlice';
 
 /**
  * Hook that initializes auth state on app load
- * Calls getMe to restore session from HttpOnly cookies
+ * 1. Restaura token de sessionStorage (para requests con Authorization header)
+ * 2. Llama getMe para restaurar user data desde servidor
  */
 export const useAuthInit = () => {
   const dispatch = useDispatch();
   const initialized = useRef(false);
   
   try {
-    // Always call getMe - RTK Query will handle caching
-    // This ensures session is restored from cookies after page reload
+    // Paso 1: Restaurar token de sessionStorage si existe
+    useEffect(() => {
+      try {
+        const token = sessionStorage.getItem('_auth_token');
+        if (token && !initialized.current) {
+          console.log('🔄 Restoring token from sessionStorage...');
+          dispatch(restoreFromSessionStorage());
+        }
+      } catch (e) {
+        console.warn('Could not restore from sessionStorage:', e);
+      }
+    }, [dispatch]);
+
+    // Paso 2: Llamar getMe para restaurar user data desde servidor
+    // RTK Query usará el token de Redux para hacer la request
     const { data: user, isLoading, error } = useGetMeQuery(undefined);
 
     useEffect(() => {
@@ -23,11 +37,13 @@ export const useAuthInit = () => {
       if (initialized.current && isLoading) return; // Skip if already processed and still loading
       
       if (user && !isLoading && !initialized.current) {
+        console.log('✅ Auth initialized with user:', user.email);
         dispatch(setUser(user));
         dispatch(setAuthInitialized(true));
         initialized.current = true;
       } else if (error && !isLoading && !initialized.current) {
-        // No valid session
+        // No valid session - token expirado o inválido
+        console.warn('⚠️ Auth failed, clearing session');
         dispatch(logout());
         dispatch(setAuthInitialized(true));
         initialized.current = true;
