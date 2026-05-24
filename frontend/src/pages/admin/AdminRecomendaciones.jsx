@@ -3,6 +3,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import { useGetProductsQuery } from '../../services/productsApi';
 import { useGetUsersListQuery } from '../../services/adminUsersApi';
 import { useCreateRecommendationMutation } from '../../services/recommendationApi';
+import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 
 const AdminRecomendaciones = () => {
@@ -14,20 +15,26 @@ const AdminRecomendaciones = () => {
   const [showClientSuggestions, setShowClientSuggestions] = useState(false);
   const clientSearchRef = useRef(null);
 
+  // Get current user from Redux
+  const user = useSelector(state => state.auth?.user);
+
   // Queries & Mutations
   const { data: productsList = { products: [] }, isLoading: productsLoading } = useGetProductsQuery({ limit: 100 });
   const { data: usersList = { users: [] }, isLoading: usersLoading } = useGetUsersListQuery({ search: clientSearch, limit: 100 });
   const [createRecommendation, { isLoading: isCreating }] = useCreateRecommendationMutation();
 
-  // Click outside handler
+  // Log current user on mount
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (clientSearchRef.current && !clientSearchRef.current.contains(e.target)) {
-        setShowClientSuggestions(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    console.log('👤 Current user:', {
+      id: user?._id,
+      nombre: user?.nombre,
+      email: user?.email,
+      role: user?.role,
+      isAdmin: user?.role === 'admin',
+    });
+  }, [user]);
+
+  // Click outside handler
   }, []);
 
   // Filter products
@@ -51,13 +58,19 @@ const AdminRecomendaciones = () => {
       return;
     }
 
-    try {
-      const result = await createRecommendation({
-        clientId: selectedClient,
-        productIds: selectedProducts,
-        message: message || '',
-      }).unwrap();
+    const payload = {
+      clientId: selectedClient,
+      productIds: selectedProducts,
+      message: message || '',
+    };
 
+    console.log('📤 Enviando recomendación:', payload);
+    console.log('👤 Usuario actual:', { id: user?._id, role: user?.role });
+
+    try {
+      const result = await createRecommendation(payload).unwrap();
+
+      console.log('✅ Respuesta del servidor:', result);
       toast.success('Recomendación creada exitosamente');
       
       // Reset form
@@ -67,7 +80,18 @@ const AdminRecomendaciones = () => {
       setClientSearch('');
       setProductSearch('');
     } catch (error) {
-      toast.error(error?.data?.message || 'Error al crear recomendación');
+      // Log completo del error para debugging
+      console.error('❌ Error creating recommendation:', {
+        status: error?.status,
+        statusText: error?.statusText,
+        message: error?.data?.message,
+        data: error?.data,
+        fullError: error,
+      });
+      
+      // Mostrar mensaje detallado del error
+      const errorMessage = error?.data?.message || error?.message || 'Error al crear recomendación';
+      toast.error(errorMessage);
     }
   };
 

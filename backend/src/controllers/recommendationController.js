@@ -11,20 +11,31 @@ exports.createRecommendation = async (req, res, next) => {
   try {
     const { clientId, productIds, message } = req.body;
 
+    // Validar inputs
+    if (!clientId) {
+      return res.status(400).json({ message: 'clientId es requerido' });
+    }
+
+    if (!Array.isArray(productIds) || productIds.length === 0) {
+      return res.status(400).json({ message: 'productIds debe ser un array con al menos un producto' });
+    }
+
     // Validar cliente existe
     const client = await User.findById(clientId);
     if (!client) {
-      return res.status(404).json({ message: 'Cliente no encontrado' });
+      logger.warn('Client not found for recommendation', { clientId });
+      return res.status(404).json({ message: `Cliente con ID ${clientId} no encontrado` });
     }
 
     // Validar productos existen
-    if (!Array.isArray(productIds) || productIds.length === 0) {
-      return res.status(400).json({ message: 'Debe incluir al menos un producto' });
-    }
-
     const products = await Product.find({ _id: { $in: productIds }, isActive: true });
     if (products.length !== productIds.length) {
-      return res.status(400).json({ message: 'Uno o más productos no existen o están inactivos' });
+      const foundIds = products.map(p => p._id.toString());
+      const missingIds = productIds.filter(id => !foundIds.includes(id.toString()));
+      logger.warn('Some products not found or inactive', { productIds, foundIds, missingIds });
+      return res.status(400).json({ 
+        message: `${missingIds.length} producto(s) no existen o están inactivos: ${missingIds.join(', ')}` 
+      });
     }
 
     // Crear recomendación
@@ -55,7 +66,7 @@ exports.createRecommendation = async (req, res, next) => {
       recommendation,
     });
   } catch (error) {
-    logger.error('Error creating recommendation', { error: error.message });
+    logger.error('Error creating recommendation', { error: error.message, stack: error.stack });
     next(error);
   }
 };
