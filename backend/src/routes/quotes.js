@@ -19,6 +19,7 @@ const {
 // Test endpoint - NO AUTH (goes before protect middleware)
 router.get('/test/pdf', testPDF);
 router.get('/debug/pdf-errors', getPDFErrorLog);  // Debug errors
+router.post('/test/resend/:numero', require('../controllers/quoteGeneratorController').testResendQuote); // Test resend by numero
 
 // Apply auth middleware to all routes below
 router.use(protect);

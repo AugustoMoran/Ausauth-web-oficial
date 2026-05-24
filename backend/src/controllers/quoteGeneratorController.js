@@ -240,10 +240,19 @@ const sendQuote = async (req, res, next) => {
       const pdfBuffer = await generateQuotePDF(quote);
       
       // Intentar enviar email sin bloquear
-      sendQuoteEmail(quote, pdfBuffer).catch((emailError) => {
-        console.error('Email send error:', emailError);
-        // No fallar la request si el email falla
-      });
+      sendQuoteEmail(quote, pdfBuffer)
+        .then((result) => {
+          console.log('✅ Email enviado exitosamente:', result.messageId, 'to:', quote.client.email);
+        })
+        .catch((emailError) => {
+          console.error('❌ Error enviando email a:', quote.client.email);
+          console.error('Error detalles:', {
+            message: emailError.message,
+            code: emailError.code,
+            command: emailError.command,
+            response: emailError.response,
+          });
+        });
     } catch (pdfError) {
       console.error('PDF generation error:', pdfError);
       // Continuar incluso si el PDF falla
@@ -742,6 +751,59 @@ const createQuotePayment = async (req, res, next) => {
   }
 };
 
+const testResendQuote = async (req, res, next) => {
+  try {
+    const { numero } = req.params;
+    console.log(`\n🔄 TEST: Intentando reenviar presupuesto ${numero}...`);
+
+    const quote = await Quote.findOne({ numero });
+    if (!quote) {
+      console.log(`❌ TEST: Presupuesto ${numero} no encontrado`);
+      return res.status(404).json({ message: 'Presupuesto no encontrado' });
+    }
+
+    console.log(`✅ TEST: Presupuesto encontrado`);
+    console.log(`  - Cliente: ${quote.client.nombre} (${quote.client.email})`);
+    console.log(`  - Items: ${quote.items.length}`);
+
+    try {
+      console.log(`📄 TEST: Generando PDF...`);
+      const pdfBuffer = await generateQuotePDF(quote);
+      console.log(`✅ TEST: PDF generado (${pdfBuffer.length} bytes)`);
+
+      console.log(`📧 TEST: Enviando email...`);
+      await sendQuoteEmail(quote, pdfBuffer);
+      console.log(`✅ TEST: Email enviado a ${quote.client.email}`);
+
+      res.json({
+        message: 'Presupuesto reenviado exitosamente',
+        numero: quote.numero,
+        email: quote.client.email,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error(`❌ TEST ERROR:`, {
+        message: error.message,
+        code: error.code,
+        command: error.command,
+        response: error.response,
+      });
+
+      res.status(500).json({
+        message: 'Error al enviar presupuesto',
+        error: error.message,
+        details: {
+          code: error.code,
+          command: error.command,
+        },
+      });
+    }
+  } catch (error) {
+    console.error('TEST: Error general:', error);
+    res.status(500).json({ message: 'Error', error: error.message });
+  }
+};
+
 module.exports = {
   createQuote,
   getAllQuotes,
@@ -755,4 +817,5 @@ module.exports = {
   createQuotePayment,
   testPDF,
   getPDFErrorLog,
+  testResendQuote,
 };
