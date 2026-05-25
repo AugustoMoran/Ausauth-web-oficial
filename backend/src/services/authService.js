@@ -16,7 +16,12 @@ const register = async ({ nombre, apellido, email, password, telefono }) => {
 };
 
 const login = async (email, password) => {
-  const user = await User.findOne({ email: email.toLowerCase(), isActive: true }).select('+password');
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  const user = await User.findOne({
+    email: normalizedEmail,
+    // Permite usuarios legacy sin campo isActive, pero bloquea explícitamente los desactivados
+    isActive: { $ne: false },
+  }).select('+password');
   if (!user) throw Object.assign(new Error('Credenciales inválidas.'), { statusCode: 401 });
 
   const valid = await user.comparePassword(password);

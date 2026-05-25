@@ -73,4 +73,16 @@ describe('authService.login', () => {
     const result = await authService.login('a@b.com', 'correct');
     expect(result).toBe(mockUser);
   });
+
+  it('queries with normalized email and allows legacy users without isActive field', async () => {
+    const mockUser = { _id: 'uid', comparePassword: jest.fn().mockResolvedValue(true) };
+    User.findOne.mockReturnValue({ select: jest.fn().mockResolvedValue(mockUser) });
+
+    await authService.login('  A@B.COM  ', 'correct');
+
+    expect(User.findOne).toHaveBeenCalledWith({
+      email: 'a@b.com',
+      isActive: { $ne: false },
+    });
+  });
 });
