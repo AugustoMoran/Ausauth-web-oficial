@@ -40,6 +40,8 @@ const jobRoutes = require('./modules/jobs/job.routes');
 const liquidationRoutes = require('./modules/liquidations/liquidation.routes');
 const pdfRoutes = require('./modules/pdf/pdf.routes');
 
+// Deploy marker (Render trigger): 2026-05-25
+
 const app = express();
 
 // Trust proxy for Fly.io / reverse proxies (needed for rate limiter and IP detection)
