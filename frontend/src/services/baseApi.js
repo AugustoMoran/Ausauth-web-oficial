@@ -27,7 +27,7 @@ const BASE_URL = getBaseUrlForRequest();
 
 // Store token in memory (perdido al recargar, es seguro)
 let accessToken = null;
-const AUTH_CLIENT_REV = '2026-05-25-auth-fix-r2';
+const AUTH_CLIENT_REV = '2026-05-25-redeploy-r3';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
