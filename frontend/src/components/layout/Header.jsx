@@ -26,13 +26,33 @@ const Header = () => {
   const menuOpen = useSelector((s) => s.ui.menuOpen);
   const { data: categories = [] } = useGetCategoriesQuery();
   const [search, setSearch] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [scrolled, setScrolled] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const suggestionsRef = useRef(null);
+  const debounceTimerRef = useRef(null);
   
-  // Query RTK - solo cuando el usuario hace búsqueda explícita
-  const { data: suggestions = [] } = useGetProductSuggestionsQuery(searchQuery);
+  // Debounce para evitar demasiadas requests
+  useEffect(() => {
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    
+    debounceTimerRef.current = setTimeout(() => {
+      if (search.trim()) {
+        setDebouncedSearch(search.trim());
+        setShowSuggestions(true);
+      } else {
+        setDebouncedSearch('');
+        setShowSuggestions(false);
+      }
+    }, 300);
+    
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+  }, [search]);
+  
+  // Query RTK - se ejecuta cuando debouncedSearch cambia
+  const { data: suggestions = [] } = useGetProductSuggestionsQuery(debouncedSearch);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -53,15 +73,15 @@ const Header = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     if (search.trim()) {
-      setSearchQuery(search.trim());
-      setShowSuggestions(true);
+      navigate(`/productos?buscar=${encodeURIComponent(search.trim())}`);
+      dispatch(closeMenu());
     }
   };
 
   const handleSuggestionClick = (product) => {
     navigate(`/productos/${product._id}`);
     setSearch('');
-    setSearchQuery('');
+    setDebouncedSearch('');
     setShowSuggestions(false);
     dispatch(closeMenu());
   };
@@ -98,7 +118,7 @@ const Header = () => {
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    onFocus={() => searchQuery && setShowSuggestions(true)}
+                    onFocus={() => debouncedSearch && setShowSuggestions(true)}
                     placeholder="Buscar productos..."
                     className="input-field pl-10 pr-4 py-2 text-sm bg-gray-800 text-gray-100 border-gray-700 focus:ring-2 focus:ring-primary-400 w-full"
                   />
@@ -106,7 +126,7 @@ const Header = () => {
               </form>
               
               {/* Suggestions dropdown */}
-              {showSuggestions && searchQuery.length > 0 && suggestions.length > 0 && (
+              {showSuggestions && debouncedSearch.length > 0 && suggestions.length > 0 && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto">
                   {suggestions.map((product) => (
                     <button
@@ -135,7 +155,7 @@ const Header = () => {
               )}
               
               {/* No results message */}
-              {showSuggestions && searchQuery.length > 0 && suggestions.length === 0 && (
+              {showSuggestions && debouncedSearch.length > 0 && suggestions.length === 0 && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 p-4 text-center text-sm text-gray-400">
                   No se encontraron productos
                 </div>
@@ -248,14 +268,14 @@ const Header = () => {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                onFocus={() => searchQuery && setShowSuggestions(true)}
+                onFocus={() => debouncedSearch && setShowSuggestions(true)}
                 placeholder="Buscar..."
                 className="input-field pl-9 py-2 text-sm bg-gray-800 text-gray-100 border-gray-700 focus:ring-2 focus:ring-primary-400 w-full"
               />
             </div>
             
             {/* Suggestions dropdown mobile */}
-            {showSuggestions && searchQuery.length > 0 && suggestions.length > 0 && (
+            {showSuggestions && debouncedSearch.length > 0 && suggestions.length > 0 && (
               <div className="absolute top-full left-5 right-5 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto">
                 {suggestions.map((product) => (
                   <button
