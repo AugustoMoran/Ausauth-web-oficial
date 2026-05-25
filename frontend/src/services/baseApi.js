@@ -50,8 +50,6 @@ const baseQuery = fetchBaseQuery({
     // Esto es necesario para cross-domain (www.sausansystem.com.ar → ecommerce-gestion-trabajo.onrender.com)
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
-    } else {
-      console.warn('⚠️ No token found - request may fail with 401');
     }
     return headers;
   },
