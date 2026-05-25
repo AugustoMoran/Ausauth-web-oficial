@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Product = require('../models/Product');
 const PDFDocument = require('pdfkit');
 const { generateQuotePDF, sendQuoteEmail } = require('../services/quoteService');
+const { formatQuoteMoney } = require('../utils/quoteCurrencyFormat');
 
 // In-memory error log for debugging
 const pdfErrorLog = [];
@@ -417,8 +418,8 @@ const downloadQuotePDF = async (req, res, next) => {
             
             doc.text(item.nombre || 'Producto', col1, rowY + 7);
             doc.text(qty.toString(), col2, rowY + 7);
-            doc.text(`$${price.toFixed(2)} ${itemCurrency}`, col3, rowY + 7);
-            doc.text(`$${subtotal.toFixed(2)} ${itemCurrency}`, col4, rowY + 7);
+            doc.text(formatQuoteMoney(price, itemCurrency), col3, rowY + 7);
+            doc.text(formatQuoteMoney(subtotal, itemCurrency), col4, rowY + 7);
             
             rowY += rowHeight;
             itemCount++;
@@ -439,8 +440,8 @@ const downloadQuotePDF = async (req, res, next) => {
           
           doc.text(instDesc, col1, rowY + 7);
           doc.text('1', col2, rowY + 7);
-          doc.text(`$${instMonto.toFixed(2)} ${instCurrency}`, col3, rowY + 7);
-          doc.text(`$${instMonto.toFixed(2)} ${instCurrency}`, col4, rowY + 7);
+          doc.text(formatQuoteMoney(instMonto, instCurrency), col3, rowY + 7);
+          doc.text(formatQuoteMoney(instMonto, instCurrency), col4, rowY + 7);
           
           rowY += rowHeight;
           itemCount++;
@@ -460,9 +461,9 @@ const downloadQuotePDF = async (req, res, next) => {
           
           doc.fontSize(9).font('Helvetica').fillColor('#666');
           if (instCurrency === 'USD') {
-            doc.text(`(incluye instalación: $${instMonto.toFixed(2)} USD)`, 380, rowY);
+            doc.text(`(incluye instalación: ${formatQuoteMoney(instMonto, 'USD')})`, 380, rowY);
           } else {
-            doc.text(`(incluye instalación: $${instMonto.toFixed(2)} ARS)`, 380, rowY);
+            doc.text(`(incluye instalación: ${formatQuoteMoney(instMonto, 'ARS')})`, 380, rowY);
           }
           rowY += 15;
         }
@@ -470,11 +471,11 @@ const downloadQuotePDF = async (req, res, next) => {
         // Totals box
         doc.fontSize(11).font('Helvetica-Bold').fillColor('#0066cc');
         if (totalUSD > 0) {
-          doc.text(`TOTAL USD: $${totalUSD.toFixed(2)}`, 380, rowY);
+          doc.text(`TOTAL USD: ${formatQuoteMoney(totalUSD, 'USD', { withCurrency: false })}`, 380, rowY);
           rowY += 20;
         }
         if (totalARS > 0) {
-          doc.text(`TOTAL ARS: $${totalARS.toFixed(2)}`, 380, rowY);
+          doc.text(`TOTAL ARS: ${formatQuoteMoney(totalARS, 'ARS', { withCurrency: false })}`, 380, rowY);
           rowY += 20;
         }
 
@@ -487,7 +488,7 @@ const downloadQuotePDF = async (req, res, next) => {
           const totalSingleLabel = totalUSD > 0 ? 'USD' : 'ARS';
           doc.rect(320, rowY - 5, 180, 35).fill('#0066cc');
           doc.fontSize(13).font('Helvetica-Bold').fillColor('#fff')
-            .text(`TOTAL: $${totalSingleCurrency.toFixed(2)} ${totalSingleLabel}`, 328, rowY + 5);
+            .text(`TOTAL: ${formatQuoteMoney(totalSingleCurrency, totalSingleLabel)}`, 328, rowY + 5);
         }
 
         // Footer

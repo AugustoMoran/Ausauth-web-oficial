@@ -3,6 +3,7 @@ import { useCreateQuoteMutation, useUpdateQuoteMutation } from '../../services/q
 import { useGetProductsQuery } from '../../services/productsApi';
 import { useGetUsersListQuery } from '../../services/adminUsersApi';
 import { useGetExchangeRateQuery } from '../../services/settingsApi';
+import { formatQuoteMoney } from '../../utils/quoteCurrencyFormat';
 import toast from 'react-hot-toast';
 import { HiOutlineSearch, HiX } from 'react-icons/hi';
 
@@ -318,7 +319,7 @@ const QuoteForm = ({ quote, onClose, onSuccess }) => {
                             <div className="flex justify-between items-center">
                               <span>{p.nombre}</span>
                               <span className="text-xs text-gray-400">
-                                ${getProductPriceByCurrency(p, selectedCurrency).toFixed(2)} {selectedCurrency}
+                                {formatQuoteMoney(getProductPriceByCurrency(p, selectedCurrency), selectedCurrency)}
                               </span>
                             </div>
                           </button>
@@ -403,10 +404,10 @@ const QuoteForm = ({ quote, onClose, onSuccess }) => {
                         <td className="px-4 py-2 text-gray-200">{item.nombre}</td>
                         <td className="text-center px-2 py-2 text-gray-300">{item.cantidad}</td>
                         <td className="text-right px-2 py-2 text-gray-300">
-                          ${item.precioUnitario?.toFixed(2) || '0.00'} {item.currency || 'USD'}
+                          {formatQuoteMoney(item.precioUnitario, item.currency || 'USD')}
                         </td>
                         <td className="text-right px-2 py-2 font-semibold text-green-400">
-                          ${(item.cantidad * item.precioUnitario)?.toFixed(2) || '0.00'} {item.currency || 'USD'}
+                          {formatQuoteMoney((item.cantidad * item.precioUnitario), item.currency || 'USD')}
                         </td>
                         <td className="text-center px-2 py-2">
                           <button
@@ -526,18 +527,18 @@ const QuoteForm = ({ quote, onClose, onSuccess }) => {
               <div className={totals.byCurrency.ARS.total > 0 ? "mb-4 pb-4 border-b border-blue-600" : ""}>
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-300">Subtotal USD:</span>
-                  <span className="font-medium text-gray-100">${totals.byCurrency.USD.subtotal.toFixed(2)}</span>
+                  <span className="font-medium text-gray-100">{formatQuoteMoney(totals.byCurrency.USD.subtotal, 'USD', { withCurrency: false })}</span>
                 </div>
                 {totals.byCurrency.USD.instalacion > 0 && (
                   <div className="flex justify-between mb-2">
                     <span className="text-gray-300">Instalación USD:</span>
-                    <span className="font-medium text-gray-100">${totals.byCurrency.USD.instalacion.toFixed(2)}</span>
+                    <span className="font-medium text-gray-100">{formatQuoteMoney(totals.byCurrency.USD.instalacion, 'USD', { withCurrency: false })}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-lg font-bold pt-2">
                   <span className="text-gray-200">Total USD:</span>
                   <span className="text-green-400">
-                    ${totals.byCurrency.USD.total.toFixed(2)}
+                    {formatQuoteMoney(totals.byCurrency.USD.total, 'USD', { withCurrency: false })}
                   </span>
                 </div>
               </div>
@@ -547,18 +548,18 @@ const QuoteForm = ({ quote, onClose, onSuccess }) => {
               <div>
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-300">Subtotal ARS:</span>
-                  <span className="font-medium text-gray-100">${totals.byCurrency.ARS.subtotal.toFixed(2)}</span>
+                  <span className="font-medium text-gray-100">{formatQuoteMoney(totals.byCurrency.ARS.subtotal, 'ARS', { withCurrency: false })}</span>
                 </div>
                 {totals.byCurrency.ARS.instalacion > 0 && (
                   <div className="flex justify-between mb-2">
                     <span className="text-gray-300">Instalación ARS:</span>
-                    <span className="font-medium text-gray-100">${totals.byCurrency.ARS.instalacion.toFixed(2)}</span>
+                    <span className="font-medium text-gray-100">{formatQuoteMoney(totals.byCurrency.ARS.instalacion, 'ARS', { withCurrency: false })}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-lg font-bold pt-2">
                   <span className="text-gray-200">Total ARS:</span>
                   <span className="text-green-400">
-                    ${totals.byCurrency.ARS.total.toFixed(2)}
+                    {formatQuoteMoney(totals.byCurrency.ARS.total, 'ARS', { withCurrency: false })}
                   </span>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 import { useGetMyQuotesQuery } from '../services/quotesApi';
 import QuoteCard from '../components/quotes/QuoteCard';
+import { formatQuoteMoney } from '../utils/quoteCurrencyFormat';
 
 const MyQuotes = () => {
   const { data: quotes = [], isLoading } = useGetMyQuotesQuery();
@@ -62,7 +63,7 @@ const MyQuotes = () => {
                           {item.nombre} x{item.cantidad}
                         </span>
                         <span>
-                          ${(item.cantidad * item.precioUnitario).toFixed(2)} {item.currency || 'USD'}
+                          {formatQuoteMoney((item.cantidad * item.precioUnitario), item.currency || 'USD')}
                         </span>
                       </div>
                     ))}
@@ -70,7 +71,7 @@ const MyQuotes = () => {
                       <div className="flex justify-between text-sm border-t pt-2">
                         <span>Instalación</span>
                         <span>
-                          ${quote.instalacion.monto.toFixed(2)} {quote.instalacion.currency || 'USD'}
+                          {formatQuoteMoney(quote.instalacion.monto, quote.instalacion.currency || 'USD')}
                         </span>
                       </div>
                     )}
@@ -82,10 +83,10 @@ const MyQuotes = () => {
                   <span className="font-bold">Total:</span>
                   <div className="text-blue-600 font-bold text-xl flex flex-col gap-1">
                     {quote.totales?.USD?.total > 0 && (
-                      <div>${quote.totales.USD.total.toFixed(2)} USD</div>
+                      <div>{formatQuoteMoney(quote.totales.USD.total, 'USD')}</div>
                     )}
                     {quote.totales?.ARS?.total > 0 && (
-                      <div>${quote.totales.ARS.total.toFixed(2)} ARS</div>
+                      <div>{formatQuoteMoney(quote.totales.ARS.total, 'ARS')}</div>
                     )}
                   </div>
                 </div>

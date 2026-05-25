@@ -3,6 +3,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import { useGetAllQuotesQuery } from '../../services/quotesApi';
 import QuoteForm from '../../components/quotes/QuoteForm';
 import QuoteCard from '../../components/quotes/QuoteCard';
+import { formatQuoteMoney } from '../../utils/quoteCurrencyFormat';
 
 const AdminQuotes = () => {
   const { data: quotes = [], isLoading, error } = useGetAllQuotesQuery();
@@ -90,10 +91,10 @@ const AdminQuotes = () => {
                     <td className="px-4 py-3 font-bold">
                       <div className="flex flex-col gap-1">
                         {quote.totales?.USD?.total > 0 && (
-                          <span className="text-green-400">${quote.totales.USD.total.toFixed(2)} USD</span>
+                          <span className="text-green-400">{formatQuoteMoney(quote.totales.USD.total, 'USD')}</span>
                         )}
                         {quote.totales?.ARS?.total > 0 && (
-                          <span className="text-green-400">${quote.totales.ARS.total.toFixed(2)} ARS</span>
+                          <span className="text-green-400">{formatQuoteMoney(quote.totales.ARS.total, 'ARS')}</span>
                         )}
                       </div>
                     </td>

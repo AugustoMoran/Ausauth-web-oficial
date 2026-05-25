@@ -3,6 +3,7 @@ const transporter = require('../config/mailer');
 const path = require('path');
 const fs = require('fs');
 const { PassThrough } = require('stream');
+const { formatQuoteMoney } = require('../utils/quoteCurrencyFormat');
 
 const generateQuotePDF = (quote) => {
   return new Promise((resolve, reject) => {
@@ -38,7 +39,7 @@ const generateQuotePDF = (quote) => {
       
       if (quote.items && quote.items.length > 0) {
         quote.items.forEach((item) => {
-          doc.text(`- ${item.nombre}: $${(Number(item.subtotal) || 0).toFixed(2)} ${item.currency || 'USD'}`);
+          doc.text(`- ${item.nombre}: ${formatQuoteMoney((Number(item.subtotal) || 0), item.currency || 'USD')}`);
         });
       }
       
@@ -48,10 +49,10 @@ const generateQuotePDF = (quote) => {
 
       doc.fontSize(14);
       if (totalUSD > 0) {
-        doc.text(`TOTAL USD: $${totalUSD.toFixed(2)}`);
+        doc.text(`TOTAL USD: ${formatQuoteMoney(totalUSD, 'USD', { withCurrency: false })}`);
       }
       if (totalARS > 0) {
-        doc.text(`TOTAL ARS: $${totalARS.toFixed(2)}`);
+        doc.text(`TOTAL ARS: ${formatQuoteMoney(totalARS, 'ARS', { withCurrency: false })}`);
       }
 
       // End document - THIS IS CRITICAL
@@ -112,8 +113,8 @@ const sendQuoteEmail = async (quote, pdfBuffer) => {
                 <tr>
                   <td>${item.nombre}</td>
                   <td>${item.cantidad}</td>
-                  <td>$${item.precioUnitario.toFixed(2)} ${item.currency || 'USD'}</td>
-                  <td>$${item.subtotal.toFixed(2)} ${item.currency || 'USD'}</td>
+                  <td>${formatQuoteMoney(item.precioUnitario, item.currency || 'USD')}</td>
+                  <td>${formatQuoteMoney(item.subtotal, item.currency || 'USD')}</td>
                 </tr>
               `).join('')}
               ${quote.instalacion.incluye ? `
@@ -121,7 +122,7 @@ const sendQuoteEmail = async (quote, pdfBuffer) => {
                   <td>Instalación${quote.instalacion.descripcion ? ` - ${quote.instalacion.descripcion}` : ''}</td>
                   <td>-</td>
                   <td>-</td>
-                  <td>$${quote.instalacion.monto.toFixed(2)} ${quote.instalacion.currency || 'USD'}</td>
+                  <td>${formatQuoteMoney(quote.instalacion.monto, quote.instalacion.currency || 'USD')}</td>
                 </tr>
               ` : ''}
             </tbody>
@@ -135,10 +136,10 @@ const sendQuoteEmail = async (quote, pdfBuffer) => {
               
               let html = '';
               if (hasUSD) {
-                html += `<strong>${isMixed ? 'USD Total' : 'Total Final'}: $${quote.totales.USD.total.toFixed(2)}</strong><br/>`;
+                html += `<strong>${isMixed ? 'USD Total' : 'Total Final'}: ${formatQuoteMoney(quote.totales.USD.total, 'USD')}</strong><br/>`;
               }
               if (hasARS) {
-                html += `<strong>${isMixed ? 'ARS Total' : 'Total Final'}: $${quote.totales.ARS.total.toFixed(2)}</strong><br/>`;
+                html += `<strong>${isMixed ? 'ARS Total' : 'Total Final'}: ${formatQuoteMoney(quote.totales.ARS.total, 'ARS')}</strong><br/>`;
               }
               return html;
             })()}

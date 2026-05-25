@@ -1,4 +1,5 @@
 const transporter = require('../config/mailer');
+const { formatQuoteMoney } = require('./quoteCurrencyFormat');
 
 const formatOrderItems = (items) => {
   return items
@@ -97,7 +98,7 @@ const sendQuoteAcceptanceToAdmin = async (quote) => {
     <tr>
       <td style="padding:8px;border-bottom:1px solid #e2e8f0">${item.nombre}</td>
       <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right">${item.cantidad}</td>
-      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right">$${item.subtotal.toFixed(2)} ${item.currency}</td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right">${formatQuoteMoney(item.subtotal, item.currency)}</td>
     </tr>
   `).join('');
 
@@ -105,7 +106,7 @@ const sendQuoteAcceptanceToAdmin = async (quote) => {
     <tr style="background:#f0f9ff">
       <td style="padding:8px;border-bottom:1px solid #e2e8f0"><strong>Instalación</strong></td>
       <td style="padding:8px;border-bottom:1px solid #e2e8f0"></td>
-      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right"><strong>$${quote.instalacion.monto.toFixed(2)} ${quote.instalacion.currency}</strong></td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right"><strong>${formatQuoteMoney(quote.instalacion.monto, quote.instalacion.currency)}</strong></td>
     </tr>
   ` : '';
 
@@ -143,8 +144,8 @@ const sendQuoteAcceptanceToAdmin = async (quote) => {
 
         <div style="background:#f0f9ff;padding:15px;border-radius:6px;margin:15px 0;border-left:4px solid #0284c7">
           <h3 style="color:#0284c7;margin-top:0">Totales:</h3>
-          ${quote.totales?.USD?.total > 0 ? `<p><strong>USD:</strong> $${quote.totales.USD.total.toFixed(2)}</p>` : ''}
-          ${quote.totales?.ARS?.total > 0 ? `<p><strong>ARS:</strong> $${quote.totales.ARS.total.toFixed(2)}</p>` : ''}
+          ${quote.totales?.USD?.total > 0 ? `<p><strong>USD:</strong> ${formatQuoteMoney(quote.totales.USD.total, 'USD')}</p>` : ''}
+          ${quote.totales?.ARS?.total > 0 ? `<p><strong>ARS:</strong> ${formatQuoteMoney(quote.totales.ARS.total, 'ARS')}</p>` : ''}
         </div>
 
         <p style="color:#475569;font-size:12px;margin-top:20px;border-top:1px solid #e2e8f0;padding-top:15px">
@@ -169,7 +170,7 @@ const sendQuotePaymentConfirmation = async (quote) => {
     <tr>
       <td style="padding:8px;border-bottom:1px solid #e2e8f0">${item.nombre}</td>
       <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right">${item.cantidad}</td>
-      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right">$${item.subtotal.toFixed(2)} ${item.currency}</td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right">${formatQuoteMoney(item.subtotal, item.currency)}</td>
     </tr>
   `).join('');
 
@@ -177,7 +178,7 @@ const sendQuotePaymentConfirmation = async (quote) => {
     <tr style="background:#f0f9ff">
       <td style="padding:8px;border-bottom:1px solid #e2e8f0"><strong>Instalación</strong></td>
       <td style="padding:8px;border-bottom:1px solid #e2e8f0"></td>
-      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right"><strong>$${quote.instalacion.monto.toFixed(2)} ${quote.instalacion.currency}</strong></td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right"><strong>${formatQuoteMoney(quote.instalacion.monto, quote.instalacion.currency)}</strong></td>
     </tr>
   ` : '';
 
@@ -217,8 +218,8 @@ const sendQuotePaymentConfirmation = async (quote) => {
 
         <div style="background:#f0f9ff;padding:15px;border-radius:6px;margin:15px 0;border-left:4px solid #0284c7">
           <h3 style="color:#0284c7;margin-top:0">Totales:</h3>
-          ${quote.totales?.USD?.total > 0 ? `<p><strong>USD:</strong> $${quote.totales.USD.total.toFixed(2)}</p>` : ''}
-          ${quote.totales?.ARS?.total > 0 ? `<p><strong>ARS:</strong> $${quote.totales.ARS.total.toFixed(2)}</p>` : ''}
+          ${quote.totales?.USD?.total > 0 ? `<p><strong>USD:</strong> ${formatQuoteMoney(quote.totales.USD.total, 'USD')}</p>` : ''}
+          ${quote.totales?.ARS?.total > 0 ? `<p><strong>ARS:</strong> ${formatQuoteMoney(quote.totales.ARS.total, 'ARS')}</p>` : ''}
         </div>
 
         <p style="color:#475569;margin-top:20px">Nuestro equipo procesará tu pedido en breve y te contactaremos para confirmar los detalles de entrega.</p>
@@ -241,7 +242,7 @@ const sendQuotePaymentToAdmin = async (quote) => {
     <tr>
       <td style="padding:8px;border-bottom:1px solid #e2e8f0">${item.nombre}</td>
       <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right">${item.cantidad}</td>
-      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right">$${item.subtotal.toFixed(2)} ${item.currency}</td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right">${formatQuoteMoney(item.subtotal, item.currency)}</td>
     </tr>
   `).join('');
 
@@ -249,7 +250,7 @@ const sendQuotePaymentToAdmin = async (quote) => {
     <tr style="background:#f0f9ff">
       <td style="padding:8px;border-bottom:1px solid #e2e8f0"><strong>Instalación</strong></td>
       <td style="padding:8px;border-bottom:1px solid #e2e8f0"></td>
-      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right"><strong>$${quote.instalacion.monto.toFixed(2)} ${quote.instalacion.currency}</strong></td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right"><strong>${formatQuoteMoney(quote.instalacion.monto, quote.instalacion.currency)}</strong></td>
     </tr>
   ` : '';
 
@@ -288,8 +289,8 @@ const sendQuotePaymentToAdmin = async (quote) => {
 
         <div style="background:#dcfce7;padding:15px;border-radius:6px;margin:15px 0;border-left:4px solid #059669">
           <h3 style="color:#059669;margin-top:0">Totales Pagados:</h3>
-          ${quote.totales?.USD?.total > 0 ? `<p><strong>USD:</strong> $${quote.totales.USD.total.toFixed(2)}</p>` : ''}
-          ${quote.totales?.ARS?.total > 0 ? `<p><strong>ARS:</strong> $${quote.totales.ARS.total.toFixed(2)}</p>` : ''}
+          ${quote.totales?.USD?.total > 0 ? `<p><strong>USD:</strong> ${formatQuoteMoney(quote.totales.USD.total, 'USD')}</p>` : ''}
+          ${quote.totales?.ARS?.total > 0 ? `<p><strong>ARS:</strong> ${formatQuoteMoney(quote.totales.ARS.total, 'ARS')}</p>` : ''}
         </div>
 
         <p style="color:#475569;margin-top:20px"><strong>⚠️ Acción requerida:</strong> Procesa este pedido y prepara el envío del material según lo acordado.</p>
