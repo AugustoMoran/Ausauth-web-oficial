@@ -27,6 +27,7 @@ const BASE_URL = getBaseUrlForRequest();
 
 // Store token in memory (perdido al recargar, es seguro)
 let accessToken = null;
+const AUTH_CLIENT_REV = '2026-05-25-auth-fix-r2';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
@@ -48,7 +49,7 @@ const baseQuery = fetchBaseQuery({
     
     // FALLBACK: Si no hay cookie, usar token en memoria + Authorization header
     // Esto es necesario para cross-domain (www.sausansystem.com.ar → ecommerce-gestion-trabajo.onrender.com)
-    if (token) {
+    if (AUTH_CLIENT_REV && typeof token === 'string' && token.length > 0) {
       headers.set('Authorization', `Bearer ${token}`);
     }
     return headers;
