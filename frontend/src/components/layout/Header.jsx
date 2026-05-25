@@ -51,8 +51,10 @@ const Header = () => {
     };
   }, [search]);
   
-  // Query RTK - se ejecuta cuando debouncedSearch cambia
-  const { data: suggestions = [] } = useGetProductSuggestionsQuery(debouncedSearch);
+  // Query RTK - se ejecuta cuando debouncedSearch cambia (skip correcto en el hook)
+  const { data: suggestions = [] } = useGetProductSuggestionsQuery(debouncedSearch, {
+    skip: !debouncedSearch || debouncedSearch.trim().length === 0,
+  });
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -72,8 +74,12 @@ const Header = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (search.trim()) {
-      navigate(`/productos?search=${encodeURIComponent(search.trim())}`);
+    const term = search.trim();
+    if (term) {
+      setSearch('');
+      setDebouncedSearch('');
+      setShowSuggestions(false);
+      navigate(`/productos?search=${encodeURIComponent(term)}`);
       dispatch(closeMenu());
     }
   };
@@ -146,7 +152,7 @@ const Header = () => {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-100 truncate">{product.nombre}</p>
                         <p className="text-xs text-gray-400">
-                          ${product.precioOferta ? product.precioOferta.toLocaleString('es-AR') : product.precio.toLocaleString('es-AR')}
+                          ${(product.precioOferta || product.precio || 0).toLocaleString('es-AR')}
                         </p>
                       </div>
                     </button>
@@ -295,7 +301,7 @@ const Header = () => {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-100 truncate text-xs">{product.nombre}</p>
                       <p className="text-xs text-gray-400">
-                        ${product.precioOferta ? product.precioOferta.toLocaleString('es-AR') : product.precio.toLocaleString('es-AR')}
+                        ${(product.precioOferta || product.precio || 0).toLocaleString('es-AR')}
                       </p>
                     </div>
                   </button>

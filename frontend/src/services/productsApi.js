@@ -19,7 +19,6 @@ export const productsApi = baseApi.injectEndpoints({
     }),
     getProductSuggestions: builder.query({
       query: (q) => ({ url: '/products/suggestions', params: { q, limit: 10 } }),
-      skip: (q) => !q || q.trim().length === 0,
     }),
     createProduct: builder.mutation({
       query: (data) => ({ url: '/products', method: 'POST', body: data }),
