@@ -1,10 +1,6 @@
-/**
- * chatApi.js — Chat API service
- *
- * Simple fetch-based service for the chat widget.
- */
+import config from '../frontend/src/config/app';
 
-const BASE_URL = 'http://localhost:5001/api';
+const BASE_URL = config.apiUrl;
 
 export async function sendChatMessage(message, sessionId, conversationHistory = []) {
   const res = await fetch(`${BASE_URL}/chat`, {
