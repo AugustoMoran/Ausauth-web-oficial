@@ -1,10 +1,14 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { logout, setCredentials } from '../features/auth/authSlice';
+import config from '../config/app';
 
 // Determinar URL base en cada request (no compilación)
 // Para desarrollo: usa /api (proxy Vite)
 // Para producción: usa URL absoluta (no confiar en paths relativos con Vercel rewrites)
 const getBaseUrlForRequest = () => {
+  // Usar la URL configurada en app.js (que lee de env variables)
+  const configuredUrl = config.apiUrl;
+  
   // Si estamos en navegador
   if (typeof window !== 'undefined' && window.location) {
     const hostname = window.location.hostname;
@@ -13,13 +17,10 @@ const getBaseUrlForRequest = () => {
     if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('localhost:')) {
       return '/api';
     }
-    
-    // En producción, SIEMPRE usar URL absoluta (Vercel puede reescribir paths relativos)
-    return 'https://ecommerce-gestion-trabajo.onrender.com/api';
   }
   
-  // Default para SSR/build - usar URL absoluta para producción
-  return 'https://ecommerce-gestion-trabajo.onrender.com/api';
+  // En producción, SIEMPRE usar URL configurada (absoluta)
+  return configuredUrl;
 };
 
 // Llamar una sola vez pero permitir que window se resuelva correctamente
