@@ -362,7 +362,7 @@ const ProductDetail = () => {
                           return;
                         }
                         const installationText = `Quiero solicitar la instalación para el producto *${product.nombre}*${selectedTalla ? ` (Talla: ${selectedTalla})` : ''}${selectedColor ? ` - Color: ${selectedColor}` : ''} - Cantidad: ${qty}`;
-                        const waNumber = '5491130932799'; // WhatsApp number
+                        const waNumber = config.whatsappNumber; // WhatsApp number
                         const wa = `https://wa.me/${waNumber}?text=${encodeURIComponent(installationText)}`;
                         window.open(wa, '_blank');
                       }}

@@ -29,15 +29,17 @@ const transporter = nodemailer.createTransport(smtpConfig);
 console.log('🔑 [Mailer Init] SMTP configured for Ausauth Dev');
 
 // Verify transporter
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('❌ [Mailer] Verification failed:', error);
-    logger.error('Mailer verification failed', { message: error.message });
-  } else {
-    console.log('✅ [Mailer] Server is ready to send emails');
-    logger.info('Mailer ready');
-  }
-});
+if (process.env.NODE_ENV !== 'test') {
+  transporter.verify((error, success) => {
+    if (error) {
+      console.warn('⚠️ [Mailer] Verification failed. Check credentials, but server will continue starting.');
+      logger.warn('Mailer verification failed', { message: error.message });
+    } else {
+      console.log('✅ [Mailer] Server is ready to send emails');
+      logger.info('Mailer ready');
+    }
+  });
+}
 
 // Export transporter with enhanced methods
 const enhancedTransporter = {

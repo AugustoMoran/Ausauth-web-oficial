@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { HiOutlineCode, HiOutlineServer, HiOutlineShieldCheck, HiOutlineCube, HiOutlineLightningBolt, HiOutlineGlobeAlt, HiOutlineChartBar, HiOutlineAcademicCap } from 'react-icons/hi';
+import { Link } from 'react-router-dom';
+import config from '../config/app';
 
 const ServiceCard = ({ icon: Icon, title, description, features, color }) => (
   <motion.div 
@@ -30,30 +32,30 @@ const Services = () => {
   const serviceList = [
     {
       icon: HiOutlineCode,
-      title: "MERN Stack Experts",
-      description: "Desarrollamos ecosistemas digitales escalables aprovechando el poder de React y Node.js para soluciones de alto rendimiento.",
-      features: ["React, Vite & Redux Toolkit", "Node.js & Express.js Backend", "JWT & Secure Auth Protocols", "PWA & Offline-First Apps"],
+      title: "APLICACIONES WEB",
+      description: "Desarrollamos plataformas modernas capaces de gestionar operaciones, usuarios y procesos empresariales a gran escala.",
+      features: ["React", "Vite", "Redux Toolkit", "Node.js", "Express", "JWT", "PWA", "MongoDB"],
       color: "bg-primary-500/20 text-primary-400"
     },
     {
       icon: HiOutlineServer,
-      title: "Architecture & Data",
-      description: "Diseño de modelos relacionales y no relacionales robustos para garantizar la integridad y velocidad de tus datos.",
-      features: ["MongoDB & Mongoose Specialists", "SQL Server Integration", "MVC & Clean Architecture", "Advanced API Logic"],
+      title: "GESTIÓN DE DATOS",
+      description: "Diseñamos estructuras robustas para mantener tu información organizada, segura y disponible cuando la necesites.",
+      features: ["MongoDB", "Mongoose", "SQL Server", "MVC", "Clean Architecture"],
       color: "bg-secondary-500/20 text-secondary-400"
     },
     {
       icon: HiOutlineCube,
-      title: "Testing & DevOps",
-      description: "Garantizamos la estabilidad total de tus productos mediante ciclos de testing automatizado y despliegues continuos.",
-      features: ["Vitest & Playwright E2E", "Docker & Containerization", "CI/CD (Vercel, Fly.io)", "Automated Unit Testing"],
+      title: "CALIDAD Y RENDIMIENTO",
+      description: "Aplicamos procesos de validación y despliegue que garantizan estabilidad, seguridad y continuidad operativa.",
+      features: ["Vitest", "Playwright", "Docker", "CI/CD", "Vercel", "Fly.io"],
       color: "bg-white/10 text-white"
     },
     {
       icon: HiOutlineShieldCheck,
-      title: "Fiscal & Integration",
-      description: "Especialistas en la integración de capas legales y fiscales complejas en flujos de trabajo digitales modernos.",
-      features: ["AFIP / ARCA SDK Experts", "Facturación Electrónica (WSFE)", "Cloudinary Media Mgmt", "Third-party SDK Bridge"],
+      title: "AUTOMATIZACIÓN EMPRESARIAL",
+      description: "Integramos sistemas externos y procesos críticos para reducir tareas manuales y aumentar la productividad.",
+      features: ["AFIP", "ARCA", "WSFE", "Cloudinary", "SDK Integrations", "API Bridges"],
       color: "bg-emerald-500/20 text-emerald-400"
     }
   ];
@@ -72,12 +74,11 @@ const Services = () => {
             <span className="text-[10px] font-black text-primary-400 uppercase tracking-[0.3em]">Full Stack Capabilities</span>
           </motion.div>
           <h1 className="text-6xl md:text-8xl font-black italic tracking-tighter uppercase leading-none mb-8">
-            ESPECTRO DE <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400">TECNOLOGÍA</span>
+            TECNOLOGÍA DETRÁS <br />
+            DE CADA <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400">SOLUCIÓN</span>
           </h1>
           <p className="text-gray-400 text-xl font-medium leading-relaxed">
-            Combinamos ingeniería de precisión con diseño disruptivo para entregar 
-            soluciones que no solo funcionan, sino que lideran mercados.
+            Utilizamos herramientas modernas y probadas para construir plataformas rápidas, seguras y preparadas para crecer junto a tu negocio.
           </p>
         </div>
 
@@ -106,9 +107,14 @@ const Services = () => {
             <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8 max-w-lg">
                 ¿TIENES UN DESAFÍO QUE REQUIERA <span className="text-primary-400">MÁXIMA PRECISIÓN?</span>
             </h2>
-            <Link to="/contacto" className="px-12 py-5 bg-white text-black font-black uppercase italic tracking-tighter rounded-2xl hover:bg-primary-400 transition-all scale-100 hover:scale-105">
+            <a 
+                href={`https://wa.me/${config.whatsappNumber}?text=Hola%20Ausauth!%20Me%20gustaría%20consultar%20por%20un%20servicio%20especializado.`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-12 py-5 bg-white text-black font-black uppercase italic tracking-tighter rounded-2xl hover:bg-primary-400 transition-all scale-100 hover:scale-105"
+            >
                 Iniciar Consultoría
-            </Link>
+            </a>
         </div>
       </div>
     </div>
@@ -117,4 +123,4 @@ const Services = () => {
 
 export default Services;
 
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';

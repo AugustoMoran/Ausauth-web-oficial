@@ -5,8 +5,8 @@ export const projectsApi = baseApi.injectEndpoints({
     getProjects: builder.query({
       query: (params) => ({ url: '/projects', params }),
       providesTags: (result) =>
-        result?.projects
-          ? [...result.projects.map(({ _id }) => ({ type: 'Project', id: _id })), { type: 'Project', id: 'LIST' }]
+        result?.proyectos
+          ? [...result.proyectos.map(({ _id }) => ({ type: 'Project', id: _id })), { type: 'Project', id: 'LIST' }]
           : [{ type: 'Project', id: 'LIST' }],
     }),
     getProject: builder.query({

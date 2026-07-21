@@ -6,6 +6,7 @@ import { selectCurrentUser, selectIsAdmin } from './features/auth/authSlice';
 import useAuthInit from './hooks/useAuthInit';
 import Layout from './components/layout/Layout';
 import SplashScreen from './components/ui/SplashScreen';
+import ScrollToTop from './components/utils/ScrollToTop';
 
 // Pages
 const Home = lazy(() => import('./pages/Home'));
@@ -99,6 +100,7 @@ const App = () => {
       >
         <Suspense fallback={<Loading />}>
           <AuthInitializer />
+          <ScrollToTop />
           <Routes>
       {/* Public routes with layout */}
       <Route element={<Layout />}>

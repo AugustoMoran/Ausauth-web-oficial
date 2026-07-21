@@ -1,4 +1,5 @@
 const cloudinary = require('cloudinary').v2;
+require('dotenv').config(); // Añadido para asegurar carga en sub-procesos
 const logger = require('../utils/logger');
 
 // Initialize cloudinary with environment variables

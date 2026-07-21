@@ -5,8 +5,8 @@ import config from '../../config/app';
 
 const FloatingButtons = () => {
   // Número actualizado por el usuario
-  const waNumber = '5491168393582';
-  const instaUrl = config.instagramUrl || 'https://instagram.com/ausauth.dev';
+  const waNumber = config.whatsappNumber;
+  const instaUrl = config.instagramUrl;
 
   return (
     <div className="fixed bottom-6 right-4 z-[10001] flex flex-col-reverse items-center gap-4 pointer-events-auto">

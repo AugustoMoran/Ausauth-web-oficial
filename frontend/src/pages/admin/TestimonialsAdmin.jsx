@@ -59,7 +59,7 @@ const TestimonialsAdmin = () => {
         const formData = new FormData();
         formData.append('image', imageFile);
         const res = await uploadImage(formData).unwrap();
-        imageData = { url: res.image.url, publicId: res.image.public_id };
+        imageData = { url: res.url, publicId: res.publicId };
       }
 
       const payload = { ...form, imagen: imageData };

@@ -27,8 +27,9 @@ const Footer = () => {
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-4xl font-black text-white tracking-widest uppercase italic leading-none">
-                  AUSAUTH
+                <span className="text-4xl font-black tracking-widest uppercase italic leading-none">
+                  <span className="text-secondary-400">AUS</span>
+                  <span className="text-white">AUTH</span>
                 </span>
                 <span className="text-[10px] font-bold text-gray-600 uppercase tracking-[0.5em] leading-none mt-2">Architecting the future</span>
               </div>
@@ -50,7 +51,7 @@ const Footer = () => {
                 <FaWhatsapp size={24} className="text-gray-400 group-hover:text-green-500 transition-colors" />
               </a>
               <a
-                href="https://www.instagram.com/ausauth.dev"
+                href={config.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-14 h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center hover:bg-primary-500/10 hover:border-primary-500/50 transition-all group"
@@ -59,7 +60,7 @@ const Footer = () => {
                 <FaInstagram size={24} className="text-gray-400 group-hover:text-primary-400 transition-colors" />
               </a>
               <a
-                href="mailto:info@ausauth.dev"
+                href={`mailto:${config.contactEmail}`}
                 className="w-14 h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center hover:bg-secondary-500/10 hover:border-secondary-500/50 transition-all group"
                 aria-label="Email"
               >
@@ -87,21 +88,6 @@ const Footer = () => {
               <li><Link to="/terms" className="text-gray-500 hover:text-white transition-colors">Terms</Link></li>
               <li><Link to="/contact" className="text-gray-500 hover:text-white transition-colors">Contact</Link></li>
             </ul>
-          </div>
-
-          <div className="md:col-span-4 lg:col-span-3">
-            <h3 className="font-black text-white mb-8 italic tracking-widest uppercase text-xs border-l-2 border-primary-400 pl-4">Newsletter</h3>
-            <p className="text-gray-600 text-xs font-bold uppercase tracking-widest mb-4">Arquitectura técnica mensual</p>
-            <div className="flex gap-2">
-              <input 
-                type="email" 
-                placeholder="EMAIL ADDRESS" 
-                className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs w-full focus:outline-none focus:ring-1 focus:ring-primary-400 text-white font-bold"
-              />
-              <button className="bg-primary-400 text-black p-3 rounded-xl hover:scale-105 transition-all">
-                <HiArrowRight size={18} />
-              </button>
-            </div>
           </div>
         </div>
 

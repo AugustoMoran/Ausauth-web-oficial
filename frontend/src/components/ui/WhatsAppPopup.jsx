@@ -96,7 +96,7 @@ const WhatsAppPopup = () => {
         <div className="relative h-44 overflow-hidden group">
           <img
             src={cfg.imagen}
-            alt="Ausauth Dev Agency"
+            alt="Ausauth Agency"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             loading="lazy"
             onError={(e) => { e.target.src = DEFAULT_IMAGE; }}

@@ -15,10 +15,10 @@ const config = {
   storeName: import.meta.env.VITE_STORE_NAME || 'Ausauth',
 
   // Social media / contact (random defaults until configured)
-  whatsappNumber: import.meta.env.VITE_WHATSAPP_NUMBER || '5491100000000',
-  instagramUrl: import.meta.env.VITE_INSTAGRAM_URL || 'https://instagram.com/ausauth',
-  contactEmail: import.meta.env.VITE_CONTACT_EMAIL || 'contacto@ausauth.dev',
-  contactPhone: import.meta.env.VITE_CONTACT_PHONE || '+54 9 11 0000-0000',
+  whatsappNumber: import.meta.env.VITE_WHATSAPP_NUMBER || '5491168393582',
+  instagramUrl: import.meta.env.VITE_INSTAGRAM_URL || 'https://www.instagram.com/ausauth.dev/',
+  contactEmail: import.meta.env.VITE_CONTACT_EMAIL || 'augusto.moran.informatica@gmail.com',
+  contactPhone: import.meta.env.VITE_CONTACT_PHONE || '+54 9 11 6839-3582',
 
   // Logo (optional - null if not configured)
   logoUrl: import.meta.env.VITE_LOGO_URL || '/logo3d.png',

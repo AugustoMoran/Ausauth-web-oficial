@@ -191,5 +191,3 @@ const MyQuotes = () => {
 };
 
 export default MyQuotes;
-
-export default MyQuotes;

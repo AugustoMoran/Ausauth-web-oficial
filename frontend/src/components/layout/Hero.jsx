@@ -29,15 +29,15 @@ const Hero = () => {
             </div>
 
             <h1 className="text-5xl md:text-7xl font-black text-white leading-none mb-6">
-              ARQUITECTURA <br />
+              TRANSFORMAMOS <br />
+              IDEAS EN <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400 italic">
-                DIGITAL
-              </span> DISRUPTIVA
+                SOLUCIONES DIGITALES
+              </span>
             </h1>
 
             <p className="text-gray-400 text-lg md:text-xl max-w-lg mb-8 leading-relaxed">
-              Transformamos visiones complejas en ecosistemas digitales escalables. 
-              Desarrollo de software a medida con estándares de clase mundial.
+              Desde sitios web hasta plataformas empresariales completas. Diseñamos soluciones tecnológicas a medida que ayudan a automatizar procesos, optimizar operaciones y generar resultados reales.
             </p>
 
             <div className="flex flex-wrap gap-4">
@@ -82,15 +82,15 @@ const Hero = () => {
                   <div className="w-12 h-12 rounded-2xl bg-primary-500/20 flex items-center justify-center mb-4 text-primary-400 group-hover:scale-110 transition-transform">
                     <HiOutlineLightningBolt size={24} />
                   </div>
-                  <h3 className="text-white font-bold mb-1 uppercase tracking-tighter italic">Velocidad</h3>
-                  <p className="text-gray-500 text-xs leading-relaxed">Optimizamos cada línea de código para un rendimiento extremo.</p>
+                  <h3 className="text-white font-bold mb-1 uppercase tracking-tighter italic text-sm">Desarrollo Ágil</h3>
+                  <p className="text-gray-500 text-[10px] leading-relaxed">Entregas rápidas y procesos optimizados para lanzar proyectos de forma eficiente.</p>
                 </div>
                 <div className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/10 transition-all group">
                   <div className="w-12 h-12 rounded-2xl bg-secondary-500/20 flex items-center justify-center mb-4 text-secondary-400 group-hover:scale-110 transition-transform">
                     <HiOutlineShieldCheck size={24} />
                   </div>
-                  <h3 className="text-white font-bold mb-1 uppercase tracking-tighter italic">Seguridad</h3>
-                  <p className="text-gray-500 text-xs leading-relaxed">Arquitecturas blindadas bajo estándares de seguridad militar.</p>
+                  <h3 className="text-white font-bold mb-1 uppercase tracking-tighter italic text-sm">Seguridad Empresarial</h3>
+                  <p className="text-gray-500 text-[10px] leading-relaxed">Protección de datos y arquitecturas robustas diseñadas para operar con confianza.</p>
                 </div>
               </div>
               <div className="space-y-4">
@@ -98,15 +98,15 @@ const Hero = () => {
                   <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-4 text-white group-hover:scale-110 transition-transform">
                     <img src="/logooficial.png" alt="Logo" className="w-8 h-8 object-contain" />
                   </div>
-                  <h3 className="text-white font-bold mb-1 uppercase tracking-tighter italic">Ausauth HUB</h3>
-                  <p className="text-gray-500 text-xs leading-relaxed">Centraliza y escala tus servicios desde un solo CORE.</p>
+                  <h3 className="text-white font-bold mb-1 uppercase tracking-tighter italic text-sm">Crecimiento sin límites</h3>
+                  <p className="text-gray-500 text-[10px] leading-relaxed">Soluciones preparadas para acompañar la evolución y expansión de tu empresa.</p>
                 </div>
                 <div className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/10 transition-all group">
                   <div className="w-12 h-12 rounded-2xl bg-primary-500/20 flex items-center justify-center mb-4 text-primary-400 group-hover:scale-110 transition-transform">
                     <HiOutlineCube size={24} />
                   </div>
-                  <h3 className="text-white font-bold mb-1 uppercase tracking-tighter italic">Escalabilidad</h3>
-                  <p className="text-gray-500 text-xs leading-relaxed">Sistemas que crecen orgánicamente con tu modelo de negocio.</p>
+                  <h3 className="text-white font-bold mb-1 uppercase tracking-tighter italic text-sm">Ecosistema Integrado</h3>
+                  <p className="text-gray-500 text-[10px] leading-relaxed">Centraliza usuarios, procesos y servicios en una única plataforma escalable.</p>
                 </div>
               </div>
             </div>

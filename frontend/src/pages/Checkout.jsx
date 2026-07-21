@@ -80,7 +80,7 @@ const Checkout = () => {
 
   const handleContactInstallation = () => {
     // Generar mensaje de WhatsApp para consulta de instalación
-    const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '5491130932799'; // Número por defecto
+    const whatsappNumber = config.whatsappNumber; // Número por defecto
     
     const productList = items
       .map(item => `${item.cantidad}x ${item.producto?.nombre || 'Producto'}`)

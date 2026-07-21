@@ -94,7 +94,7 @@ const ServicesAdmin = () => {
             <h1 className="text-6xl font-black text-white italic tracking-tighter uppercase mb-2">
               Engineering <span className="text-primary-400">Services</span>
             </h1>
-            <p className="text-gray-500 font-bold uppercase tracking-[0.2em] text-xs">Propuesta de Valor de Ausauth Dev Agency</p>
+            <p className="text-gray-500 font-bold uppercase tracking-[0.2em] text-xs">Propuesta de Valor de Ausauth Agency</p>
           </motion.div>
           
           <motion.button

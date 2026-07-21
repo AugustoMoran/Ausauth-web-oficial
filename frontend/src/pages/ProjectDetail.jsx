@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useGetProjectByIdQuery } from "../services/projectsApi";
+import { useGetProjectQuery } from "../services/projectsApi";
 import { motion } from "framer-motion";
 import { 
   HiOutlineChevronLeft, 
@@ -17,7 +17,11 @@ import config from "../config/app";
 const ProjectDetail = () => {
   const { id } = useParams();
   const waNumber = config.whatsappNumber;
-  const { data: project, isLoading, error } = useGetProjectByIdQuery(id);
+  const { data: project, isLoading, error } = useGetProjectQuery(id);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
 
   if (isLoading) return (
     <div className="min-h-screen bg-black flex items-center justify-center">
@@ -82,16 +86,6 @@ const ProjectDetail = () => {
               >
                 <FaWhatsapp size={20} /> Iniciar Consulta
               </a>
-              {project.urlProyecto && (
-                <a 
-                  href={project.urlProyecto}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-white/5 hover:bg-white/10 text-white border border-white/10 px-12 py-6 rounded-2xl font-black flex items-center gap-4 transition-all italic uppercase tracking-widest text-sm"
-                >
-                  <HiOutlineExternalLink size={20} /> Live Demo
-                </a>
-              )}
             </div>
           </motion.div>
 

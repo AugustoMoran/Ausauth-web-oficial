@@ -54,7 +54,7 @@ const Login = () => {
         <div className="bg-white/5 backdrop-blur-3xl border border-white/10 p-10 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
           <div className="text-center mb-12">
             <div className="inline-block p-4 bg-white/5 rounded-3xl border border-white/10 mb-6 group hover:border-primary-400/50 transition-all">
-              <img src="/logooficial.png" alt="Ausauth Dev" className="h-16 w-auto object-contain filter drop-shadow-[0_0_10px_rgba(139,92,246,0.5)] group-hover:scale-110 transition-transform" />
+              <img src="/logooficial.png" alt="Ausauth" className="h-16 w-auto object-contain filter drop-shadow-[0_0_10px_rgba(139,92,246,0.5)] group-hover:scale-110 transition-transform" />
             </div>
             <h1 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none">
               ACCESO <span className="text-primary-400">CORE</span>
@@ -71,7 +71,7 @@ const Login = () => {
                 value={form.email}
                 onChange={handleChange}
                 className="w-full bg-black/50 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:ring-1 focus:ring-primary-400 focus:border-primary-400/50 transition-all text-sm font-bold placeholder:text-gray-700"
-                placeholder="EMAIL@AUSAUTH.DEV"
+                placeholder="EMAIL@AUSAUTH"
                 required
                 autoComplete="email"
               />

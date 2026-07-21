@@ -36,13 +36,6 @@ const getProjects = async ({ page = 1, limit = 12, categoria, search, sort, sinS
   if (cleanSearch.length >= 2) {
     query.$text = { $search: cleanSearch };
   }
-  if (cleanSinStock) {
-    query.stock = { $lte: 0 };
-  } else if (hasCategoryFilter) {
-    // Si se filtra por categoría específica, mostrar solo projectos con stock > 0
-    query.stock = { $gt: 0 };
-  }
-  // Si es 'todas' o vacío, no filtrar por stock (mostrar todos los projectos activos)
 
   // --- Ordenamiento robusto ---
   const sortOptions = {
@@ -101,9 +94,6 @@ const getProjects = async ({ page = 1, limit = 12, categoria, search, sort, sinS
     };
   };
 
-  // --- Logs para depuración ---
-  // console.log('[getProjects] Query:', query, 'Sort:', sortBy, 'Page:', cleanPage, 'Limit:', cleanLimit);
-
   const total = await Project.countDocuments(query);
   let projects;
 
@@ -153,7 +143,7 @@ const getProjects = async ({ page = 1, limit = 12, categoria, search, sort, sinS
   }
 
   return {
-    projects,
+    proyectos: projects,
     page: cleanPage,
     pages: Math.ceil(total / cleanLimit),
     total,
@@ -162,7 +152,7 @@ const getProjects = async ({ page = 1, limit = 12, categoria, search, sort, sinS
 
 const getProjectById = async (id) => {
   console.log(`[DEBUG] getProjectById called with id: ${id}`);
-  const project = await Project.findOne({ _id: id, isActive: true });
+  const project = await Project.findOne({ _id: id, isActive: true }).populate('categoria', 'nombre');
   console.log(`[DEBUG] Query result:`, project ? `Found - ${project.nombre}` : 'Not found');
   if (!project) throw Object.assign(new Error('Projecto no encontrado.'), { statusCode: 404 });
   return project;
@@ -186,10 +176,10 @@ const sanitizeProjectData = (data) => {
   if (!clean.precioOferta) clean.precioOferta = null;
   if (!clean.priceOfferUSD) clean.priceOfferUSD = null;
   if (!clean.priceOfferPesos) clean.priceOfferPesos = null;
-  // Asegurar que al menos uno de los campos de precio esté presente
-  if (!clean.priceUSD && !clean.pricePesos && !clean.precio) {
-    throw Object.assign(new Error('Al menos un precio (USD o ARS) es requerido.'), { statusCode: 400 });
-  }
+  
+  // Asignar precio 0 por defecto si no existen para evitar validación de e-commerce viejo
+  if (clean.precio === undefined) clean.precio = 0;
+  
   // Si incluye instalación pero no tiene zonas, asignar AMBA y CABA por defecto
   if (clean.hasInstallation && (!clean.installationZones || clean.installationZones.length === 0)) {
     clean.installationZones = ['AMBA', 'CABA'];

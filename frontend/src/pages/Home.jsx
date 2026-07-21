@@ -20,9 +20,9 @@ const Home = () => {
         <section className="py-24">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase mb-4">
-              CAPACIDADES <span className="text-primary-400">CORE</span>
+              SOLUCIONES PARA <span className="text-primary-400">IMPULSAR TU EMPRESA</span>
             </h2>
-            <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-sm">Nuestra infraestructura a tu servicio</p>
+            <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-sm">TECNOLOGÍA Y EXPERIENCIA ORIENTADAS A RESULTADOS</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-4 h-auto md:h-[600px]">
@@ -36,9 +36,9 @@ const Home = () => {
                   <div className="w-12 h-12 rounded-2xl bg-primary-500/20 flex items-center justify-center mb-4 text-primary-400 group-hover:scale-110 transition-transform">
                     <HiOutlineCode size={24} />
                   </div>
-                  <h3 className="text-2xl font-black italic uppercase tracking-tighter mb-2">Web Apps & SaaS</h3>
+                  <h3 className="text-2xl font-black italic uppercase tracking-tighter mb-2">PLATAFORMAS WEB A MEDIDA</h3>
                   <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
-                    Plataformas integrales construidas con React, Node.js y arquitecturas cloud de alta disponibilidad.
+                    Desarrollamos sistemas personalizados para optimizar ventas, operaciones y procesos empresariales.
                   </p>
                 </div>
                 <Link to="/proyectos" className="text-primary-400 font-black uppercase tracking-tighter text-xs mt-4 flex items-center gap-2 group-hover:gap-3 transition-all">
@@ -57,8 +57,8 @@ const Home = () => {
                 <div className="w-12 h-12 rounded-2xl bg-secondary-500/20 flex items-center justify-center mb-4 text-secondary-400 group-hover:scale-110 transition-transform">
                   <HiOutlineGlobeAlt size={24} />
                 </div>
-                <h3 className="text-xl font-black italic uppercase tracking-tighter leading-none mb-2">Omnichannel</h3>
-                <p className="text-gray-500 text-xs">Escalabilidad global para negocios digitales.</p>
+                <h3 className="text-xl font-black italic uppercase tracking-tighter leading-none mb-2">EXPERIENCIA CONECTADA</h3>
+                <p className="text-gray-500 text-xs">Integramos todos tus canales digitales para ofrecer una experiencia unificada a clientes y equipos.</p>
               </div>
             </motion.div>
 
@@ -72,15 +72,17 @@ const Home = () => {
                   <HiOutlinePresentationChartBar size={24} />
                 </div>
                 <h3 className="text-2xl font-black italic uppercase tracking-tighter leading-tight mb-4 text-white">
-                  Fiscal & Secure Auth
+                  FACTURACIÓN Y SEGURIDAD
                 </h3>
                 <p className="text-white/70 text-sm mb-6">
-                  Expertos en integraciones con AFIP/ARCA y sistemas de autenticación JWT de doble factor.
+                  Integraciones con AFIP/ARCA, autenticación segura y gestión avanzada de usuarios.
                 </p>
               </div>
-              <div className="w-full h-1/3 bg-black/20 rounded-2xl backdrop-blur-sm border border-white/10 flex flex-col items-center justify-center font-black text-white italic tracking-widest text-xl">
-                <span>AUSAUTH</span>
-                <span className="text-[10px] opacity-50 tracking-[0.5em] mt-2">SECURED API</span>
+              <div className="w-full h-1/3 bg-black/20 rounded-2xl backdrop-blur-sm border border-white/10 flex flex-col items-center justify-center font-black italic tracking-widest text-xl">
+                <span>
+                  <span className="text-secondary-400">AUS</span>
+                  <span className="text-white">AUTH</span>
+                </span>
               </div>
               {/* Animated lines effect could go here */}
             </motion.div>
@@ -94,8 +96,8 @@ const Home = () => {
                 <div className="w-12 h-12 rounded-2xl bg-primary-500/20 flex items-center justify-center mb-4 text-primary-400 group-hover:scale-110 transition-transform">
                   <HiOutlineChip size={24} />
                 </div>
-                <h3 className="text-xl font-black italic uppercase tracking-tighter leading-none mb-2">Automated QA</h3>
-                <p className="text-gray-500 text-xs">Testeo riguroso con Vitest y Playwright.</p>
+                <h3 className="text-xl font-black italic uppercase tracking-tighter leading-none mb-2">CALIDAD GARANTIZADA</h3>
+                <p className="text-gray-500 text-xs">Probamos cada solución para garantizar estabilidad, rendimiento y confiabilidad a largo plazo.</p>
               </div>
             </motion.div>
 
@@ -121,15 +123,15 @@ const Home = () => {
         <section className="py-24 border-t border-white/5">
           <div className="flex items-end justify-between mb-12">
             <div>
-              <p className="text-primary-400 font-bold uppercase tracking-[0.4em] text-[10px] mb-2">Build History</p>
-              <h2 className="text-4xl font-black italic uppercase tracking-tighter">PORTFOLIO <span className="text-gray-600">DE SELECCIÓN</span></h2>
+              <p className="text-primary-400 font-bold uppercase tracking-[0.4em] text-[10px] mb-2">CASOS REALES</p>
+              <h2 className="text-4xl font-black italic uppercase tracking-tighter">PROYECTOS <span className="text-gray-600">DESTACADOS</span></h2>
             </div>
             <Link to="/proyectos" className="group text-white hover:text-primary-400 text-xs font-black uppercase tracking-widest flex items-center gap-3 border-b-2 border-primary-400/20 pb-1 transition-all">
               Ver Archivo <HiArrowRight className="group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {(featuredData?.projects || []).slice(0, 4).map((p) => (
+            {(featuredData?.proyectos || []).slice(0, 4).map((p) => (
               <ProjectCard key={p._id} project={p} />
             ))}
           </div>
@@ -169,12 +171,12 @@ const Home = () => {
         <section className="py-24 pb-32">
           <div className="flex items-end justify-between mb-12">
             <div>
-              <p className="text-secondary-400 font-bold uppercase tracking-[0.4em] text-[10px] mb-2">Latest Deployments</p>
-              <h2 className="text-4xl font-black italic uppercase tracking-tighter">ÚLTIMAS <span className="text-gray-600">IMPLEMENTACIONES</span></h2>
+              <p className="text-secondary-400 font-bold uppercase tracking-[0.4em] text-[10px] mb-2">ÚLTIMAS IMPLEMENTACIONES</p>
+              <h2 className="text-4xl font-black italic uppercase tracking-tighter">SISTEMAS <span className="text-gray-600">RECIENTES</span></h2>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {(newData?.projects || []).slice(0, 4).map((p) => (
+            {(newData?.proyectos || []).slice(0, 4).map((p) => (
               <ProjectCard key={p._id} project={p} />
             ))}
           </div>

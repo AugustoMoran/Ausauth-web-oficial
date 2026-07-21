@@ -54,7 +54,7 @@ const AdminLayout = ({ children }) => {
             </div>
             <div>
               <span className="font-black text-white text-xl tracking-tighter uppercase italic leading-none">Control <span className="text-primary-400">Hub</span></span>
-              <p className="text-[9px] font-bold text-gray-600 uppercase tracking-[0.4em] mt-2">AUSAUTH DEV CORE</p>
+              <p className="text-[9px] font-bold text-gray-600 uppercase tracking-[0.4em] mt-2">AUSAUTH CORE</p>
             </div>
           </div>
         </div>

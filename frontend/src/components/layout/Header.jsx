@@ -141,8 +141,9 @@ const Header = () => {
                 />
               </motion.div>
               <div className="hidden lg:flex flex-col">
-                <span className="text-2xl font-black text-white tracking-widest uppercase italic leading-none">
-                  AUSAUTH
+                <span className="text-2xl font-black tracking-widest uppercase italic leading-none">
+                  <span className="text-secondary-400">AUS</span>
+                  <span className="text-white">AUTH</span>
                 </span>
                 <span className="text-[9px] font-bold text-gray-500 uppercase tracking-[0.4em] leading-none mt-1">Software Architecture</span>
               </div>
@@ -151,8 +152,8 @@ const Header = () => {
 
           {/* Nav Links Desktop */}
           <div className="hidden md:flex items-center gap-8">
-            <Link to="/proyectos" className="text-sm font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Portfolio</Link>
-            <Link to="/servicios" className="text-sm font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Expertise</Link>
+            <Link to="/proyectos" className="text-sm font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">PROYECTOS</Link>
+            <Link to="/servicios" className="text-sm font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">TECNOLOGÍA</Link>
           </div>
 
           {/* Right Section */}

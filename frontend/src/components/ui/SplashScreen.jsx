@@ -111,9 +111,10 @@ const SplashScreen = ({ onComplete }) => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 1 }}
-            className="text-4xl md:text-6xl font-black text-white tracking-[0.2em] uppercase italic"
+            className="text-4xl md:text-6xl font-black tracking-[0.2em] uppercase italic"
           >
-            AUSAUTH<span className="text-primary-400">.DEV</span>
+            <span className="text-secondary-400">AUS</span>
+            <span className="text-white">AUTH</span>
           </motion.h1>
           
           <motion.div

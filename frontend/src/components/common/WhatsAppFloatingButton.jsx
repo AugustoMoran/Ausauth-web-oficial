@@ -35,7 +35,7 @@ const WhatsAppFloatingButton = () => {
       </AnimatePresence>
 
       <motion.a
-        href="https://wa.me/5491168393582?text=Hola!%20Vi%20tu%20web%20y%20me%20gustar%C3%ADa%20consultar%20por%20un%20proyecto."
+        href={`https://wa.me/${config.whatsappNumber}?text=Hola!%20Vi%20tu%20web%20y%20me%20gustar%C3%ADa%20consultar%20por%20un%20proyecto.`}
         target="_blank"
         rel="noopener noreferrer"
         whileHover={{ scale: 1.1 }}

@@ -33,9 +33,7 @@ const EMPTY = {
   resultado: '',
   tecnologias: '',
   categoria: '', 
-  isFeatured: false,
-  urlProyecto: '',
-  urlGithub: ''
+  isFeatured: false
 };
 
 const ProjectsAdmin = () => {
@@ -116,12 +114,17 @@ const ProjectsAdmin = () => {
       for (const file of newImageFiles) {
         const formData = new FormData();
         formData.append('image', file);
-        const uploadRes = await uploadImage(formData).unwrap();
-        await addImage({ 
-          id: projectId, 
-          url: uploadRes.image.url, 
-          publicId: uploadRes.image.public_id 
-        }).unwrap();
+        try {
+          const uploadRes = await uploadImage(formData).unwrap();
+          await addImage({ 
+            id: projectId, 
+            url: uploadRes.url, 
+            publicId: uploadRes.publicId 
+          }).unwrap();
+        } catch (uploadErr) {
+          console.error('Error subiendo imagen individual:', uploadErr);
+          toast.error(`Error al subir la imagen ${file.name}`);
+        }
       }
 
       setForm(EMPTY);
@@ -149,9 +152,7 @@ const ProjectsAdmin = () => {
       resultado: proj.resultado || '',
       tecnologias: proj.tecnologias?.join(', ') || '',
       categoria: proj.categoria?._id || proj.categoria || '',
-      isFeatured: proj.isFeatured || false,
-      urlProyecto: proj.urlProyecto || '',
-      urlGithub: proj.urlGithub || ''
+      isFeatured: proj.isFeatured || false
     });
     setNewImageFiles([]);
     setNewImagePreviews([]);
@@ -176,7 +177,7 @@ const ProjectsAdmin = () => {
             <h1 className="text-5xl font-black text-white italic tracking-tighter uppercase mb-2">
               Gestión de <span className="text-primary-400">Proyectos</span>
             </h1>
-            <p className="text-gray-500 font-bold uppercase tracking-[0.2em] text-xs">Portafolio de Ausauth Dev Agency</p>
+            <p className="text-gray-500 font-bold uppercase tracking-[0.2em] text-xs">Portafolio de Ausauth Agency</p>
           </motion.div>
           
           <motion.button
@@ -243,7 +244,7 @@ const ProjectsAdmin = () => {
                 layout
                 className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
               >
-                {data?.projects?.map((proj, idx) => (
+                {(data?.proyectos || data?.projects)?.map((proj, idx) => (
                   <motion.div 
                     key={proj._id}
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -435,35 +436,6 @@ const ProjectsAdmin = () => {
                         onChange={(e) => setForm({ ...form, solucion: e.target.value })}
                         className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-medium focus:border-primary-400 outline-none resize-none"
                       />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-black text-gray-500 mb-3 uppercase tracking-[0.2em] italic">Live Demo</label>
-                        <div className="relative">
-                          <HiOutlineExternalLink className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
-                          <input 
-                            type="url"
-                            placeholder="https://..."
-                            value={form.urlProyecto}
-                            onChange={(e) => setForm({ ...form, urlProyecto: e.target.value })}
-                            className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-xs font-bold focus:border-primary-400 outline-none"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-black text-gray-500 mb-3 uppercase tracking-[0.2em] italic">Source Code</label>
-                        <div className="relative">
-                          <HiOutlineCode className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
-                          <input 
-                            type="url"
-                            placeholder="GitHub Link"
-                            value={form.urlGithub}
-                            onChange={(e) => setForm({ ...form, urlGithub: e.target.value })}
-                            className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-xs font-bold focus:border-primary-400 outline-none"
-                          />
-                        </div>
-                      </div>
                     </div>
 
                     <div className="pt-4">
