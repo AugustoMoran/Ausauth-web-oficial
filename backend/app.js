@@ -13,14 +13,13 @@ const errorHandler = require('./src/middleware/errorHandler');
 // Routes
 const authRoutes = require('./src/routes/auth');
 const userRoutes = require('./src/routes/users');
-const productRoutes = require('./src/routes/products');
+const projectRoutes = require('./src/routes/projects');
+const serviceRoutes = require('./src/routes/services');
+const testimonialRoutes = require('./src/routes/testimonials');
+const faqRoutes = require('./src/routes/faqs');
 const categoryRoutes = require('./src/routes/categories');
-const orderRoutes = require('./src/routes/orders');
-const cartRoutes = require('./src/routes/cart');
-const couponRoutes = require('./src/routes/coupons');
 const uploadRoutes = require('./src/routes/upload');
 const webhookRoutes = require('./src/routes/webhook');
-const bannerRoutes = require('./src/routes/banners');
 const popupRoutes = require('./src/routes/popup');
 const chatRoutes = require('./src/routes/chat');
 const testRoutes = require('./src/routes/test');
@@ -30,8 +29,6 @@ const locationRoutes = require('./src/routes/location');
 const quoteRoutes = require('./src/routes/quote');
 const quotesRoutes = require('./src/routes/quotes');
 const adminUserRoutes = require('./src/routes/admin/users');
-const adminRecommendationRoutes = require('./src/routes/admin/recommendations');
-const recommendationRoutes = require('./src/routes/recommendations');
 const settingsRoutes = require('./src/routes/settings');
 const downloadRoutes = require('./src/routes/downloads');
 
@@ -55,8 +52,8 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'http://localhost:5000',
-  'https://www.sausansystem.com.ar',
-  'https://sausansystem.com.ar',
+  'https://www.ausauth.dev',
+  'https://ausauth.dev',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
@@ -107,14 +104,13 @@ app.use('/api', apiLimiter);
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/products', productRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/testimonials', testimonialRoutes);
+app.use('/api/faqs', faqRoutes);
 app.use('/api/categories', categoryRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/cart', cartRoutes);
-app.use('/api/coupons', couponRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/webhook', webhookRoutes);
-app.use('/api/banners', bannerRoutes);
 app.use('/api/popup', popupRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/test', testRoutes);
@@ -124,8 +120,6 @@ app.use('/api/location', locationRoutes);
 app.use('/api/quote', quoteRoutes);
 app.use('/api/quotes', quotesRoutes);
 app.use('/api/admin/users', adminUserRoutes);
-app.use('/api/admin/recommendations', adminRecommendationRoutes);
-app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/downloads', downloadRoutes);
 

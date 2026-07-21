@@ -4,7 +4,7 @@
  * Simple fetch-based service for the chat widget.
  */
 
-const BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const BASE_URL = 'http://localhost:5001/api';
 
 export async function sendChatMessage(message, sessionId, conversationHistory = []) {
   const res = await fetch(`${BASE_URL}/chat`, {

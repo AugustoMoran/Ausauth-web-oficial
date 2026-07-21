@@ -7,7 +7,7 @@ const smtpConfig = {
   port: parseInt(process.env.SMTP_PORT || '587', 10),
   secure: process.env.SMTP_PORT === '465' ? true : false, // 465=TLS (secure:true), 587=STARTTLS (secure:false)
   auth: {
-    user: process.env.SMTP_USER || process.env.EMAIL_FROM || 'sausansystem@gmail.com',
+    user: process.env.SMTP_USER || process.env.EMAIL_FROM || 'info@ausauth.dev',
     pass: process.env.SMTP_PASS || 'eflo zqxv fyft yvct', // Gmail app password
   },
   connectionTimeout: 10000, // 10 seconds
@@ -26,16 +26,16 @@ console.log('🔑 [Mailer Init] SMTP config:', {
 
 const transporter = nodemailer.createTransport(smtpConfig);
 
-console.log('🔑 [Mailer Init] Gmail SMTP configured for sausansystem@gmail.com');
+console.log('🔑 [Mailer Init] SMTP configured for Ausauth Dev');
 
 // Verify transporter
 transporter.verify((error, success) => {
   if (error) {
-    console.error('❌ [Gmail] Verification failed:', error);
-    logger.error('Gmail mailer verification failed', { message: error.message });
+    console.error('❌ [Mailer] Verification failed:', error);
+    logger.error('Mailer verification failed', { message: error.message });
   } else {
-    console.log('✅ [Gmail] Server is ready to send emails from sausansystem@gmail.com');
-    logger.info('Gmail mailer ready');
+    console.log('✅ [Mailer] Server is ready to send emails');
+    logger.info('Mailer ready');
   }
 });
 
@@ -43,12 +43,12 @@ transporter.verify((error, success) => {
 const enhancedTransporter = {
   sendMail: async (options) => {
     try {
-      console.log('📧 [Gmail] Preparing email to:', options.to);
+      console.log('📧 [Mailer] Preparing email to:', options.to);
       
-      const fromEmail = options.from || 'sausansystem@gmail.com';
+      const fromEmail = options.from || 'info@ausauth.dev';
       
       const mailOptions = {
-        from: `Sausansystem <${fromEmail}>`,
+        from: `Ausauth Dev <${fromEmail}>`,
         to: options.to,
         subject: options.subject,
         html: options.html,

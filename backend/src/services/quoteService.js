@@ -149,9 +149,9 @@ const sendQuoteEmail = async (quote, pdfBuffer) => {
         </div>
         
         <div class="footer">
-          <p>SAUSANSYSTEM</p>
-          <p>info@sausansystem.com | +54 9 11 6839-3582</p>
-          <p>© 2026 SAUSANSYSTEM. Todos los derechos reservados.</p>
+          <p>AUSAUTH DEV</p>
+          <p>info@ausauth.dev | www.ausauth.dev</p>
+          <p>© 2026 AUSAUTH DEV. Todos los derechos reservados.</p>
         </div>
       </div>
     </body>
@@ -159,9 +159,9 @@ const sendQuoteEmail = async (quote, pdfBuffer) => {
   `;
 
   const mailOptions = {
-    from: process.env.EMAIL_FROM || process.env.SMTP_USER || 'noreply@sausansystem.com',
+    from: process.env.EMAIL_FROM || process.env.SMTP_USER || 'info@ausauth.dev',
     to: quote.client.email,
-    subject: `Presupuesto #${quote.numero} - SAUSANSYSTEM`,
+    subject: `Presupuesto #${quote.numero} - AUSAUTH DEV`,
     html: emailTemplate,
     attachments: [
       {

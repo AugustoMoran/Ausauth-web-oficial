@@ -111,7 +111,7 @@ const sendQuoteAcceptanceToAdmin = async (quote) => {
   ` : '';
 
   await transporter.sendMail({
-    from: `"Sistema SAUSANSYSTEM" <${process.env.EMAIL_FROM}>`,
+    from: `"Sistema AUSAUTH DEV" <${process.env.EMAIL_FROM}>`,
     to: process.env.ADMIN_EMAIL,
     subject: `✅ Presupuesto ${quote.numero} ACEPTADO por ${clientName}`,
     html: `
@@ -183,7 +183,7 @@ const sendQuotePaymentConfirmation = async (quote) => {
   ` : '';
 
   await transporter.sendMail({
-    from: `"SAUSANSYSTEM" <${process.env.EMAIL_FROM}>`,
+    from: `"AUSAUTH DEV" <${process.env.EMAIL_FROM}>`,
     to: clientEmail,
     subject: `✅ Pago confirmado - Presupuesto ${quote.numero}`,
     html: `
@@ -225,8 +225,8 @@ const sendQuotePaymentConfirmation = async (quote) => {
         <p style="color:#475569;margin-top:20px">Nuestro equipo procesará tu pedido en breve y te contactaremos para confirmar los detalles de entrega.</p>
         
         <p style="color:#64748b;font-size:12px;margin-top:30px;border-top:1px solid #e2e8f0;padding-top:15px">
-          <strong>SAUSANSYSTEM</strong><br/>
-          info@sausansystem.com | +54 9 11 6839-3582
+          <strong>AUSAUTH DEV</strong><br/>
+          info@ausauth.dev | www.ausauth.dev
         </p>
       </div>
     `,
@@ -255,7 +255,7 @@ const sendQuotePaymentToAdmin = async (quote) => {
   ` : '';
 
   await transporter.sendMail({
-    from: `"Sistema SAUSANSYSTEM" <${process.env.EMAIL_FROM}>`,
+    from: `"Sistema AUSAUTH DEV" <${process.env.EMAIL_FROM}>`,
     to: process.env.ADMIN_EMAIL,
     subject: `💰 Presupuesto ${quote.numero} - PAGO APROBADO`,
     html: `

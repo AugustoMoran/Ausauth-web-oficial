@@ -35,9 +35,14 @@ const validateConfig = () => {
       if (required || critical) {
         missingVars.push({
           name,
-          critical: critical || false,
+          critical: (critical && process.env.NODE_ENV !== 'development') || false,
         });
-        logger.error(`❌ MISSING: ${name}`, { critical });
+        
+        if (process.env.NODE_ENV === 'development') {
+          logger.warn(`⚠️ MISSING: ${name} (Optional in dev)`);
+        } else {
+          logger.error(`❌ MISSING: ${name}`, { critical });
+        }
       }
       return;
     }

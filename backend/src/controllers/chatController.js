@@ -1,398 +1,71 @@
 /**
  * src/controllers/chatController.js
  *
- * Integrates the AI Engine with this project's MongoDB Product model.
- *
- * DESIGN DECISION: This controller is the only place that knows about both
- * the engine AND the database. It acts as the adapter layer:
- *
- *   MongoDB Product (Spanish fields) ──► normalised dependency functions ──► AI Engine
- *
- * The engine receives plain functions — it never imports mongoose or Product directly.
+ * Integrates the AI Engine with this project's MongoDB Service and Project models.
+ * REFACTORED: Now uses a real AI model (Gemini) instead of mock logic.
  */
 
-const Product = require('../models/Product');
-const chatIntentService = require('../services/chatIntentService');
-
-// Simple fuzzy matching utility (Levenshtein distance based)
-const fuzzyMatch = (term, candidates, threshold = 0.6) => {
-  const levenshtein = (a, b) => {
-    const matrix = [];
-    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-    for (let i = 1; i <= b.length; i++) {
-      for (let j = 1; j <= a.length; j++) {
-        matrix[i][j] = b.charAt(i - 1) === a.charAt(j - 1)
-          ? matrix[i - 1][j - 1]
-          : Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
-      }
-    }
-    return matrix[b.length][a.length];
-  };
-  const maxLen = Math.max(term.length, ...candidates.map(c => c.length));
-  return candidates.filter(c => {
-    const distance = levenshtein(term, c);
-    const similarity = 1 - (distance / maxLen);
-    return similarity >= threshold;
-  });
-};
-
-// ─── Engine initialisation (simplified mock, real ai-ecommerce-engine not deployed) ─
-
-// Mock AI Engine - when the real engine is deployed, replace this block
-const engine = {
-  getStats: () => ({ requestsProcessed: 0, cacheSizeBytes: 0, status: 'mock' }),
-  clearCache: () => console.log('[MOCK] Cache cleared'),
-  processQuery: async (msg) => ({ type: 'search', results: [] }),
-};
-
-
-// ─── Dependency adapter ───────────────────────────────────────────────────────
-
-// Strip accents for accent-insensitive comparison (pantalon matches Pantalón)
-function sa(str) {
-  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-}
-
-function buildDependencies() {
-  const getProducts = async (query, opts = {}) => {
-    const limit = Math.min(opts.limit || 10, 50);
-
-    console.log('[getProducts] Query:', query, 'Limit:', limit);
-
-    const ofertaRegex = /(oferta|descuento|promocion|promoción|rebaja|sale|liquidación)/i;
-    const filtrarOferta = ofertaRegex.test(query);
-
-    if (!query || query.trim().length === 0 || query.toLowerCase().match(/^(todos?|catalogo|catálogo|lista)$/i)) {
-      let all = await Product.find({ isActive: true, deletedAt: null })
-        .select('_id nombre descripcion precio precioOferta stock imagenes tags vendidos isActive')
-        .populate('categoria', 'nombre')
-        .limit(limit)
-        .lean();
-      if (filtrarOferta) all = all.filter(p => p.precioOferta != null);
-      return all;
-    }
-
-    if (query.trim().length < 2) return [];
-
-    const searchTerms = sa(query.toLowerCase()).split(/\s+/).filter(t => t.length > 0);
-    const expandedTerms = [];
-    for (const term of searchTerms) {
-      expandedTerms.push(term);
-      if (term.endsWith('s') && term.length > 3) expandedTerms.push(term.slice(0, -1));
-      if (!term.endsWith('s')) expandedTerms.push(term + 's');
-    }
-
-    console.log('[getProducts] Expanded search terms:', expandedTerms);
-
-    let allProducts = await Product.find({ isActive: true, deletedAt: null })
-      .select('_id nombre descripcion precio precioOferta stock imagenes tags vendidos isActive')
-      .populate('categoria', 'nombre')
-      .lean();
-
-    if (filtrarOferta) allProducts = allProducts.filter(p => p.precioOferta != null);
-
-    const allProductNames = allProducts.map(p => sa(p.nombre.toLowerCase()));
-    const fuzzyExpandedTerms = expandedTerms.flatMap(term => {
-      const m = fuzzyMatch(term, allProductNames, 0.6);
-      return m.length > 0 ? m : [term];
-    });
-
-    console.log('[getProducts] Fuzzy-expanded terms:', fuzzyExpandedTerms);
-
-    return allProducts.filter(p => {
-      const normNombre = sa(p.nombre.toLowerCase());
-      const normDesc   = p.descripcion ? sa(p.descripcion.toLowerCase()) : '';
-      const n = fuzzyExpandedTerms.some(t => normNombre.includes(t));
-      const d = normDesc && fuzzyExpandedTerms.some(t => normDesc.includes(t));
-      const g = p.tags && fuzzyExpandedTerms.some(t =>
-        p.tags.some(tag => sa(tag.toLowerCase()).includes(t))
-      );
-      const c = p.categoria && sa((p.categoria.nombre || '').toLowerCase()).includes(fuzzyExpandedTerms[0]);
-      return n || d || g || c;
-    }).slice(0, limit);
-  };
-
-  const getProductById = async (id) =>
-    Product.findOne({ _id: id, isActive: true, deletedAt: null }).populate('categoria', 'nombre').lean();
-
-  const searchProductsSemantic = async (query, opts = {}) => getProducts(query, opts);
-
-  const getAvailableProducts = async (limit = 50) => {
-    try {
-      const products = await Product.find({ isActive: true, deletedAt: null })
-        .select('_id nombre precio precioOferta stock imagenes tags vendidos')
-        .populate('categoria', 'nombre')
-        .limit(limit)
-        .lean();
-      return products.map(p => ({
-        id: p._id,
-        nombre: p.nombre,
-        precio: p.precioOferta || p.precio,
-        stock: p.stock,
-        tags: p.tags || [],
-        categoria: p.categoria?.nombre,
-      }));
-    } catch (err) {
-      return [];
-    }
-  };
-
-  return { getProducts, getProductById, searchProductsSemantic, getAvailableProducts };
-}
-
-// ─── Route handlers ───────────────────────────────────────────────────────────
+const Service = require('../models/Service');
+const Project = require('../models/Project');
+const FAQ     = require('../models/FAQ');
+const aiService = require('../services/aiService');
 
 async function handleChat(req, res) {
-  const { message, context = {} } = req.body;
+  try {
+    const { message, sessionId, conversationHistory = [] } = req.body;
 
-  if (!message || typeof message !== 'string' || message.trim().length === 0) {
-    return res.status(400).json({ error: 'El campo "message" es requerido.' });
-  }
-
-  const dependencies = buildDependencies();
-
-  // Fetch all active products (with imagenes) for price-sort operations
-  const allActive = await Product.find({ isActive: true, deletedAt: null })
-    .select('_id nombre precio precioOferta stock imagenes tags vendidos')
-    .populate('categoria', 'nombre')
-    .lean();
-
-  const msg = message.trim();
-
-  // Helper: DB product → outgoing JSON shape
-  function toOut(p) {
-    const id    = String(p._id || p.id || '').trim();
-    const name  = String(p.nombre || p.name || '').trim();
-    const price = Number(p.precioOferta || p.precio || p.price || 0) || 0;
-    const image = (p.imagenes && p.imagenes[0] && p.imagenes[0].url) || p.image || '';
-    const url   = p.url || (id ? '/producto/' + id : '');
-    return { id, name, price, image, url };
-  }
-
-  // Normalize common typos/variants before intent detection (also strip accents)
-  const msgNorm = sa(msg
-    .toLowerCase()
-    .replace(/\bvermudas?\b/g, 'bermuda')
-    .replace(/\bpolo[s]?\b/g, 'remera')
-    .replace(/\btops?\b/g, 'remera')
-    .replace(/\btelefono[s]?\b/g, 'celular')
-    .replace(/\bteléfono[s]?\b/g, 'celular')
-    .replace(/\bzapatillas?\b/g, 'zapatilla'));
-
-  // ── Special intents (non-product): greeting, orders, installation, jobs, etc. ─
-  // Checked before the product-search chain so they always take priority.
-  // Returns null if no special intent matched → falls through to existing logic.
-  const specialResponse = chatIntentService.detectSpecialIntent(msg, msgNorm, context);
-  if (specialResponse) return res.json(specialResponse);
-
-  // Known product category keywords (for category-scoped price filtering and honest "not found")
-  const PRODUCT_KEYWORDS = [
-    'remera', 'remeras', 'camiseta', 'camisetas',
-    'pantalon', 'pantalones', 'jean', 'jeans', 'jogger', 'jogging', 'calza',
-    'zapatilla', 'zapatillas', 'zapato', 'zapatos', 'bota', 'botas', 'calzado',
-    'buzo', 'buzos', 'campera', 'camperas', 'rompeviento', 'parka',
-    'short', 'shorts', 'bermuda', 'bermudas',
-    'gorra', 'gorras', 'medias', 'mochila', 'mochilas', 'rinonera',
-    'camisa', 'camisas', 'vestido', 'vestidos', 'abrigo', 'abrigos', 'chaleco',
-    'libro', 'libros', 'lapicera', 'lapiceras', 'goma', 'regla', 'tijera',
-    'celular', 'celulares', 'electronico', 'electronicos',
-    'accesorio', 'accesorios', 'bolso', 'bolsos', 'cartera', 'carteras',
-    'perfume', 'perfumes', 'crema', 'shampoo',
-  ];
-
-  function extractProductKeyword(text) {
-    for (const kw of PRODUCT_KEYWORDS) {
-      if (new RegExp('\\b' + kw + '\\b').test(text)) return kw;
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      return res.status(400).json({ error: 'El mensaje es requerido.' });
     }
-    return null;
+
+    // 1. Obtener contexto (Servicios, Proyectos, FAQs)
+    const [services, projects, faqs] = await Promise.all([
+      Service.find({ habilitado: true }).select('titulo descripcion beneficios -_id').lean(),
+      Project.find({ isActive: true }).select('nombre descripcion solucion tecnologas -_id').limit(8).lean(),
+      FAQ.find().select('question answer -_id').lean()
+    ]);
+
+    // 2. Delegar a la IA
+    const aiResponseText = await aiService.generateResponse(message, { 
+      services, 
+      projects,
+      faqs,
+      history: conversationHistory 
+    });
+
+    // 3. Responder
+    return res.json({
+      text: aiResponseText,
+      intent: 'ai_consultation',
+      sessionId: sessionId || 'default',
+      actions: [
+        { label: 'Consultar por WhatsApp', url: 'https://wa.me/5491168393582', type: 'whatsapp' },
+        { label: 'Ver mis proyectos', url: '/proyectos', type: 'link' },
+        { label: 'Solicitar Presupuesto', url: '/contacto', type: 'link' }
+      ]
+    });
+  } catch (error) {
+    console.error('❌ Error en handleChat:', error);
+    return res.json({
+      text: 'Disculpa, estoy teniendo dificultades técnicas. Augusto Morán puede ayudarte personalmente por WhatsApp en este mismo momento.',
+      intent: 'error_fallback',
+      actions: [
+        { label: 'Hablar con Augusto', url: 'https://wa.me/541176045100', type: 'whatsapp' }
+      ]
+    });
   }
-
-  const productKeyword = extractProductKeyword(msgNorm);
-
-  // ── Dynamic category match (from DB keywords) ──────────────────────────────
-  // Used as fallback when no static productKeyword matched and getProducts finds
-  // nothing: we retry the search using the matched category name.
-  // Non-blocking: awaited lazily only when needed (see generic search branch).
-  let _matchedCat = null; // resolved on demand
-  const getMatchedCat = async () => {
-    if (_matchedCat === undefined) return null;
-    if (_matchedCat !== null) return _matchedCat;
-    _matchedCat = await chatIntentService.matchCategory(msgNorm);
-    return _matchedCat;
-  };
-
-  // Pluralize (Spanish rules: ends in vowel → +s, ends in consonant → +es, already plural → keep)
-  function pluralize(word) {
-    if (word.endsWith('s')) return word;
-    const vowels = ['a','e','i','o','u','á','é','í','ó','ú'];
-    return vowels.includes(word[word.length - 1]) ? word + 's' : word + 'es';
-  }
-
-  // ── Intent flags ────────────────────────────────────────────────────────────
-  const isAvoid     = /\bno (lo m[aá]s barato|m[aá]s barato|barat[ao])\b/i.test(msg);
-  const isPriceLow  = !isAvoid && /\b(lo m[aá]s barato|m[aá]s barato|de menor (valor|precio)|m[aá]s econ[oó]mico|barat[ao]s?|econ[oó]mic[ao]s?|m[aá]s barat[ao])\b/i.test(msg);
-  const isPriceHigh = /\b(lo m[aá]s caro|m[aá]s caro|m[aá]s car[ao]|caro|costoso|premium)\b/i.test(msg);
-  const isGift      = /\b(regalar|regalo|regalos|de regalo|para regalar)\b/i.test(msg);
-  const isCatalog   = /\b(qu[eé] tienen|qu[eé] tien[eé]s|qu[eé] hay|disponible|cat[aá]logo|mostrame todo|todo lo que tienen|qu[eé] venden|qu[eé] ofrecen|tenés algo|tienen algo)\b/i.test(msg);
-  const isRecommend = /\b(recomend|suger|qu[eé] me d[aá]s|qu[eé] me mostr[aá]s|qu[eé] me suger[ií]s)\b/i.test(msg);
-  const isCompare   = /\b(compar[aá]|versus|vs\.?)\b/i.test(msg);
-
-  let selected = [];
-  let intent   = 'unknown';
-  let text     = '';
-
-  // ── 1. Avoid cheapest ──────────────────────────────────────────────────────
-  if (isAvoid) {
-    const sorted = allActive.slice()
-      .sort((a, b) => (Number(a.precioOferta||a.precio||Infinity)) - (Number(b.precioOferta||b.precio||Infinity)));
-    selected = sorted.slice(1, 5);
-    intent   = 'avoid_cheapest';
-    text     = selected.length ? 'Aca van opciones por encima de la mas barata:' : 'No encontre alternativas';
-
-  // ── 2. Category + price ("la remera mas barata") ──────────────────────────
-  } else if ((isPriceLow || isPriceHigh) && productKeyword) {
-    const results = await dependencies.getProducts(productKeyword, { limit: 20 });
-    if (results.length === 0) {
-      return res.json({
-        text: 'No tenemos ' + pluralize(productKeyword) + ' en este momento',
-        products: [],
-        intent: 'no_results',
-        actions: [],
-      });
-    }
-    results.sort((a, b) => isPriceLow
-      ? (Number(a.precioOferta||a.precio||Infinity)) - (Number(b.precioOferta||b.precio||Infinity))
-      : (Number(b.precioOferta||b.precio||0))       - (Number(a.precioOferta||a.precio||0)));
-    const wantsOne = isPriceLow
-      ? /\blo m[aá]s barato\b|\bm[aá]s barat[ao]\b/i.test(msg)
-      : /\blo m[aá]s caro\b|\bm[aá]s car[ao]\b/i.test(msg);
-    selected = results.slice(0, wantsOne ? 1 : 3);
-    intent   = isPriceLow ? 'filter_price_low' : 'filter_price_high';
-    const adj = isPriceLow
-      ? (wantsOne ? 'la mas barata' : 'las mas baratas')
-      : (wantsOne ? 'la mas cara'   : 'las mas caras');
-    text = 'Aca ' + (wantsOne ? 'esta' : 'estan') + ' ' + adj + ' en ' + productKeyword + ':';
-
-  // ── 3. Global price low ────────────────────────────────────────────────────
-  } else if (isPriceLow) {
-    const sorted = allActive.slice()
-      .sort((a, b) => (Number(a.precioOferta||a.precio||Infinity)) - (Number(b.precioOferta||b.precio||Infinity)));
-    const wantsOne = /\blo m[aá]s barato\b/i.test(msg);
-    selected = sorted.slice(0, wantsOne ? 1 : 3);
-    intent   = 'filter_price_low';
-    text     = selected.length
-      ? (wantsOne ? 'Aca esta el mas barato:' : 'Aca estan las opciones mas economicas:')
-      : 'No encontre productos';
-
-  // ── 4. Global price high ───────────────────────────────────────────────────
-  } else if (isPriceHigh) {
-    const sorted = allActive.slice()
-      .sort((a, b) => (Number(b.precioOferta||b.precio||0)) - (Number(a.precioOferta||a.precio||0)));
-    const wantsOne = /\blo m[aá]s caro\b/i.test(msg);
-    selected = sorted.slice(0, wantsOne ? 1 : 3);
-    intent   = 'filter_price_high';
-    text     = selected.length
-      ? (wantsOne ? 'Aca esta el mas caro:' : 'Las opciones mas premium:')
-      : 'No encontre productos';
-
-  // ── 5. Gift recommendations ────────────────────────────────────────────────
-  } else if (isGift) {
-    const sorted = allActive.slice().sort((a, b) => Number(b.vendidos||0) - Number(a.vendidos||0));
-    selected = sorted.slice(0, 4);
-    intent   = 'recommend';
-    text     = selected.length ? 'Para regalar, te recomiendo estas opciones populares:' : 'No encontre productos';
-
-  // ── 6. Catalog browse ("que tienen disponible?") ──────────────────────────
-  } else if (isCatalog) {
-    const sorted = allActive.slice().sort((a, b) => Number(b.vendidos||0) - Number(a.vendidos||0));
-    selected = sorted.slice(0, 4);
-    intent   = 'catalog';
-    text     = selected.length ? 'Aca van algunos de nuestros productos mas populares:' : 'No tenemos productos disponibles por el momento';
-
-  // ── 7. General recommendation ─────────────────────────────────────────────
-  } else if (isRecommend) {
-    const sorted = allActive.slice().sort((a, b) => Number(b.vendidos||0) - Number(a.vendidos||0));
-    selected = sorted.slice(0, 4);
-    intent   = 'recommend';
-    text     = selected.length ? 'Te dejo las opciones mas populares:' : 'No encontre productos';
-
-  // ── 8. Compare ────────────────────────────────────────────────────────────
-  } else if (isCompare) {
-    const results = await dependencies.getProducts(msg, { limit: 3 });
-    selected = results.length ? results : allActive.slice()
-      .sort((a, b) => (Number(a.precioOferta||a.precio||Infinity)) - (Number(b.precioOferta||b.precio||Infinity)))
-      .slice(0, 3);
-    intent   = 'compare';
-    text     = selected.length ? 'Compara estas opciones:' : 'No encontre productos para comparar';
-
-  // ── 9. Generic search ─────────────────────────────────────────────────────
-  } else {
-    const results = await dependencies.getProducts(msg, { limit: 4 });
-    if (results.length > 0) {
-      selected = results;
-      intent   = 'search';
-      text     = 'Encontre estos productos:';
-    } else {
-      // No direct match → try DB category keywords as fallback query
-      const matchedCat = await getMatchedCat();
-      const catResults = matchedCat
-        ? await dependencies.getProducts(matchedCat.nombre, { limit: 4 })
-        : [];
-
-      if (catResults.length > 0) {
-        selected = catResults;
-        intent   = 'category_search';
-        text     = `Estos son productos de la categoría "${matchedCat.nombre}":`;
-      } else if (productKeyword) {
-        // Specific product searched but not in catalog → honest answer
-        return res.json({
-          text: 'No tenemos ' + pluralize(productKeyword) + ' en este momento',
-          products: [],
-          intent: 'no_results',
-          actions: [],
-        });
-      } else {
-        // Vague / greeting / gibberish → show popular as soft catalog
-        const sorted = allActive.slice().sort((a, b) => Number(b.vendidos||0) - Number(a.vendidos||0));
-        selected = sorted.slice(0, 3);
-        intent   = selected.length ? 'catalog' : 'no_results';
-        text     = selected.length ? 'Aca van algunos de nuestros productos mas populares:' : 'No encontre productos con ese criterio';
-      }
-    }
-  }
-
-  if (selected.length === 0) {
-    return res.json({ text: 'No encontre productos con ese criterio', products: [], intent: 'no_results', actions: [] });
-  }
-
-  const outProducts = selected.slice(0, 4).map(toOut);
-  const actions = outProducts.map(p => ({ type: 'view_product', label: 'Ver ' + p.name, url: p.url }));
-
-  // context field allows the frontend to send lastIntent back in the next turn
-  return res.json({ text, products: outProducts, intent, actions, context: { lastIntent: intent } });
 }
 
-/**
- * GET /api/chat/stats
- */
-function getChatStats(req, res) {
-  res.json(engine.getStats());
+async function getChatStats(req, res) {
+  res.json({ status: 'active', engine: 'Gemini 3 Flash (Preview)' });
 }
 
-/**
- * GET /api/chat/analytics
- */
-function getChatAnalytics(req, res) {
-  res.json(analyticsPlugin.getReport());
+async function getChatAnalytics(req, res) {
+  res.json({ totalInteractions: 0 });
 }
 
-/**
- * DELETE /api/chat/cache
- */
-function clearChatCache(req, res) {
-  engine.clearCache();
-  res.json({ message: 'Cache del chat limpiado correctamente.' });
+async function clearChatCache(req, res) {
+  res.json({ success: true });
 }
 
 module.exports = {
