@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 
 // Use full backend URL - in production, this comes from the environment
 // For Hostinger production build, set: VITE_API_URL=https://ecommerce-gestion-trabajo.onrender.com/api
-const API_URL = process.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.VITE_API_URL || 'http://localhost:5001/api';
 
 export default defineConfig({
   plugins: [react()],
@@ -14,7 +14,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:5001',
         changeOrigin: true,
         secure: false,
         cookieDomainRewrite: 'localhost',

@@ -4,15 +4,15 @@ import { HiX, HiSparkles } from 'react-icons/hi';
 import { useGetPopupConfigQuery } from '../../services/popupApi';
 import config from '../../config/app';
 
-// Imagen default: shopping premium (Unsplash, libre de derechos)
+// Imagen default: Tech Premium Agency (Unsplash)
 const DEFAULT_IMAGE =
-  'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=600&q=80';
+  'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&q=80';
 
 const DEFAULTS = {
-  titulo: '¿Buscás atención personalizada?',
+  titulo: '¿Listo para escalar tu Proyecto?',
   descripcion:
-    'Hablá con nosotros por WhatsApp y te ayudamos a encontrar exactamente lo que necesitás.',
-  ctaTexto: 'Hablar por WhatsApp',
+    'Hablemos hoy sobre tu próxima solución digital. Arquitectura de software y diseño premium a un clic.',
+  ctaTexto: 'Iniciar Consultoría',
   whatsappNumero: config.whatsappNumber,
   mensajePrellenado:
     'Hola, estuve viendo la página y me gustaría recibir atención personalizada.',
@@ -76,75 +76,87 @@ const WhatsAppPopup = () => {
 
   return (
     <div
-      className={`fixed bottom-24 right-4 z-[60] w-[310px] max-w-[calc(100vw-2rem)] transition-all duration-350 ease-out ${
+      className={`fixed bottom-8 right-4 z-[9999] w-[320px] max-w-[calc(100vw-2rem)] transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${
         animating
-          ? 'opacity-100 translate-y-0 scale-100'
-          : 'opacity-0 translate-y-6 scale-95'
+          ? 'opacity-100 translate-y-0 scale-100 rotate-0'
+          : 'opacity-0 translate-y-12 scale-90 rotate-2'
       }`}
       style={{ transitionProperty: 'opacity, transform' }}
       role="dialog"
       aria-modal="false"
-      aria-label="Chat por WhatsApp"
+      aria-label="Consultoría Digital"
     >
-      {/* Card */}
-      <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-gray-900">
+      {/* GLOW EFFECT */}
+      <div className="absolute -inset-1 bg-gradient-to-r from-primary-400 to-secondary-400 rounded-[2rem] blur opacity-20" />
 
-        {/* Imagen de fondo con overlay */}
-        <div className="relative h-36 overflow-hidden">
+      {/* CARD BODY */}
+      <div className="relative rounded-[2rem] overflow-hidden border border-white/10 bg-gray-950/90 backdrop-blur-2xl shadow-2xl">
+
+        {/* HEADER MEDIA */}
+        <div className="relative h-44 overflow-hidden group">
           <img
             src={cfg.imagen}
-            alt="Atención personalizada"
-            className="w-full h-full object-cover"
+            alt="Ausauth Dev Agency"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             loading="lazy"
             onError={(e) => { e.target.src = DEFAULT_IMAGE; }}
           />
-          {/* Overlay degradado */}
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent" />
+          
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/40 to-transparent" />
+          <div className="absolute inset-0 bg-primary-400/10 mix-blend-overlay" />
 
-          {/* Badge premium */}
-          <div className="absolute top-3 left-3 flex items-center gap-1 bg-primary-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-            <HiSparkles size={10} />
-            Exclusivo
+          {/* BADGE */}
+          <div className="absolute top-4 left-4 flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-[0.2em]">
+            <span className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-pulse" />
+            Software Agency
           </div>
 
-          {/* Botón cerrar */}
+          {/* CLOSE */}
           <button
-            onClick={handleClose}
-            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/80 flex items-center justify-center text-white transition-colors"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleClose();
+            }}
+            className="absolute top-4 right-4 w-10 h-10 rounded-xl bg-black/80 hover:bg-rose-500 text-white flex items-center justify-center transition-all duration-300 active:scale-90 z-[100] cursor-pointer border border-white/20"
             aria-label="Cerrar"
           >
-            <HiX size={14} />
+            <HiX size={20} />
           </button>
         </div>
 
-        {/* Contenido */}
-        <div className="px-4 pt-3 pb-4">
-          {/* Título */}
-          <h3 className="text-white font-bold text-sm leading-snug mb-1">
-            {cfg.titulo}
-          </h3>
+        {/* CONTENT */}
+        <div className="px-6 pt-4 pb-6">
+          <div className="mb-4">
+            <h3 className="text-white font-black text-lg italic uppercase tracking-tighter leading-none mb-2">
+              {cfg.titulo.split(' ').map((word, i) => i === cfg.titulo.split(' ').length - 1 ? <span key={i} className="text-primary-400">{word}</span> : word + ' ')}
+            </h3>
+            <p className="text-gray-400 text-[11px] font-medium leading-relaxed">
+              {cfg.descripcion}
+            </p>
+          </div>
 
-          {/* Descripción */}
-          <p className="text-gray-400 text-xs leading-relaxed mb-3">
-            {cfg.descripcion}
-          </p>
-
-          {/* CTA WhatsApp */}
+          {/* CTA */}
           <a
             href={waUrl}
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleClose}
-            className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold text-sm py-2.5 rounded-xl transition-all duration-200 active:scale-95 shadow-lg shadow-green-900/30"
+            className="group relative flex items-center justify-center gap-3 w-full bg-white text-black font-black uppercase tracking-widest text-[10px] py-4 rounded-2xl transition-all duration-300 hover:bg-primary-400 hover:text-white active:scale-95 shadow-[0_10px_20px_rgba(0,0,0,0.3)]"
           >
-            <FaWhatsapp size={18} />
+            <FaWhatsapp size={16} className="transition-transform group-hover:rotate-12" />
             {cfg.ctaTexto}
+            <div className="absolute inset-0 rounded-2xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
           </a>
 
-          {/* Micro-texto de confianza */}
-          <p className="text-center text-gray-500 text-[10px] mt-2">
-            Respondemos en minutos · Sin compromisos
-          </p>
+          {/* FOOTER */}
+          <div className="flex items-center justify-center gap-4 mt-5">
+            <span className="h-px flex-1 bg-white/5" />
+            <p className="text-gray-600 font-bold uppercase tracking-[0.3em] text-[8px] whitespace-nowrap">
+              EST. 2024 · AUSAUTH DEV
+            </p>
+            <span className="h-px flex-1 bg-white/5" />
+          </div>
         </div>
       </div>
     </div>

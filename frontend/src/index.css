@@ -15,54 +15,59 @@
 }
 
 @layer components {
-  /* Primary CTA — red bg + white text */
+  /* Primary CTA — Global Theme */
   .btn-primary {
-    @apply bg-primary-400 hover:bg-primary-500 text-white font-bold px-6 py-2.5 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm;
+    @apply bg-primary-400 hover:bg-primary-500 text-black font-black uppercase tracking-tighter px-6 py-2.5 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(139,92,246,0.2)];
   }
-  /* Secondary — blue bg with white text, professional look */
+  /* Secondary — Glassmorphism style */
   .btn-secondary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-all duration-200 active:scale-95 shadow-sm;
+    @apply bg-white/5 hover:bg-white/10 text-white font-bold px-6 py-2.5 rounded-xl border border-white/10 backdrop-blur-md transition-all duration-200 active:scale-95 shadow-sm;
   }
   .btn-danger {
-    @apply bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-200 active:scale-95;
+    @apply bg-red-600/20 hover:bg-red-600/40 text-red-500 border border-red-600/30 font-bold px-4 py-2 rounded-xl transition-all duration-200 active:scale-95;
   }
   .input-field {
-    @apply w-full border border-gray-700 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all bg-gray-800 text-white placeholder-gray-300;
+    @apply w-full border border-white/5 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all bg-white/5 text-white placeholder-gray-500 backdrop-blur-xl;
   }
   .input-field::placeholder {
-    color: #9ca3af;
+    color: #6b7280;
   }
   .card {
-    @apply bg-gray-900 rounded-2xl shadow-md overflow-hidden;
+    @apply bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden;
   }
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest;
   }
 }
 
-/* Swiper — red bullets & arrows */
+/* Glassmorphism Generic */
+.glass {
+  @apply bg-white/5 backdrop-blur-xl border border-white/10;
+}
+
+/* Swiper — Theme colors */
 .swiper-pagination-bullet-active {
-  background: #FF0000 !important;
+  background: #8B5CF6 !important;
 }
 .swiper-button-next,
 .swiper-button-prev {
-  color: #FF0000 !important;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+  color: #8B5CF6 !important;
+  filter: drop-shadow(0 0 10px rgba(139,92,246,0.3));
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: #EAE8E2;
+  background: #050505;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1A1A1A;
-  border-radius: 3px;
+  background: #222;
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #000000;
+  background: #8B5CF6;
 }
 
 /* Line clamp utilities */

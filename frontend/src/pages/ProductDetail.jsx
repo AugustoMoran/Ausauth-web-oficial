@@ -345,7 +345,7 @@ const ProductDetail = () => {
                 className="btn-primary w-full flex items-center justify-center gap-2 py-3"
               >
                 <HiOutlineShoppingCart size={20} />
-                Agregar al carrito
+                Añadir al Presupuesto
               </button>
 
               {/* Mostrar opción de instalación si está disponible, o mensajes si no */}

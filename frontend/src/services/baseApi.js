@@ -48,7 +48,7 @@ const baseQuery = fetchBaseQuery({
     }
     
     // FALLBACK: Si no hay cookie, usar token en memoria + Authorization header
-    // Esto es necesario para cross-domain (www.sausansystem.com.ar → ecommerce-gestion-trabajo.onrender.com)
+    // Esto es necesario para cross-domain (www.ausauth.dev → ecommerce-gestion-trabajo.onrender.com)
     if (AUTH_CLIENT_REV && typeof token === 'string' && token.length > 0) {
       headers.set('Authorization', `Bearer ${token}`);
     }
@@ -102,7 +102,19 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Product', 'Category', 'Order', 'Cart', 'User', 'Users', 'Coupon', 'Upload', 'Banner', 'Popup', 'Job', 'ExchangeRate', 'Recommendations', 'ClientRecommendations'],
+  tagTypes: [
+    'Project', 
+    'Category', 
+    'User', 
+    'Users', 
+    'Quote', 
+    'Service', 
+    'Testimonial', 
+    'FAQ', 
+    'Job', 
+    'Upload', 
+    'Popup'
+  ],
   endpoints: () => ({}),
 });
 

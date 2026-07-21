@@ -5,16 +5,25 @@ export default {
     extend: {
       colors: {
         primary: {
-          50:  '#F5F5F5',
-          100: '#E8E8E8',
-          200: '#CCCCCC',
-          300: '#999999',
-          400: '#FF0000', // main red — CTA bg
-          500: '#CC0000', // hover red
-          600: '#666666', // medium gray
-          700: '#444444', // dark gray
-          800: '#2A2A2A', // darker gray
-          900: '#000000', // pure black
+          50:  '#F5F3FF',
+          100: '#EDE9FE',
+          200: '#DDD6FE',
+          300: '#C4B5FD',
+          400: '#8B5CF6', // Electric Violet
+          500: '#7C3AED', // Deeper Violet
+          600: '#6D28D9',
+          700: '#5B21B6',
+          800: '#4C1D95',
+          900: '#2E1065',
+        },
+        secondary: {
+          400: '#3B82F6', // Blue Neon
+          500: '#2563EB',
+        },
+        dark: {
+          pure: '#000000',
+          rich: '#050505',
+          card: 'rgba(20, 20, 25, 0.7)',
         },
         accent: {
           400: '#FF0000',

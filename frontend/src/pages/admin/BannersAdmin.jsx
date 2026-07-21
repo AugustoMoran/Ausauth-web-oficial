@@ -351,7 +351,7 @@ const BannersAdmin = () => {
                 onChange={(e) => setForm({ ...form, activo: e.target.checked })}
                 className="w-4 h-4"
               />
-              <label htmlFor="activo" className="text-sm">Visible en la tienda</label>
+              <label htmlFor="activo" className="text-sm text-white">Visible en el Portal</label>
             </div>
 
             <div className="md:col-span-2 flex gap-3 justify-end">

@@ -41,7 +41,7 @@ export const generateWhatsAppLink = (items, total, phone) => {
   }
 
   const message = encodeURIComponent(
-    `🛒 *Nuevo pedido desde la tienda*\n\n${itemsList}\n\n*Total: ${totalLines}*${currencyNote}\n\n¡Quiero finalizar mi compra!`
+    `� *Nueva Consulta / Proyecto desde Ausauth Dev*\n\n${itemsList}\n\n*Referencia: ${totalLines}*${currencyNote}\n\n¡Hola! Me gustaría coordinar una reunión para este proyecto.`
   );
 
   return `https://wa.me/${number}?text=${message}`;

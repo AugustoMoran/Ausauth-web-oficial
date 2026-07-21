@@ -45,54 +45,64 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12 bg-gray-950">
-      <div className="w-full max-w-md">
-        <div className="card p-8">
-          <div className="text-center mb-8">
-            <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-white font-bold text-xl">T</span>
+    <div className="min-h-screen flex items-center justify-center px-6 py-12 bg-[#050505] relative overflow-hidden">
+      {/* Background Orbs */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-600/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-secondary-600/10 blur-[100px] rounded-full pointer-events-none" />
+
+      <div className="w-full max-w-md relative z-10">
+        <div className="bg-white/5 backdrop-blur-3xl border border-white/10 p-10 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+          <div className="text-center mb-12">
+            <div className="inline-block p-4 bg-white/5 rounded-3xl border border-white/10 mb-6 group hover:border-primary-400/50 transition-all">
+              <img src="/logooficial.png" alt="Ausauth Dev" className="h-16 w-auto object-contain filter drop-shadow-[0_0_10px_rgba(139,92,246,0.5)] group-hover:scale-110 transition-transform" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Iniciar sesión</h1>
-            <p className="text-gray-500 text-sm mt-1">Accedé a tu cuenta</p>
+            <h1 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none">
+              ACCESO <span className="text-primary-400">CORE</span>
+            </h1>
+            <p className="text-gray-500 text-[10px] font-bold mt-4 uppercase tracking-[0.4em] italic">System Authentication</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="block text-[10px] font-black text-gray-400 italic uppercase tracking-widest ml-1">Identity Endpoint</label>
               <input
                 type="email"
                 name="email"
                 value={form.email}
                 onChange={handleChange}
-                className="input-field"
-                placeholder="tu@email.com"
+                className="w-full bg-black/50 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:ring-1 focus:ring-primary-400 focus:border-primary-400/50 transition-all text-sm font-bold placeholder:text-gray-700"
+                placeholder="EMAIL@AUSAUTH.DEV"
                 required
                 autoComplete="email"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+            <div className="space-y-2">
+              <label className="block text-[10px] font-black text-gray-400 italic uppercase tracking-widest ml-1">Access Token</label>
               <input
                 type="password"
                 name="password"
                 value={form.password}
                 onChange={handleChange}
-                className="input-field"
+                className="w-full bg-black/50 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:ring-1 focus:ring-primary-400 focus:border-primary-400/50 transition-all text-sm font-bold placeholder:text-gray-700"
                 placeholder="••••••••"
                 required
                 autoComplete="current-password"
               />
             </div>
 
-            <button type="submit" disabled={isLoading} className="btn-primary w-full py-3 mt-2">
-              {isLoading ? 'Ingresando...' : 'Ingresar'}
+            <button 
+              type="submit" 
+              disabled={isLoading} 
+              className="w-full bg-primary-400 hover:bg-white text-black font-black py-5 rounded-2xl shadow-[0_10px_30px_rgba(139,92,246,0.3)] transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 mt-4 uppercase italic tracking-tighter text-lg"
+            >
+              {isLoading ? 'HANDSHAKING...' : 'INITIATE SESSION'}
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-500 mt-6">
-            ¿No tenés cuenta?{' '}
-            <Link to="/registro" className="text-primary-600 hover:underline font-medium">
-              Registrate
+          <p className="text-center text-[10px] text-gray-600 mt-10 font-bold uppercase tracking-widest">
+            ¿NO TIENES ACCESO?{' '}
+            <Link to="/registro" className="text-primary-400 hover:text-white transition-colors border-b border-primary-400/20 pb-0.5">
+              SOLICITAR CREDENCIALES
             </Link>
           </p>
         </div>

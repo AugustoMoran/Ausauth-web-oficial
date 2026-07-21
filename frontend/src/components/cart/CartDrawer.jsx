@@ -42,12 +42,12 @@ const CartDrawer = () => {
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <HiOutlineShoppingBag size={20} />
-            <span className="font-bold text-lg">Carrito</span>
+            <span className="font-bold text-lg">Consultas</span>
             {items.length > 0 && (
-              <span className="badge bg-primary-100 text-primary-700">{items.length}</span>
+              <span className="badge bg-primary-100 text-black">{items.length}</span>
             )}
           </div>
-          <button onClick={() => dispatch(closeCart())} className="p-1.5 rounded-lg hover:bg-gray-800 text-gray-400">
+          <button onClick={() => dispatch(closeCart())} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400">
             <HiX size={20} />
           </button>
         </div>
@@ -57,26 +57,24 @@ const CartDrawer = () => {
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 gap-3">
               <HiOutlineShoppingBag size={48} className="opacity-30" />
-              <p className="text-sm">Tu carrito está vacío</p>
+              <p className="text-sm">No tienes consultas pendientes</p>
               <Link
-                to="/productos"
+                to="/proyectos"
                 onClick={() => dispatch(closeCart())}
-                className="btn-primary text-sm"
+                className="btn-primary text-sm bg-primary-400 text-black"
               >
-                Ver productos
+                Explorar Soluciones
               </Link>
             </div>
           ) : (
             <>
-
-
-              <ul className="space-y-4">
+              <ul className="space-y-4 text-white">
                 {items.map((item) => {
                   const producto = item.producto;
                   const id = producto?._id || producto;
                   const price = getPriceByRole(producto, user?.role, exchangeRate);
                   const imagen = producto?.imagenes?.[0]?.url || '';
-                  const nombre = producto?.nombre || item.nombre || 'Producto sin nombre';
+                  const nombre = producto?.nombre || item.nombre || 'Proyecto sin nombre';
 
                   return (
                     <li key={id} className="flex gap-3">
@@ -93,14 +91,14 @@ const CartDrawer = () => {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => updateQuantity(id, item.cantidad - 1, item.talla, item.color)}
-                            className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-sm hover:bg-gray-100"
+                            className="w-6 h-6 rounded-full border border-gray-700 flex items-center justify-center text-sm hover:bg-white/10"
                           >
                             -
                           </button>
                           <span className="text-sm font-medium w-5 text-center">{item.cantidad}</span>
                           <button
                             onClick={() => updateQuantity(id, item.cantidad + 1, item.talla, item.color)}
-                            className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-sm hover:bg-gray-100"
+                            className="w-6 h-6 rounded-full border border-gray-700 flex items-center justify-center text-sm hover:bg-white/10"
                           >
                             +
                           </button>
@@ -125,11 +123,11 @@ const CartDrawer = () => {
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="px-5 py-4 border-t border-gray-800 space-y-3">
+          <div className="px-5 py-4 border-t border-gray-100/10 space-y-3">
             <div className="space-y-1">
               <div className="flex justify-between items-center">
-                <span className="font-medium text-gray-400 text-sm">Total</span>
-                <span className="font-bold text-xl">
+                <span className="font-medium text-gray-500 text-sm italic uppercase tracking-widest">Presupuesto Estimado</span>
+                <span className="font-bold text-xl text-primary-400">
                   {userCurrency === 'USD' ? `USD $${cartTotal.toFixed(2)}` : formatCurrency(cartTotal)}
                 </span>
               </div>
@@ -137,15 +135,15 @@ const CartDrawer = () => {
             <Link
               to="/checkout"
               onClick={() => dispatch(closeCart())}
-              className="btn-primary block text-center w-full"
+              className="btn-primary block text-center w-full bg-primary-400 text-black font-black uppercase tracking-widest py-4 rounded-xl"
             >
-              Finalizar compra
+              Confirmar Solicitud
             </Link>
             <button
               onClick={() => clearCart()}
-              className="w-full py-2 px-4 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition-colors font-medium text-sm"
+              className="w-full py-2 px-4 rounded-lg border border-red-500/30 text-red-500 hover:bg-red-500/10 transition-colors font-bold text-xs uppercase tracking-widest"
             >
-              Vaciar carrito
+              Borrar todo
             </button>
           </div>
         )}

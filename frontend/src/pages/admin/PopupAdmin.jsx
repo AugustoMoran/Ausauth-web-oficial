@@ -3,8 +3,16 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import { useGetPopupConfigQuery, useUpdatePopupConfigMutation } from '../../services/popupApi';
 import { useUploadImageMutation } from '../../services/cartApi';
 import toast from 'react-hot-toast';
-import { HiOutlinePhotograph, HiOutlineSave, HiOutlineRefresh, HiOutlineFilm, HiX } from 'react-icons/hi';
+import { 
+  HiOutlinePhotograph, 
+  HiOutlineSave, 
+  HiOutlineRefresh, 
+  HiOutlineFilm, 
+  HiX,
+  HiOutlineSpeakerphone 
+} from 'react-icons/hi';
 import { FaWhatsapp } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 
 const DEFAULTS = {
   activo: true,
@@ -117,214 +125,233 @@ const PopupAdmin = () => {
 
   return (
     <AdminLayout>
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <FaWhatsapp className="text-green-500" size={24} />
-              Popup de WhatsApp
-            </h1>
-            <p className="text-gray-400 text-sm mt-1">
-              Configurá el cartelito que aparece al visitante. Si dejás un campo vacío, se usa el texto por defecto.
-            </p>
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        {/* Header Premium */}
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-16">
+          <div className="flex items-center gap-6">
+            <div className="w-20 h-20 bg-primary-400/10 rounded-[2rem] border border-primary-400/20 flex items-center justify-center text-primary-400 shadow-[0_0_50px_rgba(139,92,246,0.1)]">
+              <HiOutlineSpeakerphone size={40} className="rotate-[-10deg]" />
+            </div>
+            <div>
+              <h1 className="text-6xl font-black text-white italic tracking-tighter uppercase mb-2">
+                Conversion <span className="text-primary-400">HUB</span>
+              </h1>
+              <p className="text-gray-500 font-bold uppercase tracking-[0.2em] text-[10px]">Gestión de anuncios y llamadas a la acción</p>
+            </div>
           </div>
+          
           <button
             type="button"
             onClick={handleReset}
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-200 border border-gray-600 hover:border-gray-400 px-3 py-1.5 rounded-lg transition-colors"
+            className="flex items-center gap-3 bg-white/5 hover:bg-white/10 text-white/50 hover:text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] border border-white/5 transition-all italic"
           >
-            <HiOutlineRefresh size={15} />
-            Restaurar defaults
+            <HiOutlineRefresh size={16} /> Restore Systems
           </button>
-        </div>
+        </header>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Toggle activo */}
-          <div className="card p-5 flex items-center justify-between">
-            <div>
-              <p className="font-semibold text-gray-100">Mostrar popup</p>
-              <p className="text-sm text-gray-400">Activá o desactivá el popup para todos los visitantes</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => set('activo', !form.activo)}
-              className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
-                form.activo ? 'bg-primary-400' : 'bg-gray-600'
-              }`}
-            >
-              <span
-                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
-                  form.activo ? 'translate-x-6' : 'translate-x-0'
-                }`}
-              />
-            </button>
-          </div>
-
-          {/* Tiempo de aparición */}
-          <div className="card p-5">
-            <label className="block text-sm font-semibold text-gray-100 mb-1">
-              Tiempo de aparición (segundos)
-            </label>
-            <input
-              type="number"
-              min={1}
-              max={60}
-              value={form.tiempoAparicion}
-              onChange={(e) => set('tiempoAparicion', Number(e.target.value))}
-              className="input-field w-32"
-            />
-            <p className="text-xs text-gray-400 mt-1">Cuántos segundos esperar antes de mostrar el popup al visitante</p>
-          </div>
-
-          {/* Imagen */}
-          <div className="card p-5">
-            <label className="block text-sm font-semibold text-gray-100 mb-2">
-              Imagen de fondo
-            </label>
-            {form.imagen ? (
-              <div className="relative mb-3">
-                <img
-                  src={form.imagen}
-                  alt="Preview"
-                  className="w-full h-36 object-cover rounded-xl"
-                />
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Main Config Area */}
+          <div className="lg:col-span-7 space-y-8">
+            
+            {/* Status Card */}
+            <div className="bg-gray-900/50 backdrop-blur-xl border border-white/5 p-10 rounded-[3rem] relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-400/5 blur-3xl -z-10" />
+              <div className="flex items-center justify-between relative z-10">
+                <div>
+                  <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter mb-2">Estado del Sistema</h3>
+                  <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Visibilidad global del popup</p>
+                </div>
                 <button
                   type="button"
-                  onClick={() => setForm((f) => ({ ...f, imagen: '', imagenPublicId: '' }))}
-                  className="absolute top-2 right-2 bg-black/60 hover:bg-black text-white rounded-full w-7 h-7 flex items-center justify-center text-xs transition-colors"
+                  onClick={() => set('activo', !form.activo)}
+                  className={`relative w-20 h-10 rounded-full transition-all duration-500 overflow-hidden border ${
+                    form.activo 
+                      ? 'bg-primary-400 border-primary-300 shadow-[0_0_30px_rgba(139,92,246,0.4)]' 
+                      : 'bg-black border-white/10'
+                  }`}
                 >
-                  ✕
+                  <motion.div
+                    animate={{ x: form.activo ? 40 : 4 }}
+                    className={`w-8 h-8 rounded-full shadow-2xl ${
+                      form.activo ? 'bg-white' : 'bg-gray-800'
+                    }`}
+                  />
                 </button>
               </div>
-            ) : (
-              <div className="h-28 border-2 border-dashed border-gray-700 rounded-xl flex items-center justify-center text-gray-400 text-sm mb-3">
-                Sin imagen — se usará la imagen por defecto
+            </div>
+
+            {/* Content Card */}
+            <div className="bg-gray-900/50 backdrop-blur-xl border border-white/5 p-10 rounded-[3rem] space-y-8">
+              <div className="flex items-center gap-4 mb-4">
+                <span className="text-[10px] font-black text-primary-400 uppercase tracking-[0.3em]">Module 01</span>
+                <h3 className="text-xl font-black text-white italic uppercase tracking-tighter">Copywriting & Logic</h3>
+                <span className="h-px flex-1 bg-white/5"></span>
               </div>
-            )}
-            <label className="flex items-center gap-2 cursor-pointer w-fit border border-gray-600 hover:border-gray-400 px-3 py-1.5 rounded-lg text-sm text-gray-400 hover:text-gray-200 transition-colors">
-              <HiOutlinePhotograph size={16} />
-              {uploading ? 'Subiendo...' : 'Subir imagen'}
-              <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
-            </label>
-          </div>
 
-          {/* Video (opcional) */}
-          <div className="card p-5">
-            <label className="block text-sm font-semibold text-gray-100 mb-2">
-              Video de fondo (opcional)
-            </label>
-            {form.video ? (
-              <div className="relative mb-3">
-                <video
-                  src={form.video}
-                  className="w-full h-36 object-cover rounded-xl"
-                />
-                <button
-                  type="button"
-                  onClick={handleRemoveVideo}
-                  className="absolute top-2 right-2 bg-black/60 hover:bg-black text-white rounded-full w-7 h-7 flex items-center justify-center text-xs transition-colors"
-                >
-                  ✕
-                </button>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-[10px] font-black text-gray-500 mb-3 uppercase tracking-[0.2em] italic">Headline Principal</label>
+                    <input
+                      type="text"
+                      value={form.titulo}
+                      onChange={(e) => set('titulo', e.target.value)}
+                      placeholder="¿Buscás atención personalizada?"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold focus:border-primary-400 outline-none transition-all placeholder:text-gray-700"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-gray-500 mb-3 uppercase tracking-[0.2em] italic">Delay de Aparición (s)</label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={60}
+                      value={form.tiempoAparicion}
+                      onChange={(e) => set('tiempoAparicion', Number(e.target.value))}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold focus:border-primary-400 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black text-gray-500 mb-3 uppercase tracking-[0.2em] italic">Mensaje Descriptivo</label>
+                  <textarea
+                    value={form.descripcion}
+                    onChange={(e) => set('descripcion', e.target.value)}
+                    rows={3}
+                    className="w-full bg-white/5 border border-white/10 rounded-[2rem] px-6 py-5 text-white font-medium focus:border-primary-400 outline-none transition-all resize-none placeholder:text-gray-700"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black text-gray-500 mb-3 uppercase tracking-[0.2em] italic">Call to Action (Botón)</label>
+                  <input
+                    type="text"
+                    value={form.ctaTexto}
+                    onChange={(e) => set('ctaTexto', e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold focus:border-primary-400 outline-none transition-all"
+                  />
+                </div>
               </div>
-            ) : (
-              <div className="h-28 border-2 border-dashed border-gray-700 rounded-xl flex items-center justify-center text-gray-400 text-sm mb-3">
-                Sin video — se usará la imagen de fondo
+            </div>
+
+            {/* Media Card */}
+            <div className="bg-gray-900/50 backdrop-blur-xl border border-white/5 p-10 rounded-[3rem] space-y-8">
+               <div className="flex items-center gap-4 mb-4">
+                <span className="text-[10px] font-black text-primary-400 uppercase tracking-[0.3em]">Module 02</span>
+                <h3 className="text-xl font-black text-white italic uppercase tracking-tighter">Visual Identity</h3>
+                <span className="h-px flex-1 bg-white/5"></span>
               </div>
-            )}
-            <label className="flex items-center gap-2 cursor-pointer w-fit border border-gray-600 hover:border-gray-400 px-3 py-1.5 rounded-lg text-sm text-gray-400 hover:text-gray-200 transition-colors">
-              <HiOutlineFilm size={16} />
-              {uploading ? 'Subiendo...' : 'Subir video'}
-              <input type="file" accept="video/*" className="hidden" onChange={handleVideoUpload} disabled={uploading} />
-            </label>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Image Section */}
+                <div className="space-y-4">
+                  <label className="block text-[10px] font-black text-gray-500 mb-3 uppercase tracking-[0.2em] italic">Background Image</label>
+                  <div className="aspect-video bg-black rounded-[2rem] border border-white/5 overflow-hidden relative group/img">
+                    {form.imagen ? (
+                      <>
+                        <img src={form.imagen} className="w-full h-full object-cover opacity-60 group-hover/img:scale-110 transition-transform duration-700" />
+                        <button 
+                          onClick={() => setForm(f => ({ ...f, imagen: '', imagenPublicId: '' }))}
+                          className="absolute top-4 right-4 p-2 bg-rose-500/20 text-rose-400 rounded-xl backdrop-blur-md opacity-0 group-hover/img:opacity-100 transition-opacity"
+                        >
+                          <HiX />
+                        </button>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-gray-700">
+                        <HiOutlinePhotograph size={40} className="mb-2" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest">No Media</span>
+                      </div>
+                    )}
+                  </div>
+                  <label className="flex items-center justify-center gap-3 w-full bg-white/5 hover:bg-white text-gray-400 hover:text-black py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all cursor-pointer">
+                    <HiOutlinePhotograph size={16} /> {uploading ? 'Uploading...' : 'Upload Image'}
+                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                  </label>
+                </div>
+
+                {/* Video Section */}
+                <div className="space-y-4">
+                  <label className="block text-[10px] font-black text-gray-500 mb-3 uppercase tracking-[0.2em] italic">Background Video (MP4)</label>
+                  <div className="aspect-video bg-black rounded-[2rem] border border-white/5 overflow-hidden relative group/vid">
+                    {form.video ? (
+                      <>
+                        <video src={form.video} className="w-full h-full object-cover opacity-60" muted loop />
+                        <button 
+                          onClick={handleRemoveVideo}
+                          className="absolute top-4 right-4 p-2 bg-rose-500/20 text-rose-400 rounded-xl backdrop-blur-md opacity-0 group-hover/vid:opacity-100 transition-opacity"
+                        >
+                          <HiX />
+                        </button>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-gray-700">
+                        <HiOutlineFilm size={40} className="mb-2" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest">No Media</span>
+                      </div>
+                    )}
+                  </div>
+                  <label className="flex items-center justify-center gap-3 w-full bg-white/5 hover:bg-white text-gray-400 hover:text-black py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all cursor-pointer">
+                    <HiOutlineFilm size={16} /> {uploading ? 'Uploading...' : 'Upload Video'}
+                    <input type="file" accept="video/*" className="hidden" onChange={handleVideoUpload} />
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Textos */}
-          <div className="card p-5 space-y-4">
-            <h2 className="font-semibold text-gray-100 border-b border-gray-700 pb-2">Contenido del popup</h2>
+          {/* Sidebar Area */}
+          <div className="lg:col-span-5 space-y-8">
+            {/* WhatsApp Integration Card */}
+            <div className="bg-emerald-500/10 backdrop-blur-xl border border-emerald-500/20 p-10 rounded-[3rem] space-y-8">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-emerald-500/20 rounded-2xl text-emerald-400">
+                  <FaWhatsapp size={24} />
+                </div>
+                <h3 className="text-xl font-black text-white italic uppercase tracking-tighter">Direct Connect</h3>
+              </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-100 mb-1">Título</label>
-              <input
-                type="text"
-                value={form.titulo}
-                onChange={(e) => set('titulo', e.target.value)}
-                placeholder="¿Buscás atención personalizada?"
-                className="input-field"
-              />
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-[10px] font-black text-emerald-500/50 mb-3 uppercase tracking-[0.2em] italic">Número de Contacto</label>
+                  <input
+                    type="text"
+                    value={form.whatsappNumero}
+                    onChange={(e) => set('whatsappNumero', e.target.value.replace(/\D/g, ''))}
+                    placeholder="5491100000000"
+                    className="w-full bg-black/40 border border-emerald-500/10 rounded-2xl px-6 py-4 text-emerald-400 font-bold focus:border-emerald-500 outline-none transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black text-emerald-500/50 mb-3 uppercase tracking-[0.2em] italic">Mensaje Automático</label>
+                  <textarea
+                    value={form.mensajePrellenado}
+                    onChange={(e) => set('mensajePrellenado', e.target.value)}
+                    rows={4}
+                    className="w-full bg-black/40 border border-emerald-500/10 rounded-[2rem] px-6 py-5 text-emerald-200 text-sm font-medium focus:border-emerald-500 outline-none transition-all resize-none"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-100 mb-1">Descripción</label>
-              <textarea
-                value={form.descripcion}
-                onChange={(e) => set('descripcion', e.target.value)}
-                rows={3}
-                placeholder="Hablá con nosotros por WhatsApp..."
-                className="input-field resize-none"
-              />
+            {/* Save Card */}
+            <div className="sticky top-8 space-y-4">
+              <motion.button
+                whileHover={{ scale: 1.02, boxShadow: "0 0 50px rgba(139,92,246,0.3)" }}
+                whileTap={{ scale: 0.98 }}
+                disabled={isSaving}
+                className="w-full bg-primary-400 text-black py-8 rounded-[2.5rem] font-black uppercase tracking-[0.3em] text-sm italic flex items-center justify-center gap-4 shadow-2xl transition-all"
+              >
+                <HiOutlineSave size={24} />
+                {isSaving ? 'Synchronizing...' : 'Update Ad System'}
+              </motion.button>
+              
+              <div className="p-6 bg-white/5 rounded-[2rem] border border-white/5 text-center">
+                 <p className="text-[9px] text-gray-600 font-black uppercase tracking-[0.5em]">Realtime Deployment Protocol v2.5</p>
+              </div>
             </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-100 mb-1">Texto del botón CTA</label>
-              <input
-                type="text"
-                value={form.ctaTexto}
-                onChange={(e) => set('ctaTexto', e.target.value)}
-                placeholder="Hablar por WhatsApp"
-                className="input-field"
-              />
-            </div>
-          </div>
-
-          {/* WhatsApp */}
-          <div className="card p-5 space-y-4">
-            <h2 className="font-semibold text-gray-100 border-b border-gray-700 pb-2">Configuración de WhatsApp</h2>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-100 mb-1">
-                Número de WhatsApp
-                <span className="text-gray-400 font-normal ml-1">(sin + ni espacios, con código de país)</span>
-              </label>
-              <input
-                type="text"
-                value={form.whatsappNumero}
-                onChange={(e) => set('whatsappNumero', e.target.value.replace(/\D/g, ''))}
-                placeholder="5491100000000"
-                className="input-field"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-100 mb-1">Mensaje prellenado</label>
-              <textarea
-                value={form.mensajePrellenado}
-                onChange={(e) => set('mensajePrellenado', e.target.value)}
-                rows={3}
-                placeholder="Hola, estuve viendo la página..."
-                className="input-field resize-none"
-              />
-              <p className="text-xs text-gray-400 mt-1">Este mensaje aparece automáticamente en el chat de WhatsApp al hacer clic</p>
-            </div>
-
-            <a
-              href={waPreview}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 text-sm font-medium"
-            >
-              <FaWhatsapp size={15} />
-              Probar enlace de WhatsApp
-            </a>
-          </div>
-
-          {/* Submit */}
-          <div className="flex justify-end pb-8">
-            <button type="submit" disabled={isSaving || uploading} className="btn-primary flex items-center gap-2">
-              <HiOutlineSave size={18} />
-              {isSaving ? 'Guardando...' : 'Guardar configuración'}
-            </button>
           </div>
         </form>
       </div>

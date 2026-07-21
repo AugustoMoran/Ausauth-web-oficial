@@ -1,25 +1,39 @@
 import React from 'react';
-import { FaWhatsapp } from 'react-icons/fa';
+import { FaWhatsapp, FaInstagram } from 'react-icons/fa';
 import ChatWidget from './ChatWidget';
+import config from '../../config/app';
 
 const FloatingButtons = () => {
-  const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '5491100000000';
+  // Número actualizado por el usuario
+  const waNumber = '5491168393582';
+  const instaUrl = config.instagramUrl || 'https://instagram.com/ausauth.dev';
 
   return (
-    <div className="fixed bottom-6 right-4 z-50 flex flex-col gap-3">
-      {/* WhatsApp */}
+    <div className="fixed bottom-6 right-4 z-[10001] flex flex-col-reverse items-center gap-4 pointer-events-auto">
+      {/* AI Chat (Base) */}
+      <ChatWidget />
+
+      {/* WhatsApp - Premium Aesthetic */}
       <a
         href={`https://wa.me/${waNumber}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="w-12 h-12 bg-green-500 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 active:scale-95 hover:bg-green-400"
+        className="w-12 h-12 bg-black border border-white/10 ring-1 ring-primary-400/30 rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 hover:ring-primary-400 group"
         aria-label="WhatsApp"
       >
-        <FaWhatsapp size={24} color="white" />
+        <FaWhatsapp size={22} className="text-primary-400 group-hover:text-white transition-colors" />
       </a>
 
-      {/* AI Chat */}
-      <ChatWidget />
+      {/* Instagram - Premium Aesthetic */}
+      <a
+        href={instaUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-12 h-12 bg-black border border-white/10 ring-1 ring-primary-400/30 rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 hover:ring-primary-400 group"
+        aria-label="Instagram"
+      >
+        <FaInstagram size={22} className="text-primary-400 group-hover:text-white transition-colors" />
+      </a>
     </div>
   );
 };

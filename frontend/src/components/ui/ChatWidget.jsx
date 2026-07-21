@@ -14,7 +14,7 @@ const SESSION_ID = `session_${Date.now()}_${Math.random().toString(36).slice(2, 
 const INITIAL_MESSAGE = {
   id:   'init',
   role: 'assistant',
-  text: '¡Hola! 👋 Soy tu asistente de compras. Puedo ayudarte a encontrar productos, consultar precios y recomendarte opciones. ¿Qué estás buscando?',
+  text: '¡Hola! 🤖 Soy el consultor digital de AUSAUTH. Puedo asesorarte sobre desarrollo web, aplicaciones móviles, integraciones fiscales (AFIP) y arquitectura de software. ¿En qué proyecto estás pensando?',
   products: [],
   actions:  [],
 };
@@ -259,31 +259,32 @@ export default function ChatWidget() {
   // ── Quick suggestions shown only on the first interaction ─────────────────
   const showSuggestions = messages.length === 1;
   const suggestions = [
-    '¿Qué tienen disponible?',
-    'Busco algo para regalo',
-    'Ver productos en oferta',
+    '¿Qué servicios de desarrollo ofrecen?',
+    'Presupuesto para una App Móvil',
+    'Integración con AFIP / Sistemas',
+    'Consultoría en Arquitectura Cloud',
   ];
 
   return (
     <>
       {/* ── Chat window ───────────────────────────────────────────────────── */}
       {open && (
-        <div className="fixed bottom-24 right-4 z-50 w-[340px] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl shadow-2xl overflow-hidden bg-pearl border border-pearl-dark animate-slide-up">
+        <div className="fixed bottom-[140px] right-4 z-[10002] w-[350px] max-w-[calc(100vw-2rem)] max-h-[calc(100vh-200px)] flex flex-col rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.7)] overflow-hidden bg-black/95 backdrop-blur-3xl border border-white/10 animate-slide-up">
 
           {/* Header */}
-          <div className="flex items-center gap-2.5 px-4 py-3 bg-ink text-white">
+          <div className="flex items-center gap-3 px-5 py-3.5 bg-white/5 text-white border-b border-white/5">
             <div className="w-8 h-8 rounded-full bg-primary-400 flex items-center justify-center">
-              <RiRobot2Line size={18} className="text-ink" />
+              <RiRobot2Line size={18} className="text-black" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm leading-tight">Asistente de compras</p>
-              <p className="text-xs text-white/60 leading-tight">
-                {loading ? 'Escribiendo...' : 'En línea'}
+              <p className="font-bold text-xs uppercase tracking-widest text-white leading-tight">Consultor Digital</p>
+              <p className="text-[10px] text-primary-400 font-bold uppercase tracking-tighter leading-tight">
+                {loading ? 'Procesando arquitectura...' : 'Sistemas Activos'}
               </p>
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+              className="w-7 h-7 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all border border-transparent hover:border-white/10"
               aria-label="Cerrar chat"
             >
               <FiX size={16} />
@@ -291,7 +292,7 @@ export default function ChatWidget() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3 max-h-[380px] min-h-[200px]">
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 min-h-[200px] custom-scrollbar">
             {messages.map((msg, idx) => (
               <Message 
                 key={msg.id ? `${msg.id}_${idx}` : idx} 
@@ -328,25 +329,25 @@ export default function ChatWidget() {
           )}
 
           {/* Input */}
-          <div className="p-3 pt-0 flex gap-2 items-end">
+          <div className="p-3 bg-white/5 border-t border-white/5 flex gap-2 items-end">
             <textarea
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Escribí tu consulta..."
+              placeholder="Describí tu requerimiento técnico..."
               rows={1}
               disabled={loading}
-              className="flex-1 resize-none rounded-xl border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 placeholder:text-gray-500 focus:outline-none focus:border-primary-400 transition-colors disabled:opacity-60 max-h-24 overflow-y-auto"
-              style={{ lineHeight: '1.4' }}
+              className="flex-1 resize-none rounded-2xl border border-white/10 bg-black/40 px-4 py-2 text-xs text-white placeholder:text-gray-600 focus:outline-none focus:border-primary-400/50 transition-all disabled:opacity-50 max-h-24"
+              style={{ lineHeight: '1.5' }}
             />
             <button
               onClick={handleSend}
               disabled={loading || !input.trim()}
-              className="w-9 h-9 rounded-xl bg-primary-400 flex items-center justify-center hover:bg-primary-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
+              className="w-10 h-10 rounded-xl bg-primary-400 flex items-center justify-center hover:scale-105 transition-all disabled:opacity-30 disabled:grayscale flex-shrink-0 shadow-lg shadow-primary-400/20"
               aria-label="Enviar"
             >
-              <FiSend size={15} className="text-white" />
+              <FiSend size={16} className="text-black" />
             </button>
           </div>
         </div>
@@ -355,18 +356,18 @@ export default function ChatWidget() {
       {/* ── Floating toggle button ─────────────────────────────────────────── */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 active:scale-95 bg-ink relative"
-        aria-label={open ? 'Cerrar chat' : 'Abrir asistente de compras'}
+        className="w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 bg-black ring-2 ring-primary-400 relative border border-white/10"
+        aria-label={open ? 'Cerrar chat' : 'Abrir consultor digital'}
       >
         {open ? (
-          <FiX size={20} color="white" />
+          <FiX size={24} color="white" />
         ) : (
-          <RiRobot2Line size={22} color="#FF0000" />
+          <RiRobot2Line size={28} className="text-primary-400" />
         )}
 
         {/* Unread badge */}
         {!open && unread > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-primary-400 text-black text-[10px] font-black flex items-center justify-center border-2 border-black">
             {unread}
           </span>
         )}

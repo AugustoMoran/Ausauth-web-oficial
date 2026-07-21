@@ -1,34 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { motion } from 'framer-motion';
 import {
-  HiOutlineShoppingCart,
   HiOutlineSearch,
   HiOutlineUser,
-  HiOutlineHeart,
   HiX,
   HiMenu,
   HiChevronDown,
 } from 'react-icons/hi';
 import useAuth from '../../hooks/useAuth';
-import useCart from '../../hooks/useCart';
 import { toggleMenu, closeMenu } from '../../features/ui/uiSlice';
-import { useGetCategoriesQuery, useGetProductSuggestionsQuery } from '../../services/productsApi';
-import { selectIsTecnico, selectIsDespachante } from '../../features/auth/authSlice';
+import { 
+  useGetCategoriesQuery, 
+  useGetProjectSuggestionsQuery 
+} from '../../services/projectsApi';
+import config from '../../config/app';
 
 const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user, isAdmin, isAuthenticated, logout } = useAuth();
-  const isTecnico = useSelector(selectIsTecnico);
-  const isDespachante = useSelector(selectIsDespachante);
-  const { count, toggleCart } = useCart();
   const menuOpen = useSelector((s) => s.ui.menuOpen);
-  const { data: categories = [] } = useGetCategoriesQuery();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [scrolled, setScrolled] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const { data: categories = [] } = useGetCategoriesQuery();
+  const { data: suggestions = [] } = useGetProjectSuggestionsQuery(debouncedSearch, {
+    skip: debouncedSearch.length < 2
+  });
+  
   const suggestionsRef = useRef(null);
   const debounceTimerRef = useRef(null);
   
@@ -51,11 +54,6 @@ const Header = () => {
     };
   }, [search]);
   
-  // Query RTK - se ejecuta cuando debouncedSearch cambia (skip correcto en el hook)
-  const { data: suggestions = [] } = useGetProductSuggestionsQuery(debouncedSearch, {
-    skip: !debouncedSearch || debouncedSearch.trim().length === 0,
-  });
-
   const safeSuggestions = Array.isArray(suggestions)
     ? suggestions.filter((item) => item && typeof item === 'object')
     : [];
@@ -90,14 +88,14 @@ const Header = () => {
       setSearch('');
       setDebouncedSearch('');
       setShowSuggestions(false);
-      navigate(`/productos?search=${encodeURIComponent(term)}`);
+      navigate(`/proyectos?search=${encodeURIComponent(term)}`);
       dispatch(closeMenu());
     }
   };
 
   const handleSuggestionClick = (product) => {
     if (!product?._id) return;
-    navigate(`/productos/${product._id}`);
+    navigate(`/proyectos/${product._id}`);
     setSearch('');
     setDebouncedSearch('');
     setShowSuggestions(false);
@@ -106,147 +104,105 @@ const Header = () => {
 
   return (
     <>
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? 'bg-gray-900 shadow-lg border-b-4 border-primary-400' : 'bg-gray-900 shadow-sm'
+      <header 
+        className={`fixed top-0 left-0 right-0 z-[1000] transition-all duration-500 ${
+          scrolled 
+            ? 'py-2 px-4' 
+            : 'py-6 px-4 md:px-8'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Hamburger + Logo */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => dispatch(toggleMenu())}
-                className="p-2 rounded-xl hover:bg-gray-800 transition-colors text-primary-400"
-                aria-label="Menú"
-              >
-                {menuOpen ? <HiX size={24} /> : <HiMenu size={24} />}
-              </button>
-              <Link to="/" className="flex items-center gap-2" onClick={() => dispatch(closeMenu())}>
-                <img src="/logo-sausansystem.png" alt="SAUSANSYSTEM Logo" className="h-40 w-auto object-contain" />
-              </Link>
-            </div>
+      <div className="max-w-7xl mx-auto">
+        <nav 
+          className={`flex items-center justify-between px-6 py-3 rounded-2xl transition-all duration-500 border border-white/10 backdrop-blur-xl ${
+            scrolled 
+              ? 'bg-black/60 shadow-[0_8px_32px_rgba(0,0,0,0.5)] scale-[0.98]' 
+              : 'bg-white/5 shadow-none scale-100'
+          }`}
+        >
+          {/* Menu & Logo Group */}
+          <div className="flex items-center gap-6">
+            <button
+              onClick={() => dispatch(toggleMenu())}
+              className="text-white hover:text-primary-400 transition-colors p-2 rounded-xl bg-white/5 md:hidden"
+              aria-label="Menú"
+            >
+              {menuOpen ? <HiX size={24} /> : <HiMenu size={24} />}
+            </button>
 
-            {/* Desktop search */}
-            <div className="hidden md:flex flex-1 max-w-md mx-6 relative" ref={suggestionsRef}>
+            <Link to="/" className="flex items-center gap-4 group" onClick={() => dispatch(closeMenu())}>
+              <motion.div 
+                whileHover={{ scale: 1.05 }}
+                className="relative"
+              >
+                <img 
+                  src="/logooficial.png" 
+                  alt="Ausauth" 
+                  className="h-10 md:h-20 w-auto object-contain transition-all duration-500 drop-shadow-[0_0_15px_rgba(139,92,246,0.3)] group-hover:drop-shadow-[0_0_20px_rgba(139,92,246,0.6)]"
+                />
+              </motion.div>
+              <div className="hidden lg:flex flex-col">
+                <span className="text-2xl font-black text-white tracking-widest uppercase italic leading-none">
+                  AUSAUTH
+                </span>
+                <span className="text-[9px] font-bold text-gray-500 uppercase tracking-[0.4em] leading-none mt-1">Software Architecture</span>
+              </div>
+            </Link>
+          </div>
+
+          {/* Nav Links Desktop */}
+          <div className="hidden md:flex items-center gap-8">
+            <Link to="/proyectos" className="text-sm font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Portfolio</Link>
+            <Link to="/servicios" className="text-sm font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Expertise</Link>
+          </div>
+
+          {/* Right Section */}
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex flex-1 max-w-[150px] relative" ref={suggestionsRef}>
               <form onSubmit={handleSearch} className="w-full">
                 <div className="relative w-full">
-                  <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                   <input
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     onFocus={() => debouncedSearch && setShowSuggestions(true)}
-                    placeholder="Buscar productos..."
-                    className="input-field pl-10 pr-4 py-2 text-sm bg-gray-800 text-gray-100 border-gray-700 focus:ring-2 focus:ring-primary-400 w-full"
+                    placeholder="Buscar..."
+                    className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-1 focus:ring-primary-400/50 transition-all text-xs text-white placeholder:text-gray-600"
                   />
+                  <HiOutlineSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600" size={16} />
                 </div>
               </form>
-              
-              {/* Suggestions dropdown */}
-              {showSuggestions && debouncedSearch.length > 0 && safeSuggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto">
-                  {safeSuggestions.map((product) => (
-                    <button
-                      key={product._id}
-                      onClick={() => handleSuggestionClick(product)}
-                      className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-700 transition-colors border-b border-gray-700 last:border-b-0 text-left"
-                    >
-                      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-gray-800">
-                        {product.imagenes?.[0]?.url ? (
-                          <img src={product.imagenes[0].url} alt={product.nombre} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400">
-                            <HiOutlineSearch size={16} />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-100 truncate">{product.nombre}</p>
-                        <p className="text-xs text-gray-400">{formatSuggestionPrice(product)}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-              
-              {/* No results message */}
-              {showSuggestions && debouncedSearch.length > 0 && safeSuggestions.length === 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 p-4 text-center text-sm text-gray-400">
-                  No se encontraron productos
-                </div>
-              )}
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-1 sm:gap-2">
-              {/* Admin Panels in Header */}
-              {isAdmin && (
-                <Link to="/admin" className="hidden md:flex items-center gap-1 p-2 rounded-xl hover:bg-gray-800 transition-colors text-primary-400 text-sm font-medium" title="Panel Admin">
-                  ⚙️ Admin
-                </Link>
-              )}
-              {isTecnico && (
-                <Link to="/tecnico" className="hidden md:flex items-center gap-1 p-2 rounded-xl hover:bg-blue-900 transition-colors text-blue-400 text-sm font-medium" title="Panel Técnico">
-                  🔧 Técnico
-                </Link>
-              )}
-              {isDespachante && (
-                <Link to="/despachante" className="hidden md:flex items-center gap-1 p-2 rounded-xl hover:bg-purple-900 transition-colors text-purple-400 text-sm font-medium" title="Panel Despachante">
-                  📦 Despachante
-                </Link>
-              )}
+            <div className="h-6 w-[1px] bg-white/10 hidden md:block" />
 
-              {isAuthenticated ? (
-                <div className="relative group">
-                  <button className="flex items-center gap-1 p-2 rounded-xl hover:bg-gray-800 transition-colors text-primary-400">
+            {isAuthenticated ? (
+              <div className="relative group">
+                <button className="flex items-center gap-3 p-2 rounded-2xl hover:bg-white/10 transition-all border border-transparent hover:border-white/10">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-black">
                     <HiOutlineUser size={22} />
-                    <span className="hidden sm:block text-sm font-medium max-w-[80px] truncate text-gray-100">
-                      {user?.nombre}
-                    </span>
-                    <HiChevronDown size={14} className="hidden sm:block" />
-                  </button>
-                  <div className="absolute right-0 top-full mt-1 w-48 bg-gray-800 rounded-xl shadow-lg border border-gray-700 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    <Link to="/perfil" className="block px-4 py-2 text-sm hover:bg-gray-700 text-gray-100">Mi perfil</Link>
-                    <Link to="/mis-ordenes" className="block px-4 py-2 text-sm hover:bg-gray-700 text-gray-100">Mis pedidos</Link>
-                    <Link to="/mis-presupuestos" className="block px-4 py-2 text-sm hover:bg-gray-700 text-gray-100">Mis presupuestos</Link>
-                    <Link to="/recomendaciones" className="block px-4 py-2 text-sm hover:bg-gray-700 text-gray-100">Recomendaciones</Link>
-                    <Link to="/favoritos" className="block px-4 py-2 text-sm hover:bg-gray-700 text-gray-100">Favoritos</Link>
-                    <button
-                      onClick={logout}
-                      className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700 border-t border-gray-700"
-                    >
-                      Cerrar sesión
-                    </button>
                   </div>
+                  <HiChevronDown size={14} className="text-gray-500" />
+                </button>
+                <div className="absolute right-0 top-full mt-2 w-56 bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                  <div className="px-4 py-2 border-b border-white/5 mb-1">
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-none">Agencia</p>
+                    <p className="text-sm font-bold text-white truncate">{user?.nombre}</p>
+                  </div>
+                  <Link to="/perfil" className="block px-4 py-2.5 text-sm hover:bg-white/10 text-gray-300 font-bold transition-colors">Mi perfil</Link>
+                  <Link to="/mis-presupuestos" className="block px-4 py-2.5 text-sm hover:bg-white/10 text-gray-300 font-bold transition-colors">Mis presupuestos</Link>
+                  {isAdmin && <Link to="/admin" className="block px-4 py-2.5 text-sm hover:bg-primary-400/10 text-primary-400 font-bold transition-colors">Panel Admin</Link>}
+                  <button onClick={logout} className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 border-t border-white/5 mt-1 transition-colors font-bold">Cerrar sesión</button>
                 </div>
-              ) : (
-                <Link to="/login" className="p-2 rounded-xl hover:bg-gray-800 transition-colors text-primary-400">
-                  <HiOutlineUser size={22} />
-                </Link>
-              )}
-
-              {isAuthenticated && (
-                <Link to="/favoritos" className="p-2 rounded-xl hover:bg-gray-800 transition-colors text-primary-400">
-                  <HiOutlineHeart size={22} />
-                </Link>
-              )}
-
-              <button
-                onClick={toggleCart}
-                className="relative p-2 rounded-xl hover:bg-gray-800 transition-colors text-primary-400"
-              >
-                <HiOutlineShoppingCart size={22} />
-                {count > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary-400 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                    {count > 9 ? '9+' : count}
-                  </span>
-                )}
-              </button>
-            </div>
+              </div>
+            ) : (
+              <Link to="/login" className="px-6 py-2.5 bg-primary-400 text-black font-black uppercase tracking-tighter rounded-xl hover:scale-105 transition-all shadow-lg active:scale-95">
+                Ingresar
+              </Link>
+            )}
           </div>
-        </div>
-      </header>
+        </nav>
+      </div>
+    </header>
 
       {/* Mobile slide-in menu */}
       <div
@@ -323,28 +279,36 @@ const Header = () => {
             <Link
               to="/"
               onClick={() => dispatch(closeMenu())}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-800 font-medium transition-colors text-gray-100"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 font-bold transition-colors text-white"
             >
               Inicio
             </Link>
 
-            {/* Descargas Section */}
+            <Link
+              to="/proyectos"
+              onClick={() => dispatch(closeMenu())}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 font-bold transition-colors text-white"
+            >
+              Proyectos
+            </Link>
+
             <Link
               to="/downloads"
               onClick={() => dispatch(closeMenu())}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-800 font-medium transition-colors text-gray-100"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 font-bold transition-colors text-white"
             >
-              Descargas
+              Downloads & Assets
             </Link>
 
             {categories.length > 0 && (
-              <div className="pt-2">
+              <div className="pt-4 border-t border-white/5 mt-4">
+                <p className="px-3 text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2">Especialidades</p>
                 {categories.map((cat) => (
                   <Link
                     key={cat._id}
-                    to={`/productos?categoria=${cat._id}`}
+                    to={`/proyectos?categoria=${cat._id}`}
                     onClick={() => dispatch(closeMenu())}
-                    className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-800 text-sm transition-colors text-gray-100"
+                    className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/5 text-sm transition-colors text-gray-400 font-medium"
                   >
                     {cat.nombre}
                   </Link>
@@ -354,26 +318,29 @@ const Header = () => {
           </div>
 
           {/* Footer */}
-          <div className="px-5 py-4 border-t border-gray-700 space-y-2">
+          <div className="p-6 border-t border-white/5 space-y-3">
             {isAuthenticated ? (
               <>
                 <Link
                   to="/perfil"
                   onClick={() => dispatch(closeMenu())}
-                  className="block w-full text-center btn-secondary text-sm"
+                  className="block w-full text-center py-3 rounded-xl bg-white/5 text-white font-bold text-sm"
                 >
-                  Mi perfil
+                  Mi Perfil
                 </Link>
-                <button onClick={() => { logout(); dispatch(closeMenu()); }} className="w-full btn-danger text-sm">
-                  Cerrar sesión
+                <button 
+                  onClick={() => { logout(); dispatch(closeMenu()); }} 
+                  className="w-full py-3 rounded-xl text-red-400 font-bold text-sm hover:bg-red-500/10 transition-colors"
+                >
+                  Cerrar Sesión
                 </button>
               </>
             ) : (
               <>
-                <Link to="/login" onClick={() => dispatch(closeMenu())} className="block w-full text-center btn-primary text-sm">
-                  Iniciar sesión
+                <Link to="/login" onClick={() => dispatch(closeMenu())} className="block w-full text-center py-3 rounded-xl bg-primary-400 text-black font-black uppercase text-xs">
+                  Iniciar Sesión
                 </Link>
-                <Link to="/registro" onClick={() => dispatch(closeMenu())} className="block w-full text-center btn-secondary text-sm">
+                <Link to="/registro" onClick={() => dispatch(closeMenu())} className="block w-full text-center py-3 rounded-xl border border-white/10 text-white font-bold text-xs uppercase">
                   Registrarse
                 </Link>
               </>
