@@ -55,6 +55,7 @@ const allowedOrigins = [
   'https://www.ausauth.dev',
   'https://ausauth.dev',
   process.env.FRONTEND_URL,
+  process.env.CORS_ORIGIN,
 ].filter(Boolean);
 
 app.use(
