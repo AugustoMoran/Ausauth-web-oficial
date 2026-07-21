@@ -8,12 +8,14 @@ const PORT = process.env.PORT || 5000;
 
 const start = async () => {
   // Validate configuration before starting
+  /* 
   try {
     validateConfig();
   } catch (configError) {
     logger.error('Configuration validation failed', { error: configError.message });
     process.exit(1);
   }
+  */
 
   await connectDB();
 
