@@ -138,6 +138,7 @@ const Profile = () => {
             {isSaving ? 'Sincronizando...' : 'Guardar Cambios'}
           </button>
         </form>
+        </div>
       </div>
     </div>
   );
