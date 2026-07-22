@@ -28,10 +28,10 @@ const Hero = () => {
               </span>
             </div>
 
-            <h1 className="text-4xl md:text-7xl font-black text-white leading-[0.95] md:leading-[0.9] mb-6">
+            <h1 className="text-4xl md:text-6xl font-black text-white leading-tight mb-6">
               TRANSFORMAMOS <br className="hidden md:block" />
               IDEAS EN <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400 italic inline-block pb-4">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400 italic inline-block pr-12 pb-4">
                 SOLUCIONES DIGITALES
               </span>
             </h1>

@@ -12,7 +12,7 @@ const DownloadsPage = () => {
         <div className="mb-20">
           <h1 className="text-5xl sm:text-7xl font-black italic tracking-tighter uppercase leading-[0.9] mb-6">
             CENTRO DE <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400 inline-block pb-4">DESCARGAS</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400 inline-block pr-12 pb-4">DESCARGAS</span>
           </h1>
           <p className="text-gray-500 text-lg font-medium italic">Accede a todos nuestros recursos y documentos técnicos.</p>
         </div>

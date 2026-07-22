@@ -109,7 +109,7 @@ const Products = () => {
               {search ? (
                 <>RESULTADOS: <br /><span className="text-primary-400 inline-block pb-1">"{search}"</span></>
               ) : (
-                <>TECH <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400 inline-block pb-4">MARKET</span></>
+                <>TECH <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400 inline-block pr-12 pb-4">MARKET</span></>
               )}
             </h1>
             {data && (
