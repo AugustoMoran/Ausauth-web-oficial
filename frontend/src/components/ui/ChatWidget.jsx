@@ -269,7 +269,7 @@ export default function ChatWidget() {
     <>
       {/* ── Chat window ───────────────────────────────────────────────────── */}
       {open && (
-        <div className="fixed bottom-[85px] sm:bottom-[140px] right-4 z-[10002] w-[calc(100vw-2rem)] sm:w-[350px] max-h-[calc(100vh-120px)] sm:max-h-[calc(100vh-200px)] flex flex-col rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden bg-black/95 backdrop-blur-3xl border border-white/10 animate-slide-up">
+        <div className="fixed bottom-[85px] sm:bottom-[140px] right-4 z-[10002] w-[calc(100vw-2rem)] sm:max-w-[380px] sm:w-[350px] max-h-[calc(100vh-120px)] sm:max-h-[calc(100vh-200px)] flex flex-col rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden bg-black/95 backdrop-blur-3xl border border-white/10 animate-slide-up">
 
           {/* Header */}
           <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-3.5 bg-white/5 text-white border-b border-white/5">

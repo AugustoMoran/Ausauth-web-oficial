@@ -76,10 +76,10 @@ const WhatsAppPopup = () => {
 
   return (
     <div
-      className={`fixed bottom-5 sm:bottom-8 right-4 z-[9999] w-[calc(100vw-2rem)] sm:w-[320px] transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+      className={`fixed bottom-5 sm:bottom-8 right-4 z-[9999] w-[calc(100vw-2rem)] sm:max-w-[340px] sm:w-[320px] transition-all duration-500 ease-out ${
         animating
-          ? 'opacity-100 translate-y-0 scale-100 rotate-0'
-          : 'opacity-0 translate-y-12 scale-95 rotate-1'
+          ? 'opacity-100 translate-y-0 scale-100'
+          : 'opacity-0 translate-y-10 scale-95'
       }`}
       style={{ transitionProperty: 'opacity, transform' }}
       role="dialog"
@@ -93,7 +93,7 @@ const WhatsAppPopup = () => {
       <div className="relative rounded-3xl sm:rounded-[2rem] overflow-hidden border border-white/10 bg-gray-950/95 sm:bg-gray-950/90 backdrop-blur-2xl shadow-2xl">
 
         {/* HEADER MEDIA */}
-        <div className="relative h-32 sm:h-44 overflow-hidden group">
+        <div className="relative h-40 sm:h-44 overflow-hidden group">
           <img
             src={cfg.imagen}
             alt="Ausauth Agency"
