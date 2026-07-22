@@ -37,8 +37,11 @@ const OrderHistory = () => {
   const orders = data?.orders || [];
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-      <h1 className="text-2xl font-bold mb-8">Mis pedidos</h1>
+    <div className="bg-black min-h-screen pt-32 pb-24 text-white">
+      <div className="max-w-4xl mx-auto px-6">
+        <h1 className="text-5xl sm:text-7xl font-black italic tracking-tighter uppercase leading-none mb-12">
+          MIS <span className="text-primary-400">PEDIDOS</span>
+        </h1>
 
       {orders.length === 0 ? (
         <div className="text-center text-gray-400 py-16">

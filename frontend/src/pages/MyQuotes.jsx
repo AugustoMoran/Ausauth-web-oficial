@@ -51,11 +51,11 @@ const MyQuotes = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-16 text-center"
         >
-          <h1 className="text-6xl font-black text-white italic tracking-tighter uppercase mb-2">
-            Mis <span className="text-primary-400">Presupuestos</span>
+          <h1 className="text-5xl sm:text-7xl font-black text-white italic tracking-tighter uppercase mb-4 leading-none">
+            Mis <span className="text-primary-400 inline-block pb-1">Presupuestos</span>
           </h1>
-          <p className="text-gray-500 font-medium max-w-lg mx-auto leading-relaxed">
-            Aquí puedes gestionar y aprobar todas tus cotizaciones activas de <span className="text-white">Ausauth Agency</span>.
+          <p className="text-gray-500 font-medium max-w-lg mx-auto leading-relaxed italic">
+            Gestiona y aprueba todas tus cotizaciones de <span className="text-white">Ausauth Agency</span>.
           </p>
         </motion.header>
 

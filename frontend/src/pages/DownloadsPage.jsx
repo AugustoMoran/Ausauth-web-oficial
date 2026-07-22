@@ -6,12 +6,15 @@ const DownloadsPage = () => {
   const { data: downloads = [], isLoading, error } = useGetDownloadsQuery();
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      <div className="max-w-4xl mx-auto px-4 py-12">
+    <div className="min-h-screen bg-black pt-32 pb-24 text-white">
+      <div className="max-w-4xl mx-auto px-6">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Centro de Descargas</h1>
-          <p className="text-gray-400 text-lg">Accede a todos nuestros recursos y documentos</p>
+        <div className="mb-20">
+          <h1 className="text-5xl sm:text-7xl font-black italic tracking-tighter uppercase leading-[0.9] mb-6">
+            CENTRO DE <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400 inline-block pb-2">DESCARGAS</span>
+          </h1>
+          <p className="text-gray-500 text-lg font-medium italic">Accede a todos nuestros recursos y documentos técnicos.</p>
         </div>
 
         {/* Loading State */}

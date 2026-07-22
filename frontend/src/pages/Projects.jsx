@@ -58,10 +58,10 @@ const Projects = () => {
               </span>
             </div>
             
-            <h1 className="text-7xl md:text-9xl font-black italic uppercase tracking-tighter leading-[0.85] mb-12">
-              SOLUCIONES <br />
+            <h1 className="text-5xl sm:text-7xl md:text-9xl font-black italic uppercase tracking-tighter leading-[0.95] md:leading-[0.85] mb-12">
+              SOLUCIONES <br className="hidden md:block" />
               PENSADAS PARA <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400 inline-block pb-2">
                 CRECER
               </span>
             </h1>

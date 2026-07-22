@@ -100,25 +100,30 @@ const Products = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Page header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {search ? `Resultados para "${search}"` : 'Productos'}
-          </h1>
-          {data && (
-            <p className="text-sm text-gray-500 mt-1">{data.total} productos encontrados</p>
-          )}
+    <div className="bg-[#050505] min-h-screen pt-32 pb-24 text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+          <div>
+            <h1 className="text-5xl sm:text-7xl font-black italic tracking-tighter uppercase leading-[0.9] mb-4">
+              {search ? (
+                <>RESULTADOS: <br /><span className="text-primary-400 inline-block pb-1">"{search}"</span></>
+              ) : (
+                <>TECH <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400 inline-block pb-1">MARKET</span></>
+              )}
+            </h1>
+            {data && (
+              <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] italic">{data.total} UNIDADES EN STOCK DISPONIBLE</p>
+            )}
+          </div>
+          <button
+            onClick={() => setFiltersOpen(!filtersOpen)}
+            className="md:hidden flex items-center justify-center gap-2 bg-white/5 border border-white/10 px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs italic"
+          >
+            <HiAdjustments size={16} />
+            Filtros del Sistema
+          </button>
         </div>
-        <button
-          onClick={() => setFiltersOpen(!filtersOpen)}
-          className="md:hidden flex items-center gap-2 btn-secondary text-sm"
-        >
-          <HiAdjustments size={16} />
-          Filtros
-        </button>
-      </div>
 
       <div className="flex gap-6">
         {/* Sidebar filters */}

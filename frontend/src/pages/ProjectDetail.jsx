@@ -31,7 +31,7 @@ const ProjectDetail = () => {
 
   if (error || !project) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white p-6 text-center">
-      <h2 className="text-6xl font-black mb-4 italic uppercase tracking-tighter">Falla de <span className="text-primary-400">Sistema</span></h2>
+      <h2 className="text-4xl sm:text-6xl font-black mb-4 italic uppercase tracking-tighter leading-none">Falla de <span className="text-primary-400">Sistema</span></h2>
       <p className="text-gray-500 mb-12 font-bold uppercase tracking-widest text-xs">El recurso solicitado no fue hallado en el servidor.</p>
       <Link to="/proyectos" className="bg-primary-400 text-black px-12 py-5 rounded-2xl font-black uppercase tracking-widest italic shadow-[0_0_50px_rgba(139,92,246,0.3)]">Reiniciar Búsqueda</Link>
     </div>
@@ -69,7 +69,7 @@ const ProjectDetail = () => {
               <span className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em] italic">Case Study 0{Math.floor(Math.random() * 99)}</span>
             </div>
             
-            <h1 className="text-7xl md:text-9xl font-black mb-10 italic uppercase tracking-tighter leading-[0.85]">
+            <h1 className="text-5xl sm:text-7xl md:text-9xl font-black mb-10 italic uppercase tracking-tighter leading-[0.95] md:leading-[0.85] py-2">
               {project.nombre}
             </h1>
             

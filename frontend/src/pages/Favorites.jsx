@@ -27,8 +27,11 @@ const Favorites = () => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-2xl font-bold mb-8">Mis favoritos</h1>
+    <div className="bg-black min-h-screen pt-32 pb-24 text-white">
+      <div className="max-w-7xl mx-auto px-6">
+        <h1 className="text-5xl sm:text-7xl font-black italic tracking-tighter uppercase leading-none mb-12">
+          MIS <span className="text-primary-400">FAVORITOS</span>
+        </h1>
 
       {favorites.length === 0 ? (
         <div className="text-center text-gray-400 py-16">
