@@ -28,15 +28,15 @@ const Hero = () => {
               </span>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-black text-white leading-none mb-6">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white leading-[1.1] sm:leading-none mb-6 max-w-[95%] sm:max-w-none">
               TRANSFORMAMOS <br />
               IDEAS EN <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400 italic">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400 italic py-1 leading-normal">
                 SOLUCIONES DIGITALES
               </span>
             </h1>
 
-            <p className="text-gray-400 text-lg md:text-xl max-w-lg mb-8 leading-relaxed">
+            <p className="text-gray-400 text-base sm:text-lg md:text-xl max-w-lg mb-8 leading-relaxed">
               Desde sitios web hasta plataformas empresariales completas. Diseñamos soluciones tecnológicas a medida que ayudan a automatizar procesos, optimizar operaciones y generar resultados reales.
             </p>
 
