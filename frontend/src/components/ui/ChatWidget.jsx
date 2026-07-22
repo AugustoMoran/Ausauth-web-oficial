@@ -269,22 +269,23 @@ export default function ChatWidget() {
     <>
       {/* ── Chat window ───────────────────────────────────────────────────── */}
       {open && (
-        <div className="fixed bottom-[140px] right-4 z-[10002] w-[350px] max-w-[calc(100vw-2rem)] max-h-[calc(100vh-200px)] flex flex-col rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.7)] overflow-hidden bg-black/95 backdrop-blur-3xl border border-white/10 animate-slide-up">
+        <div className="fixed bottom-[85px] sm:bottom-[140px] right-4 z-[10002] w-[calc(100vw-2rem)] sm:w-[350px] max-h-[calc(100vh-120px)] sm:max-h-[calc(100vh-200px)] flex flex-col rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden bg-black/95 backdrop-blur-3xl border border-white/10 animate-slide-up">
 
           {/* Header */}
-          <div className="flex items-center gap-3 px-5 py-3.5 bg-white/5 text-white border-b border-white/5">
-            <div className="w-8 h-8 rounded-full bg-primary-400 flex items-center justify-center">
-              <RiRobot2Line size={18} className="text-black" />
+          <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-3.5 bg-white/5 text-white border-b border-white/5">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary-400 flex items-center justify-center">
+              <RiRobot2Line size={16} className="text-black sm:hidden" />
+              <RiRobot2Line size={18} className="text-black hidden sm:block" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-xs uppercase tracking-widest text-white leading-tight">Consultor Digital</p>
-              <p className="text-[10px] text-primary-400 font-bold uppercase tracking-tighter leading-tight">
+              <p className="font-bold text-[10px] sm:text-xs uppercase tracking-widest text-white leading-tight">Consultor Digital</p>
+              <p className="text-[9px] sm:text-[10px] text-primary-400 font-bold uppercase tracking-tighter leading-tight">
                 {loading ? 'Procesando arquitectura...' : 'Sistemas Activos'}
               </p>
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="w-7 h-7 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all border border-transparent hover:border-white/10"
+              className="w-7 h-7 rounded-lg sm:rounded-xl flex items-center justify-center hover:bg-white/10 transition-all border border-transparent hover:border-white/10"
               aria-label="Cerrar chat"
             >
               <FiX size={16} />
@@ -292,7 +293,7 @@ export default function ChatWidget() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 min-h-[200px] custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 flex flex-col gap-3 sm:gap-4 min-h-[250px] sm:min-h-[200px] custom-scrollbar">
             {messages.map((msg, idx) => (
               <Message 
                 key={msg.id ? `${msg.id}_${idx}` : idx} 
@@ -305,7 +306,7 @@ export default function ChatWidget() {
             {loading && <TypingIndicator />}
 
             {error && (
-              <p className="text-xs text-red-400 text-center py-1 px-3 bg-gray-800 rounded-lg">
+              <p className="text-[10px] sm:text-xs text-red-400 text-center py-1 px-3 bg-gray-800 rounded-lg">
                 {error}
               </p>
             )}
@@ -315,12 +316,12 @@ export default function ChatWidget() {
 
           {/* Quick suggestions */}
           {showSuggestions && !loading && (
-            <div className="px-3 pb-2 flex flex-wrap gap-1.5">
+            <div className="px-3 pb-2 flex flex-wrap gap-1.5 justify-center sm:justify-start">
               {suggestions.map((s) => (
                 <button
                   key={s}
                   onClick={() => { setInput(s); setTimeout(handleSend, 0); }}
-                  className="text-xs px-2.5 py-1 rounded-full border border-primary-400 text-primary-400 hover:bg-primary-400 hover:text-gray-900 transition-colors"
+                  className="text-[9px] sm:text-xs px-2.5 py-1 rounded-full border border-primary-400/50 text-primary-400 hover:bg-primary-400 hover:text-gray-900 transition-colors whitespace-nowrap"
                 >
                   {s}
                 </button>
@@ -329,7 +330,7 @@ export default function ChatWidget() {
           )}
 
           {/* Input */}
-          <div className="p-3 bg-white/5 border-t border-white/5 flex gap-2 items-end">
+          <div className="p-2.5 sm:p-3 bg-white/5 border-t border-white/5 flex gap-2 items-end">
             <textarea
               ref={inputRef}
               value={input}
@@ -338,16 +339,17 @@ export default function ChatWidget() {
               placeholder="Describí tu requerimiento técnico..."
               rows={1}
               disabled={loading}
-              className="flex-1 resize-none rounded-2xl border border-white/10 bg-black/40 px-4 py-2 text-xs text-white placeholder:text-gray-600 focus:outline-none focus:border-primary-400/50 transition-all disabled:opacity-50 max-h-24"
-              style={{ lineHeight: '1.5' }}
+              className="flex-1 resize-none rounded-xl sm:rounded-2xl border border-white/10 bg-black/40 px-3 sm:px-4 py-2 text-[11px] sm:text-xs text-white placeholder:text-gray-500 focus:outline-none focus:border-primary-400/50 transition-all disabled:opacity-50 max-h-24"
+              style={{ lineHeight: '1.4' }}
             />
             <button
               onClick={handleSend}
               disabled={loading || !input.trim()}
-              className="w-10 h-10 rounded-xl bg-primary-400 flex items-center justify-center hover:scale-105 transition-all disabled:opacity-30 disabled:grayscale flex-shrink-0 shadow-lg shadow-primary-400/20"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary-400 flex items-center justify-center hover:scale-105 transition-all disabled:opacity-30 disabled:grayscale flex-shrink-0 shadow-lg shadow-primary-400/20"
               aria-label="Enviar"
             >
-              <FiSend size={16} className="text-black" />
+              <FiSend size={15} className="text-black sm:hidden" />
+              <FiSend size={16} className="text-black hidden sm:block" />
             </button>
           </div>
         </div>
@@ -356,18 +358,20 @@ export default function ChatWidget() {
       {/* ── Floating toggle button ─────────────────────────────────────────── */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 bg-black ring-2 ring-primary-400 relative border border-white/10"
+        className="w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 bg-black ring-2 ring-primary-400 relative border border-white/10"
         aria-label={open ? 'Cerrar chat' : 'Abrir consultor digital'}
       >
         {open ? (
-          <FiX size={24} color="white" />
+          <FiX size={20} className="text-white sm:hidden" />
+          <FiX size={24} className="text-white hidden sm:block" />
         ) : (
-          <RiRobot2Line size={28} className="text-primary-400" />
+          <RiRobot2Line size={24} className="text-primary-400 sm:hidden" />
+          <RiRobot2Line size={28} className="text-primary-400 hidden sm:block" />
         )}
 
         {/* Unread badge */}
         {!open && unread > 0 && (
-          <span className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-primary-400 text-black text-[10px] font-black flex items-center justify-center border-2 border-black">
+          <span className="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary-400 text-black text-[9px] sm:text-[10px] font-black flex items-center justify-center border-2 border-black">
             {unread}
           </span>
         )}
