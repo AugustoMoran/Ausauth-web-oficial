@@ -362,11 +362,15 @@ export default function ChatWidget() {
         aria-label={open ? 'Cerrar chat' : 'Abrir consultor digital'}
       >
         {open ? (
-          <FiX size={20} className="text-white sm:hidden" />
-          <FiX size={24} className="text-white hidden sm:block" />
+          <>
+            <FiX size={20} className="text-white sm:hidden" />
+            <FiX size={24} className="text-white hidden sm:block" />
+          </>
         ) : (
-          <RiRobot2Line size={24} className="text-primary-400 sm:hidden" />
-          <RiRobot2Line size={28} className="text-primary-400 hidden sm:block" />
+          <>
+            <RiRobot2Line size={24} className="text-primary-400 sm:hidden" />
+            <RiRobot2Line size={28} className="text-primary-400 hidden sm:block" />
+          </>
         )}
 
         {/* Unread badge */}
