@@ -73,9 +73,9 @@ const Services = () => {
             <HiOutlineLightningBolt className="text-primary-400" size={12} />
             <span className="text-[10px] font-black text-primary-400 uppercase tracking-[0.3em]">Full Stack Capabilities</span>
           </motion.div>
-          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black italic tracking-tighter uppercase leading-[0.95] md:leading-[0.9] mb-8">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black italic tracking-tighter uppercase leading-[0.95] md:leading-[0.9] mb-8">
             TECNOLOGÍA DETRÁS <br className="hidden md:block" />
-            DE CADA <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400 inline-block pb-1">SOLUCIÓN</span>
+            DE CADA <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400 inline-block pb-4">SOLUCIÓN</span>
           </h1>
           <p className="text-gray-400 text-xl font-medium leading-relaxed">
             Utilizamos herramientas modernas y probadas para construir plataformas rápidas, seguras y preparadas para crecer junto a tu negocio.
