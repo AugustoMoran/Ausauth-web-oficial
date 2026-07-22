@@ -76,57 +76,66 @@ const Profile = () => {
             </div>
           </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium mb-1">Nombre</label>
-              <input type="text" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} className="input-field" required />
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 ml-4">Nombre</label>
+              <input type="text" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} className="w-full bg-black/50 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:ring-1 focus:ring-primary-400 focus:border-primary-400/50 transition-all text-sm font-bold" required />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Apellido</label>
-              <input type="text" value={form.apellido} onChange={(e) => setForm({ ...form, apellido: e.target.value })} className="input-field" required />
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 ml-4">Apellido</label>
+              <input type="text" value={form.apellido} onChange={(e) => setForm({ ...form, apellido: e.target.value })} className="w-full bg-black/50 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:ring-1 focus:ring-primary-400 focus:border-primary-400/50 transition-all text-sm font-bold" required />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Teléfono</label>
-            <input type="tel" value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} className="input-field" />
+            <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 ml-4">Teléfono de Contacto</label>
+            <input type="tel" value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} className="w-full bg-black/50 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:ring-1 focus:ring-primary-400 focus:border-primary-400/50 transition-all text-sm font-bold" />
           </div>
-          <h3 className="font-medium text-sm text-gray-600 pt-2">Dirección</h3>
-          <div>
-            <label className="block text-sm font-medium mb-1">Calle y número</label>
-            <input type="text" value={form.direccion} onChange={(e) => setForm({ ...form, direccion: e.target.value })} className="input-field" />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Ciudad</label>
-              <input type="text" value={form.ciudad} onChange={(e) => setForm({ ...form, ciudad: e.target.value })} className="input-field" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Provincia</label>
-              <input type="text" value={form.provincia} onChange={(e) => setForm({ ...form, provincia: e.target.value })} className="input-field" />
+
+          <div className="pt-6 border-t border-white/10">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-primary-400 mb-6 italic">Geolocalización y Despacho</h3>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 ml-4">Calle y número</label>
+                <input type="text" value={form.direccion} onChange={(e) => setForm({ ...form, direccion: e.target.value })} className="w-full bg-black/50 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:ring-1 focus:ring-primary-400 focus:border-primary-400/50 transition-all text-sm font-bold" />
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 ml-4">Ciudad</label>
+                  <input type="text" value={form.ciudad} onChange={(e) => setForm({ ...form, ciudad: e.target.value })} className="w-full bg-black/50 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:ring-1 focus:ring-primary-400 focus:border-primary-400/50 transition-all text-sm font-bold" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 ml-4">Provincia</label>
+                  <input type="text" value={form.provincia} onChange={(e) => setForm({ ...form, provincia: e.target.value })} className="w-full bg-black/50 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:ring-1 focus:ring-primary-400 focus:border-primary-400/50 transition-all text-sm font-bold" />
+                </div>
+              </div>
             </div>
           </div>
 
-          <p className="text-xs text-gray-500 mt-1">
-            Al guardar, se detectará automáticamente tu zona de cobertura para instalación.
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest italic opacity-50">
+            * El sistema calcula automáticamente tu zona de cobertura para servicios de instalación técnica.
           </p>
 
           {user.zone ? (
-            <div className="mt-2 p-3 bg-green-900/40 border border-green-700 rounded-lg">
-              <p className="text-sm text-green-400 font-medium">
-                📍 Zona detectada: <strong>{user.zone}</strong> — Servicio de instalación disponible en tu zona.
+            <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-2xl">
+              <p className="text-[10px] text-green-400 font-black uppercase tracking-widest">
+                📍 ZONA DETECTADA: {user.zone} — SERVICIO DISPONIBLE
               </p>
             </div>
           ) : (
-            <div className="mt-2 p-3 bg-gray-800 border border-gray-700 rounded-lg">
-              <p className="text-sm text-gray-400">
-                📍 Sin zona detectada. Guardá tu dirección para activar el servicio de instalación (solo AMBA/CABA).
+            <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest italic">
+                📍 Sin zona detectada. Guardá tu dirección para activar el servicio técnico.
               </p>
             </div>
           )}
 
-          <button type="submit" disabled={isSaving} className="btn-primary w-full mt-2">
-            {isSaving ? 'Detectando zona y guardando...' : 'Guardar cambios'}
+          <button 
+            type="submit" 
+            disabled={isSaving}
+            className="w-full bg-primary-400 hover:bg-white text-black font-black py-5 rounded-2xl shadow-[0_10px_30px_rgba(139,92,246,0.3)] transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 mt-4 uppercase italic tracking-tighter text-lg"
+          >
+            {isSaving ? 'Sincronizando...' : 'Guardar Cambios'}
           </button>
         </form>
       </div>
