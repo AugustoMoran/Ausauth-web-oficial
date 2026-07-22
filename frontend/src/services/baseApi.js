@@ -49,7 +49,7 @@ const baseQuery = fetchBaseQuery({
     }
     
     // FALLBACK: Si no hay cookie, usar token en memoria + Authorization header
-    // Esto es necesario para cross-domain (www.ausauth.dev → ecommerce-gestion-trabajo.onrender.com)
+    // Esto es necesario para cross-domain (www.ausauth.com → back-end-url)
     if (AUTH_CLIENT_REV && typeof token === 'string' && token.length > 0) {
       headers.set('Authorization', `Bearer ${token}`);
     }

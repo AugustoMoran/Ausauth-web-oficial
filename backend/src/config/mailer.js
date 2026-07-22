@@ -7,7 +7,7 @@ const smtpConfig = {
   port: parseInt(process.env.SMTP_PORT || '587', 10),
   secure: process.env.SMTP_PORT === '465' ? true : false, // 465=TLS (secure:true), 587=STARTTLS (secure:false)
   auth: {
-    user: process.env.SMTP_USER || process.env.EMAIL_FROM || 'info@ausauth.dev',
+    user: process.env.SMTP_USER || process.env.EMAIL_FROM || 'info@ausauth.com',
     pass: process.env.SMTP_PASS || 'eflo zqxv fyft yvct', // Gmail app password
   },
   connectionTimeout: 10000, // 10 seconds
@@ -47,7 +47,7 @@ const enhancedTransporter = {
     try {
       console.log('📧 [Mailer] Preparing email to:', options.to);
       
-      const fromEmail = options.from || 'info@ausauth.dev';
+      const fromEmail = options.from || 'info@ausauth.com';
       
       const mailOptions = {
         from: `Ausauth Dev <${fromEmail}>`,

@@ -52,10 +52,10 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'http://localhost:5000',
-  'https://www.ausauth.dev',
-  'https://ausauth.dev',
+  'https://www.ausauth.com',
+  'https://ausauth.com',
   process.env.FRONTEND_URL,
-  process.env.CORS_ORIGIN,
+  ...(process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : []),
 ].filter(Boolean);
 
 app.use(

@@ -150,7 +150,7 @@ const sendQuoteEmail = async (quote, pdfBuffer) => {
         
         <div class="footer">
           <p>AUSAUTH DEV</p>
-          <p>info@ausauth.dev | www.ausauth.dev</p>
+          <p>info@ausauth.com | www.ausauth.com</p>
           <p>© 2026 AUSAUTH DEV. Todos los derechos reservados.</p>
         </div>
       </div>
@@ -159,7 +159,7 @@ const sendQuoteEmail = async (quote, pdfBuffer) => {
   `;
 
   const mailOptions = {
-    from: process.env.EMAIL_FROM || process.env.SMTP_USER || 'info@ausauth.dev',
+    from: process.env.EMAIL_FROM || process.env.SMTP_USER || 'info@ausauth.com',
     to: quote.client.email,
     subject: `Presupuesto #${quote.numero} - AUSAUTH DEV`,
     html: emailTemplate,

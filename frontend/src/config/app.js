@@ -16,7 +16,7 @@ const config = {
 
   // Social media / contact (random defaults until configured)
   whatsappNumber: import.meta.env.VITE_WHATSAPP_NUMBER || '5491168393582',
-  instagramUrl: import.meta.env.VITE_INSTAGRAM_URL || 'https://www.instagram.com/ausauth.dev/',
+  instagramUrl: import.meta.env.VITE_INSTAGRAM_URL || 'https://www.instagram.com/ausauth.com/',
   contactEmail: import.meta.env.VITE_CONTACT_EMAIL || 'augusto.moran.informatica@gmail.com',
   contactPhone: import.meta.env.VITE_CONTACT_PHONE || '+54 9 11 6839-3582',
 

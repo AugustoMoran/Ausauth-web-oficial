@@ -316,7 +316,7 @@ const downloadQuotePDF = async (req, res, next) => {
           const https = require('https');
           
           await new Promise((logoResolve, logoReject) => {
-            const logoUrl = 'https://www.ausauth.dev/logo.png';
+            const logoUrl = 'https://www.ausauth.com/logo.png';
             const protocol = logoUrl.startsWith('https') ? https : http;
             
             const request = protocol.get(logoUrl, { timeout: 5000 }, (response) => {
@@ -496,7 +496,7 @@ const downloadQuotePDF = async (req, res, next) => {
         doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke('#ddd');
         doc.fontSize(8).font('Helvetica').fillColor('#999')
           .text('SAUSAN SYSTEM - Gestión Integral de Trabajos', 50, doc.y + 10, { align: 'center' })
-          .text('www.ausauth.dev', { align: 'center' })
+          .text('www.ausauth.com', { align: 'center' })
           .text('Presupuesto válido por 30 días desde su emisión', { align: 'center' });
 
         // End document

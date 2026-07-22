@@ -226,7 +226,7 @@ const sendQuotePaymentConfirmation = async (quote) => {
         
         <p style="color:#64748b;font-size:12px;margin-top:30px;border-top:1px solid #e2e8f0;padding-top:15px">
           <strong>AUSAUTH DEV</strong><br/>
-          info@ausauth.dev | www.ausauth.dev
+          info@ausauth.com | www.ausauth.com
         </p>
       </div>
     `,
